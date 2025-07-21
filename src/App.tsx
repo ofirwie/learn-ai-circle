@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+// Deploy to Lovable - ISAI AI Knowledge Hub
 import { ContentTable } from './components/Dashboard/ContentTable';
 import { ContentFiltersComponent } from './components/Dashboard/ContentFilters';
 import { ContentDetailModal } from './components/Dashboard/ContentDetailModal';
