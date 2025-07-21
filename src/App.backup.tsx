@@ -1,34 +1,9 @@
-import { useState, useEffect } from 'react';
-import { ContentTable } from './components/Dashboard/ContentTable';
-import { ContentFiltersComponent } from './components/Dashboard/ContentFilters';
-import { ContentDetailModal } from './components/Dashboard/ContentDetailModal';
-import { AnalyticsCards } from './components/Dashboard/AnalyticsCards';
-import { ContentService } from './services/contentService';
-import { ArticleService } from './services/articleService';
-import { AIContentItem, ContentFilters, Article } from './types/content';
-import { ExportUtils } from './utils/exportUtils';
-import { ArticlePreviewCard } from './components/Article/ArticlePreviewCard';
-import { ArticleViewer } from './components/Article/ArticleViewer';
-import { ArticleCreator } from './components/Article/ArticleCreator';
+import { useState } from 'react';
 
 function App() {
   const [activeSection, setActiveSection] = useState('Home');
   const [searchTerm, setSearchTerm] = useState('');
   const [copiedId, setCopiedId] = useState<number | null>(null);
-  
-  // Content Management State
-  const [contentFilters, setContentFilters] = useState<ContentFilters>({});
-  const [selectedContentItem, setSelectedContentItem] = useState<AIContentItem | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
-  const [availableSources, setAvailableSources] = useState<string[]>([]);
-  
-  // Articles State
-  const [featuredArticles, setFeaturedArticles] = useState<Article[]>([]);
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-  const [loadingArticles, setLoadingArticles] = useState(false);
-  const [showArticleCreator, setShowArticleCreator] = useState(false);
-  const [publishedArticles, setPublishedArticles] = useState<Article[]>([]);
   
   // AI Prompts Database
   const aiPrompts = [
@@ -163,139 +138,6 @@ function App() {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
-  };
-
-  // Content Management Functions
-  const handleContentItemSelect = (item: AIContentItem) => {
-    setSelectedContentItem(item);
-    setIsModalOpen(true);
-  };
-
-  const handleContentUpdate = (updatedItem: AIContentItem) => {
-    setSelectedContentItem(updatedItem);
-    // You might want to refresh the content table here
-  };
-
-  const handleBulkAction = async (action: 'approve' | 'reject' | 'delete', ids: string[]) => {
-    try {
-      switch (action) {
-        case 'approve':
-          await ContentService.bulkApprove(ids);
-          alert(`${ids.length} items approved successfully`);
-          break;
-        case 'reject':
-          await ContentService.bulkReject(ids);
-          alert(`${ids.length} items rejected successfully`);
-          break;
-        case 'delete':
-          if (confirm(`Are you sure you want to delete ${ids.length} items? This cannot be undone.`)) {
-            await ContentService.deleteContent(ids);
-            alert(`${ids.length} items deleted successfully`);
-          }
-          break;
-      }
-    } catch (error) {
-      console.error(`Error performing bulk ${action}:`, error);
-      alert(`Failed to ${action} selected items`);
-    }
-  };
-
-  // Load categories and sources when Content Management is accessed
-  useEffect(() => {
-    if (activeSection === 'Content Management') {
-      loadAvailableFilters();
-    } else if (activeSection === 'Articles') {
-      loadPublishedArticles();
-    }
-  }, [activeSection]);
-
-  // Load featured articles for home page
-  useEffect(() => {
-    loadFeaturedArticles();
-  }, []);
-
-  const loadFeaturedArticles = async () => {
-    try {
-      setLoadingArticles(true);
-      console.log('🔍 Loading featured articles...');
-      const articles = await ArticleService.getFeaturedArticles(6);
-      console.log('✅ Featured articles loaded:', articles.length, articles);
-      setFeaturedArticles(articles);
-    } catch (error) {
-      console.error('❌ Error loading featured articles:', error);
-    } finally {
-      setLoadingArticles(false);
-    }
-  };
-
-  const handleArticleClick = (article: Article) => {
-    setSelectedArticle(article);
-    setActiveSection('ArticleView');
-  };
-
-  const handleBackToHome = () => {
-    setSelectedArticle(null);
-    setActiveSection('Home');
-  };
-
-  const handleRelatedArticleClick = (article: Article) => {
-    setSelectedArticle(article);
-    // Stay in ArticleView section but update the article
-  };
-
-  const handleArticleCreated = (article: Article) => {
-    // Refresh featured articles if the new article is featured
-    if (article.featured) {
-      loadFeaturedArticles();
-    }
-    // Refresh published articles if on Articles section
-    if (activeSection === 'Articles') {
-      loadPublishedArticles();
-    }
-  };
-
-  const loadPublishedArticles = async () => {
-    try {
-      const { data } = await ArticleService.getArticles(1, 10, { status: 'published' });
-      setPublishedArticles(data);
-    } catch (error) {
-      console.error('Error loading published articles:', error);
-    }
-  };
-
-  const loadAvailableFilters = async () => {
-    try {
-      // This is a simplified version - in a real app you'd have dedicated endpoints
-      const { data } = await ContentService.getContentItems(1, 1000, {});
-      
-      const categories = Array.from(new Set(data.map(item => item.category)));
-      const sources = Array.from(new Set(data.map(item => item.source_domain)));
-      
-      setAvailableCategories(categories);
-      setAvailableSources(sources);
-    } catch (error) {
-      console.error('Error loading filter options:', error);
-    }
-  };
-
-  const handleExport = async (format: 'json' | 'csv' | 'automation') => {
-    try {
-      switch (format) {
-        case 'json':
-          await ExportUtils.exportToJSON(contentFilters);
-          break;
-        case 'csv':
-          await ExportUtils.exportToCSV(contentFilters);
-          break;
-        case 'automation':
-          await ExportUtils.exportForAutomation(contentFilters);
-          break;
-      }
-      alert(`Export completed successfully!`);
-    } catch (error) {
-      console.error('Export error:', error);
-      alert('Export failed. Please try again.');
-    }
   };
   
   const contentCards = [
@@ -441,7 +283,7 @@ function App() {
         <div style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
             <nav style={{ display: 'flex', height: '48px', justifyContent: 'center' }}>
-              {["Home", "Forums", "AI Prompts", "Prompt Library", "Articles", "Content Management", "AI Marketing"].map((item) => (
+              {["Home", "Forums", "AI Prompts", "Prompt Library", "Articles", "AI Marketing"].map((item) => (
                 <button
                   key={item}
                   onClick={() => setActiveSection(item)}
@@ -634,74 +476,9 @@ function App() {
         {/* Articles Section */}
         {activeSection === 'Articles' && (
           <div>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'start',
-              marginBottom: '32px' 
-            }}>
-              <div>
-                <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '8px' }}>Latest Articles</h2>
-                <p style={{ color: '#64748b' }}>Deep dives into AI technology, tutorials, and industry insights</p>
-              </div>
-              <button
-                onClick={() => setShowArticleCreator(true)}
-                style={{
-                  backgroundColor: '#10b981',
-                  color: 'white',
-                  border: 'none',
-                  padding: '12px 24px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-              >
-                ✨ Create Article
-              </button>
-            </div>
-
-            {/* Database Articles */}
-            {publishedArticles.length > 0 && (
-              <div style={{ marginBottom: '48px' }}>
-                <h3 style={{ 
-                  fontSize: '20px', 
-                  fontWeight: '600', 
-                  marginBottom: '24px',
-                  color: '#1e293b'
-                }}>
-                  Published Articles
-                </h3>
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', 
-                  gap: '24px',
-                  marginBottom: '32px'
-                }}>
-                  {publishedArticles.map((article) => (
-                    <ArticlePreviewCard
-                      key={article.id}
-                      article={article}
-                      onClick={() => handleArticleClick(article)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Static Articles (Sample Content) */}
-            <div style={{ marginBottom: '24px' }}>
-              <h3 style={{ 
-                fontSize: '20px', 
-                fontWeight: '600', 
-                marginBottom: '24px',
-                color: '#1e293b'
-              }}>
-                Featured Content
-              </h3>
+            <div style={{ marginBottom: '32px' }}>
+              <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '8px' }}>Latest Articles</h2>
+              <p style={{ color: '#64748b' }}>Deep dives into AI technology, tutorials, and industry insights</p>
             </div>
             
             <div style={{ display: 'grid', gap: '24px' }}>
@@ -832,87 +609,6 @@ function App() {
           </div>
         )}
 
-        {/* Content Management Section */}
-        {activeSection === 'Content Management' && (
-          <div>
-            <div style={{ marginBottom: '32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
-                <div>
-                  <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '8px' }}>AI Content Management</h2>
-                  <p style={{ color: '#64748b' }}>Review, approve, and manage AI-generated content from your automated collection pipeline.</p>
-                </div>
-                
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    onClick={() => handleExport('json')}
-                    style={{
-                      backgroundColor: '#3b82f6',
-                      color: 'white',
-                      border: 'none',
-                      padding: '10px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px'
-                    }}
-                  >
-                    Export JSON
-                  </button>
-                  <button
-                    onClick={() => handleExport('csv')}
-                    style={{
-                      backgroundColor: '#10b981',
-                      color: 'white',
-                      border: 'none',
-                      padding: '10px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px'
-                    }}
-                  >
-                    Export CSV
-                  </button>
-                  <button
-                    onClick={() => handleExport('automation')}
-                    style={{
-                      backgroundColor: '#8b5cf6',
-                      color: 'white',
-                      border: 'none',
-                      padding: '10px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px'
-                    }}
-                  >
-                    Export for Automation
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <AnalyticsCards />
-
-            <ContentFiltersComponent
-              filters={contentFilters}
-              onFiltersChange={setContentFilters}
-              availableCategories={availableCategories}
-              availableSources={availableSources}
-            />
-
-            <ContentTable
-              filters={contentFilters}
-              onItemSelect={handleContentItemSelect}
-              onBulkAction={handleBulkAction}
-            />
-
-            <ContentDetailModal
-              item={selectedContentItem}
-              isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
-              onUpdate={handleContentUpdate}
-            />
-          </div>
-        )}
-
         {activeSection === 'AI Marketing' && (
           <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '12px', textAlign: 'center' }}>
             <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>AI Marketing Solutions</h2>
@@ -925,351 +621,219 @@ function App() {
           <>
             {/* Content Grid */}
             <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-          gap: '24px',
-          marginBottom: '32px'
-        }}>
-          {/* Featured Video Card */}
-          <div style={{ gridColumn: 'span 2' }}>
-            <div
-              style={{
-                position: 'relative',
-                backgroundColor: '#1e293b',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                height: '320px',
-                backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('${contentCards.find(c => c.featured)?.image}')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer'
-              }}
-            >
-              <div style={{ 
-                position: 'absolute',
-                bottom: '24px',
-                left: '24px',
-                right: '24px',
-                color: 'white'
-              }}>
-                <h2 style={{ 
-                  fontSize: '24px', 
-                  fontWeight: 'bold', 
-                  marginBottom: '8px',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.5)'
-                }}>
-                  ISAI Platform - Complete Guide
-                </h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '14px', opacity: 0.9 }}>
-                  <span>10:24</span>
-                  <span>•</span>
-                  <span>2025.20.07</span>
-                  <span>•</span>
-                  <span>Latest Tutorial</span>
-                </div>
-              </div>
-              <div style={{
-                width: '80px',
-                height: '80px',
-                backgroundColor: 'rgba(255,255,255,0.9)',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '32px',
-                color: '#3b82f6'
-              }}>▶</div>
-            </div>
-          </div>
-
-          {/* Regular Content Cards */}
-          {contentCards.filter(card => !card.featured).map(card => (
-            <div
-              key={card.id}
-              style={{
-                backgroundColor: 'white',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                transition: 'all 0.3s ease',
-                cursor: 'pointer',
-                height: '320px'
-              }}
-              onClick={() => alert(`Opening: ${card.title}\n\nThis would normally navigate to the full article.`)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-              }}
-            >
-              {/* Card Image */}
-              <div style={{
-                height: '180px',
-                backgroundImage: `url('${card.image}')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                position: 'relative'
-              }}>
-                {card.type === 'video' && (
-                  <div style={{
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+              gap: '24px',
+              marginBottom: '32px'
+            }}>
+              {/* Featured Video Card */}
+              <div style={{ gridColumn: 'span 2' }}>
+                <div
+                  style={{
+                    position: 'relative',
+                    backgroundColor: '#1e293b',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    height: '320px',
+                    backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('${contentCards.find(c => c.featured)?.image}')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <div style={{ 
                     position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '50px',
-                    height: '50px',
-                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    bottom: '24px',
+                    left: '24px',
+                    right: '24px',
+                    color: 'white'
+                  }}>
+                    <h2 style={{ 
+                      fontSize: '24px', 
+                      fontWeight: 'bold', 
+                      marginBottom: '8px',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                    }}>
+                      ISAI Platform - Complete Guide
+                    </h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '14px', opacity: 0.9 }}>
+                      <span>10:24</span>
+                      <span>•</span>
+                      <span>2025.20.07</span>
+                      <span>•</span>
+                      <span>Latest Tutorial</span>
+                    </div>
+                  </div>
+                  <div style={{
+                    width: '80px',
+                    height: '80px',
+                    backgroundColor: 'rgba(255,255,255,0.9)',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: 'white',
-                    fontSize: '20px'
+                    fontSize: '32px',
+                    color: '#3b82f6'
                   }}>▶</div>
-                )}
-                <div style={{
-                  position: 'absolute',
-                  bottom: '8px',
-                  right: '8px',
-                  backgroundColor: 'rgba(0,0,0,0.8)',
-                  color: 'white',
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  fontSize: '12px'
-                }}>
-                  {card.readTime}
                 </div>
               </div>
 
-              {/* Card Content */}
-              <div style={{ padding: '16px' }}>
-                <h3 style={{ 
-                  fontSize: '16px', 
-                  fontWeight: '600', 
-                  color: '#1e293b', 
-                  marginBottom: '8px',
-                  lineHeight: '1.4',
-                  height: '40px',
-                  overflow: 'hidden',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical'
-                }}>
-                  {card.title}
-                </h3>
-                
-                <div style={{ 
-                  fontSize: '14px', 
-                  color: '#64748b',
-                  marginBottom: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <span>📅 {card.date}</span>
-                  <span>👁 {Math.floor(Math.random() * 5000) + 1000}</span>
+              {/* Regular Content Cards */}
+              {contentCards.filter(card => !card.featured).map(card => (
+                <div
+                  key={card.id}
+                  style={{
+                    backgroundColor: 'white',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    height: '320px'
+                  }}
+                  onClick={() => alert(`Opening: ${card.title}\n\nThis would normally navigate to the full article.`)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                  }}
+                >
+                  {/* Card Image */}
+                  <div style={{
+                    height: '180px',
+                    backgroundImage: `url('${card.image}')`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    position: 'relative'
+                  }}>
+                    {card.type === 'video' && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '50px',
+                        height: '50px',
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '20px'
+                      }}>▶</div>
+                    )}
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '8px',
+                      right: '8px',
+                      backgroundColor: 'rgba(0,0,0,0.8)',
+                      color: 'white',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      fontSize: '12px'
+                    }}>
+                      {card.readTime}
+                    </div>
+                  </div>
+
+                  {/* Card Content */}
+                  <div style={{ padding: '16px' }}>
+                    <h3 style={{ 
+                      fontSize: '16px', 
+                      fontWeight: '600', 
+                      color: '#1e293b', 
+                      marginBottom: '8px',
+                      lineHeight: '1.4',
+                      height: '40px',
+                      overflow: 'hidden',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical'
+                    }}>
+                      {card.title}
+                    </h3>
+                    
+                    <div style={{ 
+                      fontSize: '14px', 
+                      color: '#64748b',
+                      marginBottom: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <span>📅 {card.date}</span>
+                      <span>👁 {Math.floor(Math.random() * 5000) + 1000}</span>
+                    </div>
+
+                    {/* Tags */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {card.tags.slice(0, 2).map(tag => (
+                        <span
+                          key={tag}
+                          style={{
+                            padding: '4px 8px',
+                            backgroundColor: '#eff6ff',
+                            color: '#2563eb',
+                            borderRadius: '12px',
+                            fontSize: '11px',
+                            fontWeight: '500'
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-
-                {/* Tags */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                  {card.tags.slice(0, 2).map(tag => (
-                    <span
-                      key={tag}
-                      style={{
-                        padding: '4px 8px',
-                        backgroundColor: '#eff6ff',
-                        color: '#2563eb',
-                        borderRadius: '12px',
-                        fontSize: '11px',
-                        fontWeight: '500'
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Featured Articles Section */}
-        <div style={{ marginTop: '48px', marginBottom: '32px' }}>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            marginBottom: '24px' 
-          }}>
-            <div>
-              <h2 style={{ 
-                fontSize: '28px', 
-                fontWeight: '700', 
-                marginBottom: '8px',
-                color: '#1e293b'
-              }}>
-                Featured Articles
-              </h2>
-              <p style={{ 
-                color: '#64748b', 
-                fontSize: '16px' 
-              }}>
-                Latest insights and tutorials from our community
-              </p>
-            </div>
-            <button
-              onClick={() => setActiveSection('Articles')}
-              style={{
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                padding: '12px 24px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#2563eb';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#3b82f6';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              View All Articles
-            </button>
-          </div>
-
-          {loadingArticles ? (
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '200px',
-              color: '#64748b'
-            }}>
-              Loading featured articles...
-            </div>
-          ) : featuredArticles.length > 0 ? (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-              gap: '24px'
-            }}>
-              {featuredArticles.map((article) => (
-                <ArticlePreviewCard
-                  key={article.id}
-                  article={article}
-                  onClick={() => handleArticleClick(article)}
-                />
               ))}
             </div>
-          ) : (
-            <div style={{
-              textAlign: 'center',
-              padding: '48px 24px',
-              backgroundColor: '#f8fafc',
-              borderRadius: '12px',
-              border: '2px dashed #cbd5e1'
-            }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>📝</div>
-              <h3 style={{ 
-                fontSize: '18px', 
-                fontWeight: '600', 
-                marginBottom: '8px',
-                color: '#475569'
-              }}>
-                No Featured Articles Yet
-              </h3>
-              <p style={{ 
-                color: '#64748b', 
-                marginBottom: '24px' 
-              }}>
-                Create your first article with rich content and YouTube embeds
-              </p>
-              <button
-                onClick={() => setActiveSection('Articles')}
-                style={{
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  padding: '12px 24px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
-                Create First Article
-              </button>
-            </div>
-          )}
-        </div>
 
-        {/* Additional Tools Section */}
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-          gap: '16px'
-        }}>
-          {[
-            { title: "AI Video Generator", color: "#3b82f6", icon: "🎥" },
-            { title: "Image Enhancement", color: "#10b981", icon: "🖼️" },
-            { title: "OMNI AI Editing", color: "#8b5cf6", icon: "✂️" },
-            { title: "Language Learning", color: "#f59e0b", icon: "🗣️" },
-            { title: "Code Assistant", color: "#ef4444", icon: "💻" },
-            { title: "Design Tools", color: "#06b6d4", icon: "🎨" }
-          ].map((tool, index) => (
-            <div
-              key={index}
-              style={{
-                backgroundColor: tool.color,
-                color: 'white',
-                padding: '20px',
-                borderRadius: '12px',
-                textAlign: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-              }}
-            >
-              <div style={{ fontSize: '32px', marginBottom: '8px' }}>{tool.icon}</div>
-              <div style={{ fontSize: '14px', fontWeight: '600' }}>{tool.title}</div>
+            {/* Additional Tools Section */}
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+              gap: '16px'
+            }}>
+              {[
+                { title: "AI Video Generator", color: "#3b82f6", icon: "🎥" },
+                { title: "Image Enhancement", color: "#10b981", icon: "🖼️" },
+                { title: "OMNI AI Editing", color: "#8b5cf6", icon: "✂️" },
+                { title: "Language Learning", color: "#f59e0b", icon: "🗣️" },
+                { title: "Code Assistant", color: "#ef4444", icon: "💻" },
+                { title: "Design Tools", color: "#06b6d4", icon: "🎨" }
+              ].map((tool, index) => (
+                <div
+                  key={index}
+                  style={{
+                    backgroundColor: tool.color,
+                    color: 'white',
+                    padding: '20px',
+                    borderRadius: '12px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                >
+                  <div style={{ fontSize: '32px', marginBottom: '8px' }}>{tool.icon}</div>
+                  <div style={{ fontSize: '14px', fontWeight: '600' }}>{tool.title}</div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
           </>
         )}
-
-        {/* Article View Section */}
-        {activeSection === 'ArticleView' && selectedArticle && (
-          <ArticleViewer
-            article={selectedArticle}
-            onBack={handleBackToHome}
-            onRelatedClick={handleRelatedArticleClick}
-          />
-        )}
-
-        {/* Article Creator Modal */}
-        <ArticleCreator
-          isOpen={showArticleCreator}
-          onClose={() => setShowArticleCreator(false)}
-          onSuccess={handleArticleCreated}
-        />
       </div>
     </div>
   )
