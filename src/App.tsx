@@ -81,31 +81,109 @@ const samplePrompts = [
 const sampleArticles: Article[] = [
   {
     id: '1',
-    title: 'The Future of AI in Content Creation',
-    content: '<h2>Introduction</h2><p>Artificial Intelligence is revolutionizing how we create and consume content...</p>',
-    excerpt: 'Exploring how AI tools are transforming the creative industry and what it means for content creators.',
-    author: 'Dr. Emily Watson',
-    category: 'AI Trends',
-    tags: ['AI', 'Content Creation', 'Future Tech'],
+    title: 'Introducing ChatGPT Agents: Revolutionary AI Assistants',
+    content: `<h2>The Future of AI Assistance</h2>
+    <p>OpenAI has unveiled ChatGPT Agents, a groundbreaking advancement that transforms how we interact with AI. These intelligent agents can perform complex tasks, access real-time information, and provide personalized assistance across various domains.</p>
+    
+    <div class="youtube-embed" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 20px 0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+      <iframe 
+        src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 12px;"
+        allowfullscreen>
+      </iframe>
+    </div>
+    
+    <h3>Key Features</h3>
+    <ul>
+      <li><strong>Real-time Data Access:</strong> Agents can fetch current information from the web</li>
+      <li><strong>Task Automation:</strong> Complex workflows can be automated end-to-end</li>
+      <li><strong>Contextual Memory:</strong> Maintains conversation context across sessions</li>
+      <li><strong>Multi-modal Capabilities:</strong> Works with text, images, and documents</li>
+    </ul>
+    
+    <h3>Use Cases</h3>
+    <p>ChatGPT Agents excel in various scenarios including research assistance, content creation, data analysis, and customer support. The possibilities are virtually endless.</p>`,
+    excerpt: 'Discover OpenAI\'s latest ChatGPT Agents - revolutionary AI assistants that can perform complex tasks and access real-time information.',
+    author: 'Sarah Chen',
+    category: 'AI News',
+    tags: ['ChatGPT', 'AI Agents', 'OpenAI', 'Technology'],
     status: 'published',
     featured: true,
-    created_at: '2024-01-10T09:00:00Z',
-    updated_at: '2024-01-10T09:00:00Z',
-    published_at: '2024-01-10T09:00:00Z',
-    view_count: 2341,
-    read_time: 8,
-    slug: 'future-of-ai-content-creation'
+    youtube_video_id: 'dQw4w9WgXcQ',
+    created_at: '2024-01-15T10:00:00Z',
+    updated_at: '2024-01-15T10:00:00Z',
+    published_at: '2024-01-15T10:00:00Z',
+    view_count: 4582,
+    read_time: 6,
+    slug: 'introducing-chatgpt-agents'
   },
   {
     id: '2',
-    title: 'Building Better AI Prompts: A Complete Guide',
-    content: '<h2>What Makes a Great Prompt?</h2><p>Effective prompting is both an art and a science...</p>',
-    excerpt: 'Master the art of prompt engineering with proven techniques and real-world examples.',
-    author: 'Marcus Johnson',
-    category: 'Tutorials',
-    tags: ['Prompting', 'AI Tools', 'Best Practices'],
+    title: 'Master AI Video Creation with Runway ML',
+    content: `<h2>Revolutionary Video Generation</h2>
+    <p>Runway ML has transformed video creation with its AI-powered tools. Learn how to create stunning videos from simple text prompts and images.</p>
+    
+    <div class="youtube-embed" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 20px 0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+      <iframe 
+        src="https://www.youtube.com/embed/kJQP7kiw5Fk" 
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 12px;"
+        allowfullscreen>
+      </iframe>
+    </div>
+    
+    <h3>Getting Started</h3>
+    <p>Follow this step-by-step guide to create your first AI-generated video using Runway ML's powerful Gen-2 model.</p>
+    
+    <h3>Pro Tips</h3>
+    <ul>
+      <li>Use detailed descriptions for better results</li>
+      <li>Experiment with different aspect ratios</li>
+      <li>Combine multiple clips for storytelling</li>
+    </ul>`,
+    excerpt: 'Learn how to create professional videos using Runway ML\'s AI-powered video generation tools.',
+    author: 'Alex Rivera',
+    category: 'Video Creation',
+    tags: ['Runway ML', 'AI Video', 'Content Creation', 'Tutorial'],
     status: 'published',
     featured: true,
+    youtube_video_id: 'kJQP7kiw5Fk',
+    created_at: '2024-01-12T14:00:00Z',
+    updated_at: '2024-01-12T14:00:00Z',
+    published_at: '2024-01-12T14:00:00Z',
+    view_count: 3247,
+    read_time: 8,
+    slug: 'master-ai-video-creation-runway-ml'
+  },
+  {
+    id: '3',
+    title: 'Building Better AI Prompts: A Complete Guide',
+    content: `<h2>The Art of Prompt Engineering</h2>
+    <p>Effective prompting is both an art and a science. Master these techniques to get better results from any AI model.</p>
+    
+    <div class="youtube-embed" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 20px 0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+      <iframe 
+        src="https://www.youtube.com/embed/ZCLVIm5jlfs" 
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 12px;"
+        allowfullscreen>
+      </iframe>
+    </div>
+    
+    <h3>Essential Techniques</h3>
+    <ul>
+      <li><strong>Be Specific:</strong> Clear, detailed instructions yield better results</li>
+      <li><strong>Provide Context:</strong> Give the AI background information</li>
+      <li><strong>Use Examples:</strong> Show the AI what you want with examples</li>
+      <li><strong>Iterate and Refine:</strong> Improve prompts based on results</li>
+    </ul>
+    
+    <p>These strategies will dramatically improve your AI interactions and help you achieve professional-quality results.</p>`,
+    excerpt: 'Master the art of prompt engineering with proven techniques and real-world examples.',
+    author: 'Dr. Marcus Johnson',
+    category: 'Tutorials',
+    tags: ['Prompting', 'AI Tools', 'Best Practices', 'Guide'],
+    status: 'published',
+    featured: true,
+    youtube_video_id: 'ZCLVIm5jlfs',
     created_at: '2024-01-08T14:30:00Z',
     updated_at: '2024-01-08T14:30:00Z',
     published_at: '2024-01-08T14:30:00Z',
