@@ -259,7 +259,7 @@ function App() {
             margin: '0',
             cursor: 'pointer'
           }} onClick={() => setCurrentView('home')}>
-            ISAI {/* Force Render deployment */}
+            🚨 ISAI COMPLETE VERSION - DEPLOYMENT TEST 🚨
           </h1>
           
           <div style={{ display: 'flex', gap: '30px' }}>
@@ -366,7 +366,7 @@ function App() {
             marginBottom: '20px',
             lineHeight: '1.2'
           }}>
-            Your AI Knowledge Hub
+            🔥 THIS IS THE COMPLETE ISAI VERSION WITH ALL FEATURES 🔥
           </h2>
           <p style={{
             fontSize: '20px',
