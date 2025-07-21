@@ -1,9 +1,188 @@
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  margin: 0;
-  padding: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Clean AI Knowledge Hub Design - Let's AI Inspired */
+
+@layer base {
+  :root {
+    /* Clean color palette inspired by Let's AI */
+    --background: 0 0% 100%;           /* Pure white background */
+    --foreground: 222 13% 11%;         /* Dark text #1e293b */
+
+    /* Cards and surfaces */
+    --card: 0 0% 100%;                 /* White cards */
+    --card-foreground: 222 13% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 13% 11%;
+
+    /* Primary tech blue - Let's AI style */
+    --primary: 217 91% 60%;            /* #2563eb */
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary subtle gray */
+    --secondary: 210 40% 98%;          /* #f8fafc */
+    --secondary-foreground: 222 13% 11%;
+
+    /* Success green */
+    --success: 159 89% 40%;            /* #059669 */
+    --success-foreground: 0 0% 100%;
+
+    /* Muted tones - clean grays */
+    --muted: 210 40% 96%;              /* #f1f5f9 */
+    --muted-foreground: 215 16% 47%;   /* #64748b */
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Clean borders */
+    --border: 214 32% 91%;             /* #e2e8f0 */
+    --input: 214 32% 91%;
+    --ring: 217 91% 60%;
+
+    /* Minimal shadows - no glow effects */
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    --shadow-hover: 0 4px 12px 0 rgb(0 0 0 / 0.15);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+
+    /* Clean transitions */
+    --transition-smooth: all 0.2s ease;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+@layer components {
+  /* Clean component styles - Let's AI inspired */
+  
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+
+  .shadow-hover {
+    box-shadow: var(--shadow-hover);
+  }
+
+  .shadow-lg {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+
+  /* Clean hover effects - minimal lift */
+  .hover-lift {
+    transition: var(--transition-smooth);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  /* Content card styles */
+  .content-card {
+    @apply bg-white border border-border rounded-xl p-6 transition-smooth;
+  }
+
+  .content-card:hover {
+    @apply shadow-hover;
+    transform: translateY(-2px);
+  }
+
+  /* Clean button styles */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium transition-smooth;
+  }
+
+  .btn-primary:hover {
+    @apply bg-primary/90;
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    @apply bg-white text-primary border-2 border-primary px-6 py-3 rounded-lg font-medium transition-smooth;
+  }
+
+  .btn-secondary:hover {
+    @apply bg-primary/5;
+  }
+
+  /* Code and prompt blocks */
+  .prompt-block {
+    @apply bg-muted border border-border rounded-lg p-4 font-mono text-sm;
+    direction: ltr;
+  }
+
+  .code-block {
+    @apply bg-slate-900 text-slate-100 rounded-lg p-5 overflow-x-auto font-mono text-sm;
+  }
 }
