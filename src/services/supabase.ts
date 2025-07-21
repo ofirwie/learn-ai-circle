@@ -1,10 +1,17 @@
 import { createClient } from '@supabase/supabase-js'
+import { Database } from '../types/database.types'
 
-const supabaseUrl = 'https://ilotcwtcnlihoprxcdzp.supabase.co'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://ilotcwtcnlihoprxcdzp.supabase.co'
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
-// IMPORTANT: Use the ANON key for frontend, not the secret key!
-// Get this from: Supabase Dashboard > Settings > API > anon/public key
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsb3Rjd3RjbmxpaG9wcnhjZHpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2OTQzNzIsImV4cCI6MjA1MDI3MDM3Mn0.YourCorrectAnonKeyHere'
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables')
+}
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+})

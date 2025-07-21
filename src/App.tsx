@@ -1,1276 +1,473 @@
-import { useState, useEffect } from 'react';
-import { ContentTable } from './components/Dashboard/ContentTable';
-import { ContentFiltersComponent } from './components/Dashboard/ContentFilters';
-import { ContentDetailModal } from './components/Dashboard/ContentDetailModal';
-import { AnalyticsCards } from './components/Dashboard/AnalyticsCards';
-import { ContentService } from './services/contentService';
-import { ArticleService } from './services/articleService';
-import { AIContentItem, ContentFilters, Article } from './types/content';
-import { ExportUtils } from './utils/exportUtils';
-import { ArticlePreviewCard } from './components/Article/ArticlePreviewCard';
-import { ArticleViewer } from './components/Article/ArticleViewer';
-import { ArticleCreator } from './components/Article/ArticleCreator';
+import { useState, useEffect } from 'react'
+import { useAuthStore } from './store/authStore'
+import { LoginForm } from './components/auth/LoginForm'
+import { SignupForm } from './components/auth/SignupForm'
+import { 
+  Brain, 
+  Users, 
+  BookOpen, 
+  MessageCircle, 
+  Settings, 
+  LogOut,
+  Plus,
+  Search,
+  Filter,
+  TrendingUp,
+  Eye,
+  Star,
+  Calendar
+} from 'lucide-react'
+
+type ViewType = 'home' | 'guides' | 'prompts' | 'tools' | 'news' | 'videos' | 'articles' | 'forum' | 'profile'
 
 function App() {
-  const [activeSection, setActiveSection] = useState('Home');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [currentView, setCurrentView] = useState<ViewType>('home')
+  const [authView, setAuthView] = useState<'login' | 'signup'>('login')
   
-  // Content Management State
-  const [contentFilters, setContentFilters] = useState<ContentFilters>({});
-  const [selectedContentItem, setSelectedContentItem] = useState<AIContentItem | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
-  const [availableSources, setAvailableSources] = useState<string[]>([]);
-  
-  // Articles State
-  const [featuredArticles, setFeaturedArticles] = useState<Article[]>([]);
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
-  const [loadingArticles, setLoadingArticles] = useState(false);
-  const [showArticleCreator, setShowArticleCreator] = useState(false);
-  const [publishedArticles, setPublishedArticles] = useState<Article[]>([]);
-  
-  // AI Prompts Database
-  const aiPrompts = [
-    {
-      id: 1,
-      category: "Content Creation",
-      title: "Blog Post Writer",
-      prompt: "Write a comprehensive blog post about [TOPIC] that is approximately 1000 words. Include an engaging introduction, 3-5 main points with examples, and a conclusion with actionable takeaways. Use a conversational yet professional tone.",
-      tags: ["writing", "blog", "content"]
-    },
-    {
-      id: 2,
-      category: "Code Generation",
-      title: "React Component Generator",
-      prompt: "Create a React functional component for [COMPONENT_NAME] that includes: TypeScript types, proper props interface, error handling, and responsive design. Include comments explaining the code.",
-      tags: ["react", "coding", "typescript"]
-    },
-    {
-      id: 3,
-      category: "Data Analysis",
-      title: "Data Insights Analyzer",
-      prompt: "Analyze this dataset and provide: 1) Key statistics and trends, 2) Potential correlations, 3) Actionable insights, 4) Visualization recommendations. Format the response with clear headers and bullet points.",
-      tags: ["analysis", "data", "insights"]
-    },
-    {
-      id: 4,
-      category: "Marketing",
-      title: "Social Media Campaign",
-      prompt: "Create a social media campaign for [PRODUCT/SERVICE] including: 5 post ideas with captions, relevant hashtags, optimal posting times, and engagement strategies. Target audience: [AUDIENCE].",
-      tags: ["marketing", "social", "campaign"]
-    },
-    {
-      id: 5,
-      category: "Education",
-      title: "Lesson Plan Creator",
-      prompt: "Design a detailed lesson plan for teaching [SUBJECT] to [AGE_GROUP]. Include: learning objectives, materials needed, 45-minute activity breakdown, assessment methods, and homework assignments.",
-      tags: ["education", "teaching", "planning"]
-    }
-  ];
+  const { user, userProfile, entity, userGroup, loading, initialized, initialize, signOut } = useAuthStore()
 
-  // Forum Posts
-  const forumPosts = [
-    {
-      id: 1,
-      title: "Best practices for prompt engineering?",
-      author: "Sarah Chen",
-      replies: 23,
-      views: 456,
-      lastActivity: "2 hours ago",
-      category: "Prompt Engineering",
-      preview: "I've been experimenting with different prompt structures and wondering what strategies others have found most effective..."
-    },
-    {
-      id: 2,
-      title: "ChatGPT vs Claude for code generation",
-      author: "Mike Johnson",
-      replies: 45,
-      views: 892,
-      lastActivity: "5 hours ago",
-      category: "AI Comparison",
-      preview: "After extensive testing with both models, here's my detailed comparison for code generation tasks..."
-    },
-    {
-      id: 3,
-      title: "Share your favorite AI tools for content creation",
-      author: "Lisa Park",
-      replies: 67,
-      views: 1203,
-      lastActivity: "1 day ago",
-      category: "Tools & Resources",
-      preview: "Let's create a comprehensive list of AI tools that have transformed our content creation workflow..."
-    }
-  ];
-
-  // Articles
-  const articles = [
-    {
-      id: 1,
-      title: "Understanding Large Language Models: A Beginner's Guide",
-      author: "Dr. James Wilson",
-      readTime: "8 min",
-      date: "July 18, 2024",
-      excerpt: "Explore the fundamentals of LLMs, how they work, and their impact on modern AI applications.",
-      category: "AI Basics"
-    },
-    {
-      id: 2,
-      title: "The Future of AI in Healthcare",
-      author: "Emily Rodriguez",
-      readTime: "12 min",
-      date: "July 17, 2024",
-      excerpt: "Discover how artificial intelligence is revolutionizing medical diagnosis, treatment planning, and patient care.",
-      category: "Industry Applications"
-    },
-    {
-      id: 3,
-      title: "Ethical Considerations in AI Development",
-      author: "Prof. Alan Kumar",
-      readTime: "10 min",
-      date: "July 16, 2024",
-      excerpt: "A deep dive into the ethical challenges and responsibilities in developing AI systems.",
-      category: "AI Ethics"
-    }
-  ];
-
-  // Prompt Templates
-  const promptTemplates = [
-    {
-      id: 1,
-      name: "Business Email Template",
-      category: "Business",
-      template: "Subject: [SUBJECT]\n\nDear [RECIPIENT],\n\nI hope this email finds you well. I'm writing to [PURPOSE].\n\n[MAIN_CONTENT]\n\n[CALL_TO_ACTION]\n\nBest regards,\n[YOUR_NAME]",
-      description: "Professional email template for business communication"
-    },
-    {
-      id: 2,
-      name: "Product Description Generator",
-      category: "E-commerce",
-      template: "Generate a compelling product description for:\nProduct: [PRODUCT_NAME]\nKey Features: [FEATURES]\nTarget Audience: [AUDIENCE]\nTone: [TONE]\nLength: [WORD_COUNT] words",
-      description: "Create engaging product descriptions for online stores"
-    },
-    {
-      id: 3,
-      name: "Code Documentation",
-      category: "Development",
-      template: "Document this code:\n[CODE_SNIPPET]\n\nInclude:\n- Purpose and functionality\n- Parameters and return values\n- Usage examples\n- Edge cases and error handling",
-      description: "Generate comprehensive code documentation"
-    }
-  ];
-
-  const copyToClipboard = (text: string, id: number) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
-  // Content Management Functions
-  const handleContentItemSelect = (item: AIContentItem) => {
-    setSelectedContentItem(item);
-    setIsModalOpen(true);
-  };
-
-  const handleContentUpdate = (updatedItem: AIContentItem) => {
-    setSelectedContentItem(updatedItem);
-    // You might want to refresh the content table here
-  };
-
-  const handleBulkAction = async (action: 'approve' | 'reject' | 'delete', ids: string[]) => {
-    try {
-      switch (action) {
-        case 'approve':
-          await ContentService.bulkApprove(ids);
-          alert(`${ids.length} items approved successfully`);
-          break;
-        case 'reject':
-          await ContentService.bulkReject(ids);
-          alert(`${ids.length} items rejected successfully`);
-          break;
-        case 'delete':
-          if (confirm(`Are you sure you want to delete ${ids.length} items? This cannot be undone.`)) {
-            await ContentService.deleteContent(ids);
-            alert(`${ids.length} items deleted successfully`);
-          }
-          break;
-      }
-    } catch (error) {
-      console.error(`Error performing bulk ${action}:`, error);
-      alert(`Failed to ${action} selected items`);
-    }
-  };
-
-  // Load categories and sources when Content Management is accessed
   useEffect(() => {
-    if (activeSection === 'Content Management') {
-      loadAvailableFilters();
-    } else if (activeSection === 'Articles') {
-      loadPublishedArticles();
-    }
-  }, [activeSection]);
+    initialize()
+  }, [initialize])
 
-  // Load featured articles for home page
-  useEffect(() => {
-    loadFeaturedArticles();
-  }, []);
+  // Show loading spinner while initializing
+  if (loading || !initialized) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f8fafc'
+      }}>
+        <div className="spinner" style={{ width: '40px', height: '40px' }} />
+      </div>
+    )
+  }
 
-  const loadFeaturedArticles = async () => {
-    try {
-      setLoadingArticles(true);
-      console.log('🔍 Loading featured articles...');
-      const articles = await ArticleService.getFeaturedArticles(6);
-      console.log('✅ Featured articles loaded:', articles.length, articles);
-      setFeaturedArticles(articles);
-    } catch (error) {
-      console.error('❌ Error loading featured articles:', error);
-    } finally {
-      setLoadingArticles(false);
-    }
-  };
-
-  const handleArticleClick = (article: Article) => {
-    setSelectedArticle(article);
-    setActiveSection('ArticleView');
-  };
-
-  const handleBackToHome = () => {
-    setSelectedArticle(null);
-    setActiveSection('Home');
-  };
-
-  const handleRelatedArticleClick = (article: Article) => {
-    setSelectedArticle(article);
-    // Stay in ArticleView section but update the article
-  };
-
-  const handleArticleCreated = (article: Article) => {
-    // Refresh featured articles if the new article is featured
-    if (article.featured) {
-      loadFeaturedArticles();
-    }
-    // Refresh published articles if on Articles section
-    if (activeSection === 'Articles') {
-      loadPublishedArticles();
-    }
-  };
-
-  const loadPublishedArticles = async () => {
-    try {
-      const { data } = await ArticleService.getArticles(1, 10, { status: 'published' });
-      setPublishedArticles(data);
-    } catch (error) {
-      console.error('Error loading published articles:', error);
-    }
-  };
-
-  const loadAvailableFilters = async () => {
-    try {
-      // This is a simplified version - in a real app you'd have dedicated endpoints
-      const { data } = await ContentService.getContentItems(1, 1000, {});
-      
-      const categories = Array.from(new Set(data.map(item => item.category)));
-      const sources = Array.from(new Set(data.map(item => item.source_domain)));
-      
-      setAvailableCategories(categories);
-      setAvailableSources(sources);
-    } catch (error) {
-      console.error('Error loading filter options:', error);
-    }
-  };
-
-  const handleExport = async (format: 'json' | 'csv' | 'automation') => {
-    try {
-      switch (format) {
-        case 'json':
-          await ExportUtils.exportToJSON(contentFilters);
-          break;
-        case 'csv':
-          await ExportUtils.exportToCSV(contentFilters);
-          break;
-        case 'automation':
-          await ExportUtils.exportForAutomation(contentFilters);
-          break;
-      }
-      alert(`Export completed successfully!`);
-    } catch (error) {
-      console.error('Export error:', error);
-      alert('Export failed. Please try again.');
-    }
-  };
-  
-  const contentCards = [
-    {
-      id: 1,
-      title: "Creating Interactive Data Visualizations with AI",
-      description: "Learn how to build stunning interactive charts and graphs using AI-powered tools and modern frameworks.",
-      readTime: "7 min",
-      date: "19/07/2025",
-      tags: ["Data Viz", "AI", "Interactive"],
-      category: "Tutorials",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=250&fit=crop",
-      type: "article"
-    },
-    {
-      id: 2,
-      title: "OpenAI Releases Enhanced ChatGPT",
-      description: "Latest updates to ChatGPT include improved reasoning, faster responses, and new creative capabilities.",
-      readTime: "7 min",
-      date: "18/07/2025",
-      tags: ["OpenAI", "ChatGPT", "Updates"],
-      category: "News",
-      image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=250&fit=crop",
-      type: "video"
-    },
-    {
-      id: 3,
-      title: "ISAI Platform - Complete Guide",
-      description: "Comprehensive walkthrough of ISAI platform for AI knowledge sharing and collaboration.",
-      readTime: "10:24",
-      date: "2025.20.07",
-      tags: ["Lovable", "No-Code", "Tutorial"],
-      category: "Guides",
-      image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&h=400&fit=crop",
-      type: "video",
-      featured: true
-    },
-    {
-      id: 4,
-      title: "AI Audio Processing Tools",
-      description: "Explore cutting-edge AI tools for audio editing, enhancement, and generation.",
-      readTime: "5 min",
-      date: "17/07/2025",
-      tags: ["Audio", "AI Tools", "Processing"],
-      category: "Tools",
-      image: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400&h=250&fit=crop",
-      type: "article"
-    },
-    {
-      id: 5,
-      title: "OMNI Video Editing with AI",
-      description: "Revolutionary AI-powered video editing suite for content creators and professionals.",
-      readTime: "8 min",
-      date: "16/07/2025",
-      tags: ["Video", "Editing", "OMNI"],
-      category: "Tools",
-      image: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=400&h=250&fit=crop",
-      type: "article"
-    },
-    {
-      id: 6,
-      title: "Multi-Language AI Assistant",
-      description: "Building conversational AI that supports multiple languages and cultural contexts.",
-      readTime: "6 min",
-      date: "15/07/2025",
-      tags: ["Multilingual", "Assistant", "AI"],
-      category: "Development",
-      image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=250&fit=crop",
-      type: "article"
-    }
-  ];
-
-  const categories = ["All", "Guides", "Prompts", "Forum", "Tools"];
-  const popularTags = ["ChatGPT", "Prompts", "AI Tools", "Tutorial", "Development", "Machine Learning"];
-
-  return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f0f2f5', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
-      {/* Header */}
-      <header style={{ backgroundColor: '#3b82f6', color: 'white' }}>
-        {/* Top Header */}
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '60px' }}>
-            {/* Right Side - User Actions */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <span style={{ fontSize: '14px', opacity: 0.9 }}>My Area</span>
-              <div style={{ 
-                width: '32px', 
-                height: '32px', 
-                backgroundColor: 'rgba(255,255,255,0.2)', 
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer'
-              }}>🛒</div>
-              <div style={{ position: 'relative' }}>
-                <span style={{ 
-                  position: 'absolute',
-                  top: '-8px',
-                  right: '-8px',
-                  backgroundColor: '#10b981',
-                  color: 'white',
-                  borderRadius: '50%',
-                  width: '18px',
-                  height: '18px',
-                  fontSize: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>2</span>
-                <div style={{ fontSize: '14px', cursor: 'pointer' }}>📋</div>
-              </div>
-            </div>
-
-            {/* Center - Search Bar */}
-            <div style={{ position: 'relative', maxWidth: '400px', minWidth: '300px', flex: 1, margin: '0 24px' }}>
-              <input 
-                type="text"
-                placeholder="Search..."
-                style={{
-                  width: '100%',
-                  height: '36px',
-                  padding: '8px 40px 8px 16px',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  backgroundColor: 'white'
-                }}
-              />
-              <div style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b', cursor: 'pointer' }}>
-                🔍
-              </div>
-            </div>
-
-            {/* Left Side - Logo */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ fontSize: '32px', fontWeight: 'bold', letterSpacing: '2px' }}>ISAI</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation Menu */}
-        <div style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
-          <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px' }}>
-            <nav style={{ display: 'flex', height: '48px', justifyContent: 'center' }}>
-              {["Home", "Forums", "AI Prompts", "Prompt Library", "Articles", "Content Management", "AI Marketing"].map((item) => (
-                <button
-                  key={item}
-                  onClick={() => setActiveSection(item)}
-                  style={{
-                    padding: '12px 16px',
-                    border: 'none',
-                    backgroundColor: 'transparent',
-                    color: 'white',
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    opacity: activeSection === item ? 1 : 0.8,
-                    fontWeight: activeSection === item ? '600' : '400',
-                    borderBottom: activeSection === item ? '2px solid white' : 'none'
-                  }}
-                >
-                  {item}
-                </button>
-              ))}
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 24px' }}>
-        {/* Section Title */}
-        <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '24px', color: '#1e293b' }}>
-          {activeSection}
-        </h1>
-
-        {/* AI Prompts Section */}
-        {activeSection === 'AI Prompts' && (
-          <div>
-            <div style={{ marginBottom: '24px' }}>
-              <input
-                type="text"
-                placeholder="Search prompts..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{
-                  width: '100%',
-                  maxWidth: '400px',
-                  padding: '12px 16px',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '14px'
-                }}
-              />
-            </div>
-            
-            <div style={{ display: 'grid', gap: '16px' }}>
-              {aiPrompts
-                .filter(prompt => 
-                  prompt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  prompt.prompt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  prompt.category.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-                .map(prompt => (
-                  <div key={prompt.id} style={{
-                    backgroundColor: 'white',
-                    padding: '24px',
-                    borderRadius: '12px',
-                    border: '1px solid #e2e8f0'
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-                      <div>
-                        <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '4px' }}>{prompt.title}</h3>
-                        <span style={{
-                          backgroundColor: '#eff6ff',
-                          color: '#2563eb',
-                          padding: '4px 12px',
-                          borderRadius: '6px',
-                          fontSize: '12px'
-                        }}>{prompt.category}</span>
-                      </div>
-                      <button
-                        onClick={() => copyToClipboard(prompt.prompt, prompt.id)}
-                        style={{
-                          backgroundColor: copiedId === prompt.id ? '#10b981' : '#3b82f6',
-                          color: 'white',
-                          border: 'none',
-                          padding: '8px 16px',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontSize: '14px',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        {copiedId === prompt.id ? '✓ Copied!' : 'Copy Prompt'}
-                      </button>
-                    </div>
-                    
-                    <div style={{
-                      backgroundColor: '#f8fafc',
-                      padding: '16px',
-                      borderRadius: '8px',
-                      fontFamily: 'monospace',
-                      fontSize: '14px',
-                      lineHeight: '1.6',
-                      marginBottom: '12px'
-                    }}>
-                      {prompt.prompt}
-                    </div>
-                    
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      {prompt.tags.map(tag => (
-                        <span key={tag} style={{
-                          backgroundColor: '#f1f5f9',
-                          color: '#64748b',
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          fontSize: '12px'
-                        }}>#{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-        )}
-
-        {/* Forums Section */}
-        {activeSection === 'Forums' && (
-          <div>
-            <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: '600' }}>Community Discussions</h2>
-              <button style={{
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                padding: '10px 20px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}>
-                + New Topic
-              </button>
-            </div>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {forumPosts.map(post => (
-                <div key={post.id} style={{
-                  backgroundColor: 'white',
-                  padding: '24px',
-                  borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
-                    <div style={{ flex: 1 }}>
-                      <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#1e293b' }}>
-                        {post.title}
-                      </h3>
-                      <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '12px' }}>
-                        {post.preview}
-                      </p>
-                      <div style={{ display: 'flex', gap: '16px', fontSize: '12px', color: '#64748b' }}>
-                        <span>by {post.author}</span>
-                        <span>•</span>
-                        <span>{post.replies} replies</span>
-                        <span>•</span>
-                        <span>{post.views} views</span>
-                        <span>•</span>
-                        <span>{post.lastActivity}</span>
-                      </div>
-                    </div>
-                    <span style={{
-                      backgroundColor: '#eff6ff',
-                      color: '#2563eb',
-                      padding: '6px 12px',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      whiteSpace: 'nowrap'
-                    }}>{post.category}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Articles Section */}
-        {activeSection === 'Articles' && (
-          <div>
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'start',
-              marginBottom: '32px' 
-            }}>
-              <div>
-                <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '8px' }}>Latest Articles</h2>
-                <p style={{ color: '#64748b' }}>Deep dives into AI technology, tutorials, and industry insights</p>
-              </div>
-              <button
-                onClick={() => setShowArticleCreator(true)}
-                style={{
-                  backgroundColor: '#10b981',
-                  color: 'white',
-                  border: 'none',
-                  padding: '12px 24px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-              >
-                ✨ Create Article
-              </button>
-            </div>
-
-            {/* Database Articles */}
-            {publishedArticles.length > 0 && (
-              <div style={{ marginBottom: '48px' }}>
-                <h3 style={{ 
-                  fontSize: '20px', 
-                  fontWeight: '600', 
-                  marginBottom: '24px',
-                  color: '#1e293b'
-                }}>
-                  Published Articles
-                </h3>
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', 
-                  gap: '24px',
-                  marginBottom: '32px'
-                }}>
-                  {publishedArticles.map((article) => (
-                    <ArticlePreviewCard
-                      key={article.id}
-                      article={article}
-                      onClick={() => handleArticleClick(article)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Static Articles (Sample Content) */}
-            <div style={{ marginBottom: '24px' }}>
-              <h3 style={{ 
-                fontSize: '20px', 
-                fontWeight: '600', 
-                marginBottom: '24px',
-                color: '#1e293b'
-              }}>
-                Featured Content
-              </h3>
-            </div>
-            
-            <div style={{ display: 'grid', gap: '24px' }}>
-              {articles.map(article => (
-                <div key={article.id} style={{
-                  backgroundColor: 'white',
-                  padding: '32px',
-                  borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-                >
-                  <div style={{ marginBottom: '16px' }}>
-                    <span style={{
-                      backgroundColor: '#fef3c7',
-                      color: '#92400e',
-                      padding: '4px 12px',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      fontWeight: '500'
-                    }}>{article.category}</span>
-                  </div>
-                  
-                  <h3 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '12px', color: '#1e293b' }}>
-                    {article.title}
-                  </h3>
-                  
-                  <p style={{ color: '#64748b', fontSize: '16px', lineHeight: '1.6', marginBottom: '16px' }}>
-                    {article.excerpt}
-                  </p>
-                  
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', gap: '16px', fontSize: '14px', color: '#64748b' }}>
-                      <span>By {article.author}</span>
-                      <span>•</span>
-                      <span>{article.date}</span>
-                      <span>•</span>
-                      <span>{article.readTime} read</span>
-                    </div>
-                    <span style={{ color: '#3b82f6', fontWeight: '500' }}>Read more →</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Prompt Library Section */}
-        {activeSection === 'Prompt Library' && (
-          <div>
-            <div style={{ marginBottom: '32px' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '8px' }}>Prompt Templates</h2>
-              <p style={{ color: '#64748b' }}>Ready-to-use templates for common AI tasks</p>
-            </div>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '24px' }}>
-              {promptTemplates.map(template => (
-                <div key={template.id} style={{
-                  backgroundColor: 'white',
-                  padding: '24px',
-                  borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
-                  height: 'fit-content'
-                }}>
-                  <div style={{ marginBottom: '16px' }}>
-                    <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>{template.name}</h3>
-                    <span style={{
-                      backgroundColor: '#dcfce7',
-                      color: '#166534',
-                      padding: '4px 12px',
-                      borderRadius: '6px',
-                      fontSize: '12px'
-                    }}>{template.category}</span>
-                  </div>
-                  
-                  <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '16px' }}>
-                    {template.description}
-                  </p>
-                  
-                  <div style={{
-                    backgroundColor: '#f8fafc',
-                    padding: '16px',
-                    borderRadius: '8px',
-                    marginBottom: '16px',
-                    maxHeight: '200px',
-                    overflow: 'auto'
-                  }}>
-                    <pre style={{
-                      fontFamily: 'monospace',
-                      fontSize: '13px',
-                      whiteSpace: 'pre-wrap',
-                      margin: 0,
-                      color: '#475569'
-                    }}>
-                      {template.template}
-                    </pre>
-                  </div>
-                  
-                  <button
-                    onClick={() => copyToClipboard(template.template, template.id)}
-                    style={{
-                      width: '100%',
-                      backgroundColor: copiedId === template.id ? '#10b981' : '#3b82f6',
-                      color: 'white',
-                      border: 'none',
-                      padding: '10px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    {copiedId === template.id ? '✓ Copied Template!' : 'Use This Template'}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Content Management Section */}
-        {activeSection === 'Content Management' && (
-          <div>
-            <div style={{ marginBottom: '32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
-                <div>
-                  <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '8px' }}>AI Content Management</h2>
-                  <p style={{ color: '#64748b' }}>Review, approve, and manage AI-generated content from your automated collection pipeline.</p>
-                </div>
-                
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    onClick={() => handleExport('json')}
-                    style={{
-                      backgroundColor: '#3b82f6',
-                      color: 'white',
-                      border: 'none',
-                      padding: '10px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px'
-                    }}
-                  >
-                    Export JSON
-                  </button>
-                  <button
-                    onClick={() => handleExport('csv')}
-                    style={{
-                      backgroundColor: '#10b981',
-                      color: 'white',
-                      border: 'none',
-                      padding: '10px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px'
-                    }}
-                  >
-                    Export CSV
-                  </button>
-                  <button
-                    onClick={() => handleExport('automation')}
-                    style={{
-                      backgroundColor: '#8b5cf6',
-                      color: 'white',
-                      border: 'none',
-                      padding: '10px 16px',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontSize: '14px'
-                    }}
-                  >
-                    Export for Automation
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <AnalyticsCards />
-
-            <ContentFiltersComponent
-              filters={contentFilters}
-              onFiltersChange={setContentFilters}
-              availableCategories={availableCategories}
-              availableSources={availableSources}
-            />
-
-            <ContentTable
-              filters={contentFilters}
-              onItemSelect={handleContentItemSelect}
-              onBulkAction={handleBulkAction}
-            />
-
-            <ContentDetailModal
-              item={selectedContentItem}
-              isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
-              onUpdate={handleContentUpdate}
-            />
-          </div>
-        )}
-
-        {activeSection === 'AI Marketing' && (
-          <div style={{ backgroundColor: 'white', padding: '32px', borderRadius: '12px', textAlign: 'center' }}>
-            <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>AI Marketing Solutions</h2>
-            <p style={{ color: '#64748b' }}>Learn how to leverage AI for your marketing campaigns.</p>
-          </div>
-        )}
-
-        {/* Home Content - show the existing grid */}
-        {activeSection === 'Home' && (
-          <>
-            {/* Content Grid */}
-            <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-          gap: '24px',
-          marginBottom: '32px'
-        }}>
-          {/* Featured Video Card */}
-          <div style={{ gridColumn: 'span 2' }}>
-            <div
-              style={{
-                position: 'relative',
-                backgroundColor: '#1e293b',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                height: '320px',
-                backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('${contentCards.find(c => c.featured)?.image}')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer'
-              }}
-            >
-              <div style={{ 
-                position: 'absolute',
-                bottom: '24px',
-                left: '24px',
-                right: '24px',
-                color: 'white'
-              }}>
-                <h2 style={{ 
-                  fontSize: '24px', 
-                  fontWeight: 'bold', 
-                  marginBottom: '8px',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.5)'
-                }}>
-                  ISAI Platform - Complete Guide
-                </h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '14px', opacity: 0.9 }}>
-                  <span>10:24</span>
-                  <span>•</span>
-                  <span>2025.20.07</span>
-                  <span>•</span>
-                  <span>Latest Tutorial</span>
-                </div>
-              </div>
-              <div style={{
-                width: '80px',
-                height: '80px',
-                backgroundColor: 'rgba(255,255,255,0.9)',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '32px',
-                color: '#3b82f6'
-              }}>▶</div>
-            </div>
-          </div>
-
-          {/* Regular Content Cards */}
-          {contentCards.filter(card => !card.featured).map(card => (
-            <div
-              key={card.id}
-              style={{
-                backgroundColor: 'white',
-                borderRadius: '12px',
-                overflow: 'hidden',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                transition: 'all 0.3s ease',
-                cursor: 'pointer',
-                height: '320px'
-              }}
-              onClick={() => alert(`Opening: ${card.title}\n\nThis would normally navigate to the full article.`)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-              }}
-            >
-              {/* Card Image */}
-              <div style={{
-                height: '180px',
-                backgroundImage: `url('${card.image}')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                position: 'relative'
-              }}>
-                {card.type === 'video' && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '50px',
-                    height: '50px',
-                    backgroundColor: 'rgba(0,0,0,0.7)',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontSize: '20px'
-                  }}>▶</div>
-                )}
-                <div style={{
-                  position: 'absolute',
-                  bottom: '8px',
-                  right: '8px',
-                  backgroundColor: 'rgba(0,0,0,0.8)',
-                  color: 'white',
-                  padding: '4px 8px',
-                  borderRadius: '4px',
-                  fontSize: '12px'
-                }}>
-                  {card.readTime}
-                </div>
-              </div>
-
-              {/* Card Content */}
-              <div style={{ padding: '16px' }}>
-                <h3 style={{ 
-                  fontSize: '16px', 
-                  fontWeight: '600', 
-                  color: '#1e293b', 
-                  marginBottom: '8px',
-                  lineHeight: '1.4',
-                  height: '40px',
-                  overflow: 'hidden',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical'
-                }}>
-                  {card.title}
-                </h3>
-                
-                <div style={{ 
-                  fontSize: '14px', 
-                  color: '#64748b',
-                  marginBottom: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <span>📅 {card.date}</span>
-                  <span>👁 {Math.floor(Math.random() * 5000) + 1000}</span>
-                </div>
-
-                {/* Tags */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                  {card.tags.slice(0, 2).map(tag => (
-                    <span
-                      key={tag}
-                      style={{
-                        padding: '4px 8px',
-                        backgroundColor: '#eff6ff',
-                        color: '#2563eb',
-                        borderRadius: '12px',
-                        fontSize: '11px',
-                        fontWeight: '500'
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Featured Articles Section */}
-        <div style={{ marginTop: '48px', marginBottom: '32px' }}>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            marginBottom: '24px' 
-          }}>
-            <div>
-              <h2 style={{ 
-                fontSize: '28px', 
-                fontWeight: '700', 
-                marginBottom: '8px',
-                color: '#1e293b'
-              }}>
-                Featured Articles
-              </h2>
-              <p style={{ 
-                color: '#64748b', 
-                fontSize: '16px' 
-              }}>
-                Latest insights and tutorials from our community
-              </p>
-            </div>
-            <button
-              onClick={() => setActiveSection('Articles')}
-              style={{
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                padding: '12px 24px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#2563eb';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#3b82f6';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              View All Articles
-            </button>
-          </div>
-
-          {loadingArticles ? (
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '200px',
-              color: '#64748b'
-            }}>
-              Loading featured articles...
-            </div>
-          ) : featuredArticles.length > 0 ? (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-              gap: '24px'
-            }}>
-              {featuredArticles.map((article) => (
-                <ArticlePreviewCard
-                  key={article.id}
-                  article={article}
-                  onClick={() => handleArticleClick(article)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div style={{
-              textAlign: 'center',
-              padding: '48px 24px',
-              backgroundColor: '#f8fafc',
-              borderRadius: '12px',
-              border: '2px dashed #cbd5e1'
-            }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>📝</div>
-              <h3 style={{ 
-                fontSize: '18px', 
-                fontWeight: '600', 
-                marginBottom: '8px',
-                color: '#475569'
-              }}>
-                No Featured Articles Yet
-              </h3>
-              <p style={{ 
-                color: '#64748b', 
-                marginBottom: '24px' 
-              }}>
-                Create your first article with rich content and YouTube embeds
-              </p>
-              <button
-                onClick={() => setActiveSection('Articles')}
-                style={{
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  padding: '12px 24px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
-                Create First Article
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Additional Tools Section */}
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-          gap: '16px'
-        }}>
-          {[
-            { title: "AI Video Generator", color: "#3b82f6", icon: "🎥" },
-            { title: "Image Enhancement", color: "#10b981", icon: "🖼️" },
-            { title: "OMNI AI Editing", color: "#8b5cf6", icon: "✂️" },
-            { title: "Language Learning", color: "#f59e0b", icon: "🗣️" },
-            { title: "Code Assistant", color: "#ef4444", icon: "💻" },
-            { title: "Design Tools", color: "#06b6d4", icon: "🎨" }
-          ].map((tool, index) => (
-            <div
-              key={index}
-              style={{
-                backgroundColor: tool.color,
-                color: 'white',
-                padding: '20px',
-                borderRadius: '12px',
-                textAlign: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-              }}
-            >
-              <div style={{ fontSize: '32px', marginBottom: '8px' }}>{tool.icon}</div>
-              <div style={{ fontSize: '14px', fontWeight: '600' }}>{tool.title}</div>
-            </div>
-          ))}
-        </div>
-          </>
-        )}
-
-        {/* Article View Section */}
-        {activeSection === 'ArticleView' && selectedArticle && (
-          <ArticleViewer
-            article={selectedArticle}
-            onBack={handleBackToHome}
-            onRelatedClick={handleRelatedArticleClick}
+  // Show authentication forms if user is not logged in
+  if (!user) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: '#f8fafc',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '20px'
+      }}>
+        {authView === 'login' ? (
+          <LoginForm
+            onSuccess={() => {
+              // User will be automatically redirected after successful login
+            }}
+            onSwitchToSignup={() => setAuthView('signup')}
+          />
+        ) : (
+          <SignupForm
+            onSuccess={() => {
+              // User will be automatically redirected after successful signup
+            }}
+            onSwitchToLogin={() => setAuthView('login')}
           />
         )}
-
-        {/* Article Creator Modal */}
-        <ArticleCreator
-          isOpen={showArticleCreator}
-          onClose={() => setShowArticleCreator(false)}
-          onSuccess={handleArticleCreated}
-        />
       </div>
+    )
+  }
+
+  // Main navigation component
+  const renderNavigation = () => (
+    <nav style={{
+      backgroundColor: '#1e293b',
+      padding: '0 20px',
+      boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+    }}>
+      <div style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: '70px'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '40px'
+        }}>
+          <h1 style={{
+            color: '#3b82f6',
+            fontSize: '28px',
+            fontWeight: '700',
+            margin: '0',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }} onClick={() => setCurrentView('home')}>
+            <Brain size={32} />
+            ISAI
+          </h1>
+          
+          <div style={{ display: 'flex', gap: '30px' }}>
+            {[
+              { key: 'home', label: 'Home', icon: '🏠' },
+              { key: 'guides', label: 'Guides', icon: BookOpen },
+              { key: 'prompts', label: 'Prompts', icon: '⚡' },
+              { key: 'tools', label: 'Tools', icon: '🔧' },
+              { key: 'news', label: 'AI News', icon: '📰' },
+              { key: 'videos', label: 'Videos', icon: '🎥' },
+              { key: 'articles', label: 'Articles', icon: '📄' },
+              { key: 'forum', label: 'Forum', icon: MessageCircle }
+            ].map(({ key, label, icon: IconComponent }) => (
+              <button
+                key={key}
+                onClick={() => setCurrentView(key as ViewType)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: currentView === key ? '#3b82f6' : '#94a3b8',
+                  fontSize: '16px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  if (currentView !== key) e.currentTarget.style.color = '#e2e8f0'
+                }}
+                onMouseLeave={(e) => {
+                  if (currentView !== key) e.currentTarget.style.color = '#94a3b8'
+                }}
+              >
+                {typeof IconComponent === 'string' ? (
+                  <span>{IconComponent}</span>
+                ) : (
+                  <IconComponent size={16} />
+                )}
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: '2px'
+          }}>
+            <span style={{
+              color: '#e2e8f0',
+              fontSize: '14px',
+              fontWeight: '600'
+            }}>
+              {userProfile?.full_name}
+            </span>
+            <span style={{
+              color: '#94a3b8',
+              fontSize: '12px'
+            }}>
+              {entity?.name} • {userGroup?.name}
+            </span>
+          </div>
+          
+          <button
+            onClick={signOut}
+            style={{
+              backgroundColor: '#ef4444',
+              color: 'white',
+              border: 'none',
+              padding: '8px 12px',
+              borderRadius: '6px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ef4444'}
+          >
+            <LogOut size={14} />
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </nav>
+  )
+
+  // Hero section for home page
+  const renderHomeContent = () => (
+    <div>
+      <section style={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        padding: '80px 20px',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          maxWidth: '800px',
+          margin: '0 auto'
+        }}>
+          <h2 style={{
+            fontSize: '48px',
+            fontWeight: '700',
+            marginBottom: '20px',
+            lineHeight: '1.2'
+          }}>
+            Welcome to ISAI
+          </h2>
+          <p style={{
+            fontSize: '20px',
+            opacity: '0.9',
+            marginBottom: '30px',
+            lineHeight: '1.6'
+          }}>
+            Your comprehensive AI Knowledge Hub for {entity?.name}
+          </p>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '20px',
+            flexWrap: 'wrap'
+          }}>
+            <button
+              onClick={() => setCurrentView('guides')}
+              className="btn btn-secondary"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                color: 'white',
+                border: '2px solid rgba(255,255,255,0.3)'
+              }}
+            >
+              <BookOpen size={16} />
+              Browse Guides
+            </button>
+            <button
+              onClick={() => setCurrentView('prompts')}
+              className="btn btn-secondary"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                color: 'white',
+                border: '2px solid rgba(255,255,255,0.3)'
+              }}
+            >
+              ⚡ Explore Prompts
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section style={{
+        padding: '60px 20px',
+        backgroundColor: 'white'
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto'
+        }}>
+          <h3 style={{
+            fontSize: '36px',
+            fontWeight: '700',
+            textAlign: 'center',
+            marginBottom: '40px',
+            color: '#1f2937'
+          }}>
+            Everything You Need for AI Success
+          </h3>
+          
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '30px'
+          }}>
+            {[
+              {
+                icon: BookOpen,
+                title: 'Professional Guides',
+                description: 'Comprehensive guides covering AI tools, techniques, and best practices',
+                onClick: () => setCurrentView('guides')
+              },
+              {
+                icon: '⚡',
+                title: 'AI Prompts & Prefixes',
+                description: 'Ready-to-use prompts and shortcuts for maximum productivity',
+                onClick: () => setCurrentView('prompts')
+              },
+              {
+                icon: '🔧',
+                title: 'Tool Reviews',
+                description: 'In-depth reviews of AI tools with pros, cons, and ratings',
+                onClick: () => setCurrentView('tools')
+              },
+              {
+                icon: MessageCircle,
+                title: 'Community Forum',
+                description: 'Connect with peers, share experiences, and get help',
+                onClick: () => setCurrentView('forum')
+              },
+              {
+                icon: '📰',
+                title: 'AI News & Updates',
+                description: 'Stay current with the latest AI developments and trends',
+                onClick: () => setCurrentView('news')
+              },
+              {
+                icon: '🎥',
+                title: 'Video Content',
+                description: 'Tutorials, demos, and educational videos',
+                onClick: () => setCurrentView('videos')
+              }
+            ].map((feature, index) => (
+              <div
+                key={index}
+                className="content-card"
+                style={{
+                  padding: '30px',
+                  textAlign: 'center',
+                  cursor: 'pointer'
+                }}
+                onClick={feature.onClick}
+              >
+                <div style={{
+                  fontSize: '48px',
+                  marginBottom: '20px',
+                  display: 'flex',
+                  justifyContent: 'center'
+                }}>
+                  {typeof feature.icon === 'string' ? (
+                    feature.icon
+                  ) : (
+                    <feature.icon size={48} color="var(--primary-blue)" />
+                  )}
+                </div>
+                <h4 style={{
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  marginBottom: '12px',
+                  color: '#1f2937'
+                }}>
+                  {feature.title}
+                </h4>
+                <p style={{
+                  color: '#6b7280',
+                  lineHeight: '1.6'
+                }}>
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+
+  // Placeholder for other views
+  const renderContent = () => {
+    switch (currentView) {
+      case 'home':
+        return renderHomeContent()
+      
+      case 'guides':
+        return (
+          <div className="container" style={{ padding: '40px 20px' }}>
+            <h2 style={{ fontSize: '32px', fontWeight: '700', marginBottom: '24px', color: '#1f2937' }}>
+              📖 Professional Guides
+            </h2>
+            <p style={{ color: '#6b7280', fontSize: '18px', marginBottom: '40px' }}>
+              Comprehensive guides and tutorials to help you master AI tools and techniques.
+            </p>
+            <div style={{
+              textAlign: 'center',
+              padding: '80px 20px',
+              backgroundColor: '#f8fafc',
+              borderRadius: '12px'
+            }}>
+              <BookOpen size={64} color="#6b7280" style={{ marginBottom: '20px' }} />
+              <h3 style={{ color: '#1f2937', marginBottom: '12px' }}>Coming Soon</h3>
+              <p style={{ color: '#6b7280' }}>Professional guides are being prepared for your organization.</p>
+            </div>
+          </div>
+        )
+
+      case 'prompts':
+        return (
+          <div className="container" style={{ padding: '40px 20px' }}>
+            <h2 style={{ fontSize: '32px', fontWeight: '700', marginBottom: '24px', color: '#1f2937' }}>
+              ⚡ AI Prompts & Prefixes
+            </h2>
+            <p style={{ color: '#6b7280', fontSize: '18px', marginBottom: '40px' }}>
+              Ready-to-use prompts and shortcuts to boost your productivity.
+            </p>
+            <div style={{
+              textAlign: 'center',
+              padding: '80px 20px',
+              backgroundColor: '#f8fafc',
+              borderRadius: '12px'
+            }}>
+              <div style={{ fontSize: '64px', marginBottom: '20px' }}>⚡</div>
+              <h3 style={{ color: '#1f2937', marginBottom: '12px' }}>Coming Soon</h3>
+              <p style={{ color: '#6b7280' }}>Prompts and prefixes are being curated for your needs.</p>
+            </div>
+          </div>
+        )
+
+      case 'forum':
+        return (
+          <div className="container" style={{ padding: '40px 20px' }}>
+            <h2 style={{ fontSize: '32px', fontWeight: '700', marginBottom: '24px', color: '#1f2937' }}>
+              💬 Community Forum
+            </h2>
+            <p style={{ color: '#6b7280', fontSize: '18px', marginBottom: '40px' }}>
+              Connect with your peers and share knowledge.
+            </p>
+            <div style={{
+              textAlign: 'center',
+              padding: '80px 20px',
+              backgroundColor: '#f8fafc',
+              borderRadius: '12px'
+            }}>
+              <MessageCircle size={64} color="#6b7280" style={{ marginBottom: '20px' }} />
+              <h3 style={{ color: '#1f2937', marginBottom: '12px' }}>Coming Soon</h3>
+              <p style={{ color: '#6b7280' }}>Forum features are being developed for your community.</p>
+            </div>
+          </div>
+        )
+
+      default:
+        return (
+          <div className="container" style={{ padding: '40px 20px' }}>
+            <h2 style={{ fontSize: '32px', fontWeight: '700', marginBottom: '24px', color: '#1f2937' }}>
+              🚧 Under Construction
+            </h2>
+            <p style={{ color: '#6b7280', fontSize: '18px' }}>
+              This section is currently being developed. Please check back soon!
+            </p>
+          </div>
+        )
+    }
+  }
+
+  // Main application render
+  return (
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#ffffff'
+    }}>
+      {renderNavigation()}
+      <main>
+        {renderContent()}
+      </main>
     </div>
   )
 }
