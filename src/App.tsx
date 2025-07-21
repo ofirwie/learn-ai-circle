@@ -259,7 +259,7 @@ function App() {
             margin: '0',
             cursor: 'pointer'
           }} onClick={() => setCurrentView('home')}>
-            ISAI
+            ISAI {/* Force Render deployment */}
           </h1>
           
           <div style={{ display: 'flex', gap: '30px' }}>
