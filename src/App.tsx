@@ -109,23 +109,6 @@ function App() {
                   </article>
                 </div>
                 
-                <div className="shopify-promo">
-                  <div className="promo-badge">SPONSORED</div>
-                  <div className="promo-content">
-                    <div className="shopify-logo">
-                      <div style={{ color: '#95bf47', fontSize: '24px', fontWeight: '700' }}>Shopify</div>
-                    </div>
-                    <h2>From Memo to Store: How Shopify Integrates AI for Enhanced Productivity</h2>
-                    <p>Discover how leading e-commerce platform leverages artificial intelligence to streamline business operations</p>
-                    <div className="promo-stats">
-                      <span className="views">1,514 views</span>
-                      <span className="date">July 22, 2025</span>
-                      <span className="duration">15 min</span>
-                    </div>
-                    <button className="promo-cta">Watch Now</button>
-                  </div>
-                  <div className="promo-gradient"></div>
-                </div>
               </div>
             </section>
 
