@@ -2009,177 +2009,331 @@ body {
   color: #6b7280;
   margin: 0;
   line-height: 1.6;
-}/* LetsAI Professional Footer */
-.letsai-site-footer {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}/* LetsAI Professional Footer - Complete Implementation */
+.site-footer {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   color: #ffffff;
-  padding: 60px 0 20px;
-  margin-top: 80px;
+  padding: 60px 0 24px;
+  position: relative;
+  overflow: hidden;
 }
 
-.letsai-footer-container {
+.site-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #667eea 50%, transparent 100%);
+}
+
+.footer-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
 }
 
-.letsai-footer-grid {
+.footer-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 40px;
-  margin-bottom: 40px;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr;
+  gap: 48px;
+  margin-bottom: 48px;
 }
 
-.letsai-footer-column h3 {
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0 0 20px 0;
-  color: #ffffff;
-}
-
-.letsai-footer-column h4 {
-  font-size: 18px;
-  font-weight: 600;
+.footer-column h5 {
+  font-size: 28px;
+  font-weight: 700;
   margin: 0 0 16px 0;
-  color: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #667eea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.letsai-footer-column p {
-  color: #b3c5d9;
-  line-height: 1.6;
+.footer-column h6 {
+  font-size: 16px;
+  font-weight: 600;
   margin: 0 0 20px 0;
+  color: #ffffff;
+  position: relative;
+  padding-bottom: 8px;
 }
 
-.letsai-footer-column ul {
+.footer-column h6::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 30px;
+  height: 2px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 1px;
+}
+
+.company-info p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #cccccc;
+  margin: 0 0 24px 0;
+}
+
+.footer-links {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.letsai-footer-column li {
-  margin-bottom: 8px;
-}
-
-.letsai-footer-column a {
-  color: #b3c5d9;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.letsai-footer-column a:hover {
-  color: #ffffff;
-}
-
-.letsai-social-links {
-  display: flex;
-  gap: 12px;
-  margin: 20px 0;
-}
-
-.letsai-social-links a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 8px;
-  color: #ffffff;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
-
-.letsai-social-links a:hover {
-  background: #2c5aa0;
-  transform: translateY(-2px);
-}
-
-.letsai-footer-newsletter {
-  margin-top: 20px;
-}
-
-.letsai-footer-newsletter input {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid rgba(255,255,255,0.2);
-  border-radius: 6px;
-  background: rgba(255,255,255,0.1);
-  color: #ffffff;
+.footer-links li {
   margin-bottom: 12px;
 }
 
-.letsai-footer-newsletter input::placeholder {
-  color: #b3c5d9;
+.footer-links a {
+  color: #cccccc;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  position: relative;
+  padding-left: 0;
 }
 
-.letsai-footer-newsletter button {
-  background: #ff6b35;
+.footer-links a:hover {
+  color: #667eea;
+  padding-left: 8px;
+}
+
+.footer-links a::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 2px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s ease;
+}
+
+.footer-links a:hover::before {
+  width: 4px;
+}
+
+.social-links {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.social-link {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #333333 0%, #444444 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #cccccc;
+  transition: all 0.3s ease;
+  border: 1px solid #444444;
+}
+
+.social-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.social-link.facebook:hover {
+  background: linear-gradient(135deg, #1877f2 0%, #42a5f5 100%);
+  color: white;
+  border-color: #1877f2;
+}
+
+.social-link.youtube:hover {
+  background: linear-gradient(135deg, #ff0000 0%, #ff5252 100%);
+  color: white;
+  border-color: #ff0000;
+}
+
+.social-link.instagram:hover {
+  background: linear-gradient(135deg, #e4405f 0%, #f46f30 100%);
+  color: white;
+  border-color: #e4405f;
+}
+
+.social-link.twitter:hover {
+  background: linear-gradient(135deg, #1da1f2 0%, #42a5f5 100%);
+  color: white;
+  border-color: #1da1f2;
+}
+
+.social-link.linkedin:hover {
+  background: linear-gradient(135deg, #0077b5 0%, #0099d4 100%);
+  color: white;
+  border-color: #0077b5;
+}
+
+.contact-details {
+  margin-bottom: 32px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: #cccccc;
+  font-size: 14px;
+}
+
+.contact-item svg {
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.newsletter-signup h6 {
+  margin-bottom: 12px;
+}
+
+.footer-newsletter {
+  display: flex;
+  gap: 8px;
+}
+
+.footer-newsletter input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #444444;
+  border-radius: 8px;
+  background: #333333;
+  color: white;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.footer-newsletter input:focus {
+  border-color: #667eea;
+}
+
+.footer-newsletter input::placeholder {
+  color: #888888;
+}
+
+.footer-newsletter button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
   padding: 12px 20px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  width: 100%;
-  transition: background 0.3s ease;
+  font-size: 14px;
+  transition: transform 0.2s ease;
+  white-space: nowrap;
 }
 
-.letsai-footer-newsletter button:hover {
-  background: #e55a2b;
+.footer-newsletter button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102,126,234,0.3);
 }
 
-.letsai-footer-bottom {
-  border-top: 1px solid rgba(255,255,255,0.2);
-  padding-top: 20px;
+.footer-bottom {
+  border-top: 1px solid #444444;
+  padding-top: 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 24px;
 }
 
-.letsai-footer-legal {
+.footer-bottom-left {
   display: flex;
-  gap: 24px;
+  align-items: center;
+  gap: 32px;
   flex-wrap: wrap;
 }
 
-.letsai-footer-legal a {
-  color: #b3c5d9;
+.footer-bottom-left p {
+  font-size: 14px;
+  color: #888888;
+  margin: 0;
+}
+
+.footer-legal {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-legal a {
+  color: #888888;
   text-decoration: none;
   font-size: 14px;
+  transition: color 0.3s ease;
 }
 
-.letsai-footer-legal a:hover {
-  color: #ffffff;
+.footer-legal a:hover {
+  color: #667eea;
 }
 
-.letsai-footer-badges {
+.footer-badges {
   display: flex;
   gap: 16px;
   align-items: center;
 }
 
-.letsai-footer-badge {
-  background: rgba(255,255,255,0.1);
-  padding: 6px 12px;
-  border-radius: 4px;
+.security-badge,
+.certification-badge {
+  background: linear-gradient(135deg, #333333 0%, #444444 100%);
+  padding: 8px 12px;
+  border-radius: 20px;
   font-size: 12px;
-  color: #b3c5d9;
+  color: #cccccc;
+  border: 1px solid #444444;
 }
 
+.security-badge:hover,
+.certification-badge:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+}
+
+/* Tablet - 768px and down */
 @media (max-width: 768px) {
-  .letsai-footer-grid {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  
+  .company-info {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Mobile - 480px and down */
+@media (max-width: 480px) {
+  .footer-grid {
     grid-template-columns: 1fr;
-    gap: 30px;
+    gap: 24px;
   }
   
-  .letsai-footer-bottom {
+  .footer-bottom {
     flex-direction: column;
-    text-align: center;
+    align-items: flex-start;
+    gap: 16px;
   }
   
-  .letsai-footer-legal {
-    justify-content: center;
+  .footer-bottom-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .footer-badges {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }
