@@ -78,4 +78,4 @@ The project appears to be a complete AI Knowledge Hub implementation with:
 - Create first admin user account
 
 ### Memorized Tasks
-- memorize
+- memorize never remove the login mechanisem 

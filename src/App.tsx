@@ -296,9 +296,22 @@ function App() {
                 fontSize: '24px',
                 fontWeight: '700',
                 color: '#1f2937',
-                margin: 0
+                margin: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}>
                 ISAI Knowledge Hub
+                <span style={{
+                  fontSize: '10px',
+                  backgroundColor: '#ef4444',
+                  color: 'white',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  fontWeight: '500'
+                }}>
+                  v2.1.0-LetsAI
+                </span>
               </h1>
               <p style={{
                 fontSize: '14px',
