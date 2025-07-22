@@ -362,21 +362,32 @@ export class ArticleService {
     return null
   }
 
-  // Generate excerpt from content
+  // Generate excerpt from content with SAFE regex
   static generateExcerpt(content: string, maxLength: number = 200): string {
-    // Remove HTML tags
-    const textContent = content.replace(/<[^>]*>/g, '')
-    
-    // Truncate to max length
-    if (textContent.length <= maxLength) {
-      return textContent
-    }
+    try {
+      // FIXED: Use safer, more specific HTML tag removal
+      let textContent = content
+        .replace(/<a\s+[^>]*>/gi, '') // Remove opening anchor tags
+        .replace(/<\/a>/gi, '') // Remove closing anchor tags
+        .replace(/<[^>]{1,100}>/g, '') // Limit tag length to prevent catastrophic backtracking
+        .replace(/\s+/g, ' ') // Normalize whitespace
+        .trim()
+      
+      // Truncate to max length
+      if (textContent.length <= maxLength) {
+        return textContent
+      }
 
-    // Find the last complete word within maxLength
-    const truncated = textContent.substring(0, maxLength)
-    const lastSpace = truncated.lastIndexOf(' ')
-    
-    return truncated.substring(0, lastSpace) + '...'
+      // Find the last complete word within maxLength
+      const truncated = textContent.substring(0, maxLength)
+      const lastSpace = truncated.lastIndexOf(' ')
+      
+      return truncated.substring(0, lastSpace > 0 ? lastSpace : maxLength) + '...'
+    } catch (err) {
+      console.error('Error generating excerpt:', err)
+      // Fallback: just truncate without HTML processing
+      return content.substring(0, maxLength) + '...'
+    }
   }
 
   // Debug functions: Create different test articles to isolate timeout cause
@@ -690,6 +701,38 @@ Ready to take your first step? Each of these tools comes with a free plan, so yo
       status: 'draft' as const,
       featured: false,
       tags: ['AI', 'Tools', 'Excelmatic', 'Higgsfield.ai', 'Creatie.ai']
+    }
+    
+    return this.createArticle(testArticle)
+  }
+
+  static async createTestArticle11(): Promise<Article> {
+    console.log('🧪11 ArticleService: Testing EXCERPT GENERATION problem...')
+    
+    const contentWithProblematicHTML = `<a href="https://www.youtube.com/watch?v=1YtB1yrKvXM" target="_blank">Step-by-step tutorial</a>  
+
+<a href="https://www.youtube.com/watch?v=gmJeo_1lI6g" target="_blank">Excelmatic Review</a>  
+
+<a href="https://www.youtube.com/watch?v=V9TGgD03nQI" target="_blank">Analyze Excel & Google Sheets with AI</a>`
+    
+    console.log('🔍 Testing excerpt generation with problematic content...')
+    try {
+      const testExcerpt = ArticleService.generateExcerpt(contentWithProblematicHTML, 200)
+      console.log('✅ Excerpt generation completed:', testExcerpt.length, 'chars')
+    } catch (err) {
+      console.error('❌ Excerpt generation failed:', err)
+      throw err
+    }
+    
+    const testArticle = {
+      title: `Test 11 - Excerpt Gen ${new Date().getTime()}`,
+      slug: '',
+      content: contentWithProblematicHTML,
+      excerpt: '', // Force excerpt generation
+      author: 'Debug System',
+      category: 'article',
+      status: 'draft' as const,
+      featured: false
     }
     
     return this.createArticle(testArticle)
