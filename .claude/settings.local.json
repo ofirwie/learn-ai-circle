@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(npm run dev:*)",
+      "Bash(node:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx vercel:*)",
+      "Bash(cmd:*)",
+      "Bash(npx surge:*)",
+      "WebFetch(domain:isai-7uxy.onrender.com)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:isai-hub.vercel.app)",
+      "Bash(rm:*)",
+      "WebFetch(domain:ofirwie.github.io)",
+      "Bash(npm run preview:*)",
+      "Bash(git remote get-url:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(python:*)"
+    ],
+    "deny": []
+  }
+}

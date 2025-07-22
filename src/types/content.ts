@@ -1,40 +1,49 @@
 export interface AIContentItem {
   id: string
   title: string
-  url: string
-  summary: string
-  source_domain: string
+  description: string
+  type: ContentType
   category: string
-  difficulty: 'beginner' | 'intermediate' | 'advanced'
   tags: string[]
-  innovation_score: number
-  publish_score: number
-  content_snippet: string
-  scraped_at: string
-  processed_at?: string
-  published: boolean
+  content: string
+  created_at: string
+  updated_at: string
+  author: string
+  featured: boolean
+  difficulty_level: 'beginner' | 'intermediate' | 'advanced'
+  use_cases: string[]
+  status: 'draft' | 'published' | 'archived'
+  view_count: number
+  rating: number
+  rating_count: number
 }
+
+// Content Types
+export type ContentType = 'guide' | 'prompt' | 'prefix' | 'tool' | 'news' | 'video' | 'article'
 
 export interface ContentFilters {
   search?: string
   category?: string
-  source_domain?: string
+  type?: ContentType
   date_range?: {
     start: Date
     end: Date
   }
-  status?: 'all' | 'published' | 'pending'
-  min_innovation_score?: number
+  status?: 'all' | 'published' | 'draft' | 'archived'
+  difficulty_level?: 'beginner' | 'intermediate' | 'advanced'
   tags?: string[]
+  featured?: boolean
 }
 
 export interface AnalyticsData {
   totalItems: number
-  pendingItems: number
   publishedItems: number
-  topSources: Array<{ domain: string; count: number }>
-  categoryCounts: Array<{ category: string; count: number }>
-  avgInnovationScore: number
+  draftItems: number
+  archivedItems: number
+  topCategories: Array<{ category: string; count: number }>
+  contentTypeCounts: Array<{ type: ContentType; count: number }>
+  avgRating: number
+  totalViews: number
   weeklyTrend: Array<{ date: string; count: number }>
 }
 

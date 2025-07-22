@@ -1,0 +1,7 @@
+{
+  "trigger": "force-deployment",
+  "timestamp": "2025-01-22T16:50:00Z",
+  "reason": "Vercel stuck on old commit, forcing new deployment",
+  "expected_design": "LetsAI-style engaging content-rich homepage",
+  "commit": "34ab008"
+}

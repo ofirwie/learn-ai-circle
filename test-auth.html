@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ISAI Auth Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>ISAI Authentication Test</h1>
+    
+    <h2>Step 1: Test Registration Code</h2>
+    <input type="text" id="code" value="DEMO2024" />
+    <button onclick="testCode()">Test Code</button>
+    <div id="codeResult"></div>
+    
+    <h2>Step 2: Test Signup</h2>
+    <input type="email" id="email" placeholder="Email" value="test@example.com" /><br>
+    <input type="password" id="password" placeholder="Password" value="password123" /><br>
+    <input type="text" id="name" placeholder="Full Name" value="Test User" /><br>
+    <button onclick="testSignup()">Test Signup</button>
+    <div id="signupResult"></div>
+    
+    <h2>Console Output:</h2>
+    <pre id="output" style="background: #f0f0f0; padding: 10px; min-height: 200px;"></pre>
+
+    <script>
+        const supabaseUrl = 'https://ilotcwtcnlihoprxcdzp.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsb3Rjd3RjbmxpaG9wcnhjZHpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2OTQzNzIsImV4cCI6MjA1MDI3MDM3Mn0.-qJpKQJy6T-BZ1q6PVUy9FzZIsIn1lZo4DQyb8HY6sE'
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+        
+        const output = document.getElementById('output')
+        
+        function log(msg) {
+            console.log(msg)
+            output.textContent += msg + '\n'
+        }
+        
+        async function testCode() {
+            const code = document.getElementById('code').value
+            log(`\n🔍 Testing registration code: ${code}`)
+            
+            try {
+                const { data, error } = await supabase
+                    .from('registration_codes')
+                    .select('*, entity:entities(*), user_group:user_groups(*)')
+                    .eq('code', code)
+                    .eq('is_active', true)
+                    .single()
+                
+                if (error) {
+                    log(`❌ Error: ${error.message}`)
+                    document.getElementById('codeResult').innerHTML = `<span style="color: red">❌ ${error.message}</span>`
+                } else if (data) {
+                    log(`✅ Code found! Entity: ${data.entity?.name}, Group: ${data.user_group?.name}`)
+                    document.getElementById('codeResult').innerHTML = `<span style="color: green">✅ Valid code for ${data.entity?.name}</span>`
+                } else {
+                    log('❌ Code not found')
+                    document.getElementById('codeResult').innerHTML = `<span style="color: red">❌ Code not found</span>`
+                }
+            } catch (err) {
+                log(`💥 Exception: ${err.message}`)
+            }
+        }
+        
+        async function testSignup() {
+            const email = document.getElementById('email').value
+            const password = document.getElementById('password').value
+            const name = document.getElementById('name').value
+            
+            log(`\n🚀 Testing signup for ${email}`)
+            
+            try {
+                // First get registration code data
+                const { data: codeData } = await supabase
+                    .from('registration_codes')
+                    .select('*, entity:entities(*), user_group:user_groups(*)')
+                    .eq('code', 'DEMO2024')
+                    .eq('is_active', true)
+                    .single()
+                
+                if (!codeData) {
+                    log('❌ Registration code not found!')
+                    return
+                }
+                
+                log('✅ Code validated')
+                log('📝 Attempting Supabase auth signup...')
+                
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: name,
+                            registration_code: 'DEMO2024'
+                        }
+                    }
+                })
+                
+                if (error) {
+                    log(`❌ Signup error: ${error.message}`)
+                    document.getElementById('signupResult').innerHTML = `<span style="color: red">❌ ${error.message}</span>`
+                } else {
+                    log(`✅ User created! ID: ${data.user?.id}`)
+                    
+                    // Try to create profile
+                    const { error: profileError } = await supabase
+                        .from('users')
+                        .insert({
+                            id: data.user.id,
+                            email: email,
+                            full_name: name,
+                            registration_code: 'DEMO2024',
+                            entity_id: codeData.entity?.id,
+                            user_group_id: codeData.user_group?.id,
+                            preferred_language: 'en'
+                        })
+                    
+                    if (profileError) {
+                        log(`⚠️  Profile creation error: ${profileError.message}`)
+                    } else {
+                        log('✅ Profile created successfully!')
+                    }
+                    
+                    document.getElementById('signupResult').innerHTML = `<span style="color: green">✅ Account created!</span>`
+                }
+            } catch (err) {
+                log(`💥 Exception: ${err.message}`)
+            }
+        }
+        
+        // Auto-test on load
+        window.onload = () => {
+            log('🌟 ISAI Auth Test Ready')
+            log('🔗 Supabase URL: ' + supabaseUrl)
+            testCode()
+        }
+    </script>
+</body>
+</html>

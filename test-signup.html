@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Signup Debug Test</title>
+</head>
+<body>
+    <h1>🐛 Signup Debug Test</h1>
+    <button onclick="testSignup()">Test Signup Process</button>
+    <div id="result" style="margin-top: 20px; padding: 10px; background: #f5f5f5; white-space: pre-wrap;"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        
+        const supabaseUrl = 'https://ilotcwtcnlihoprxcdzp.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsb3Rjd3RjbmxpaG9wcnhjZHpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NjEyODEsImV4cCI6MjA2ODUzNzI4MX0.aCNESZNvoz_vL_lHT68NyExTjYmaw9Z5YJ_6rtcKaZk'
+        
+        const supabase = createClient(supabaseUrl, supabaseKey)
+        
+        window.testSignup = async function() {
+            const result = document.getElementById('result');
+            result.textContent = '🔍 Testing signup process...\n\n';
+            
+            try {
+                // Test 1: Validate registration code
+                result.textContent += '1️⃣ Testing registration code validation...\n';
+                const { data: codeData, error: codeError } = await supabase
+                    .from('registration_codes')
+                    .select('*, entity:entities(*), user_group:user_groups(*)')
+                    .eq('code', 'Churro393$')
+                    .eq('is_active', true)
+                    .single();
+                
+                if (codeError) {
+                    result.textContent += `❌ Code validation failed: ${codeError.message}\n`;
+                } else {
+                    result.textContent += `✅ Code is valid!\n`;
+                    result.textContent += `   Code data: ${JSON.stringify(codeData, null, 2)}\n`;
+                    if (codeData.entity) {
+                        result.textContent += `   Entity: ${codeData.entity.name}\n`;
+                    } else {
+                        result.textContent += `   ⚠️ Entity is null!\n`;
+                    }
+                    if (codeData.user_group) {
+                        result.textContent += `   Group: ${codeData.user_group.name}\n`;
+                    } else {
+                        result.textContent += `   ⚠️ User group is null!\n`;
+                    }
+                    result.textContent += `   Uses: ${codeData.current_uses}/${codeData.max_uses}\n\n`;
+                }
+                
+                // Test 2: Test signup
+                result.textContent += '2️⃣ Testing signup process...\n';
+                const testEmail = `test_${Date.now()}@example.com`;
+                const { data: signupData, error: signupError } = await supabase.auth.signUp({
+                    email: testEmail,
+                    password: 'TestPassword123!',
+                    options: {
+                        data: {
+                            full_name: 'Test User',
+                            registration_code: 'Churro393$'
+                        }
+                    }
+                });
+                
+                if (signupError) {
+                    result.textContent += `❌ Signup failed: ${signupError.message}\n`;
+                    result.textContent += `   Details: ${JSON.stringify(signupError, null, 2)}\n`;
+                } else {
+                    result.textContent += `✅ Signup successful!\n`;
+                    result.textContent += `   User ID: ${signupData.user?.id}\n`;
+                    result.textContent += `   Email: ${signupData.user?.email}\n`;
+                }
+                
+                // Test 3: Check Supabase Auth settings
+                result.textContent += '\n3️⃣ Checking auth configuration...\n';
+                result.textContent += `   URL: ${supabaseUrl}\n`;
+                result.textContent += `   Key length: ${supabaseKey.length} chars\n`;
+                
+            } catch (error) {
+                result.textContent += `\n💥 Unexpected error: ${error.message}\n`;
+                result.textContent += `Stack: ${error.stack}\n`;
+            }
+        }
+    </script>
+</body>
+</html>
