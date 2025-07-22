@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Supabase Test</title>
+</head>
+<body>
+    <h1>🧪 Simple Supabase Connection Test</h1>
+    <button onclick="testConnection('anon')">Test Anon Key</button>
+    <button onclick="testConnection('service')">Test Service Key</button>
+    <button onclick="testConnection('secret')">Test Secret Key</button>
+    <div id="result" style="margin-top: 20px; padding: 10px; background: #f5f5f5; white-space: pre-wrap;"></div>
+
+    <script>
+        async function testConnection(keyType) {
+            const result = document.getElementById('result');
+            result.textContent = `Testing with ${keyType} key...\n`;
+
+            const keys = {
+                anon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsb3Rjd3RjbmxpaG9wcnhjZHpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NjEyODEsImV4cCI6MjA2ODUzNzI4MX0.aCNESZNvoz_vL_lHT68NyExTjYmaw9Z5YJ_6rtcKaZk',
+                service: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsb3Rjd3RjbmxpaG9wcnhjZHpwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1Mjk2MTI4MSwiZXhwIjoyMDY4NTM3MjgxfQ.N01dhXaot3xNHgONGcWzoXzYmnqMOvenh1YLgoOjLg4',
+                secret: 'sb_secret_rgtqL8xmszfGGg3NILeU_Q_BAx6szfT'
+            };
+
+            try {
+                // Test 1: Simple fetch to Supabase REST API
+                const url = 'https://ilotcwtcnlihoprxcdzp.supabase.co/rest/v1/entities?select=id&limit=1';
+                const selectedKey = keys[keyType];
+                const headers = {
+                    'apikey': selectedKey,
+                    'Authorization': 'Bearer ' + selectedKey,
+                    'Content-Type': 'application/json'
+                };
+
+                result.textContent += `📡 Testing direct REST API call...\n`;
+                result.textContent += `URL: ${url}\n`;
+
+                const response = await fetch(url, { headers });
+                result.textContent += `Status: ${response.status} ${response.statusText}\n`;
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    result.textContent += `❌ Error Response: ${errorText}\n`;
+                    
+                    if (response.status === 401) {
+                        result.textContent += `\n🔑 This means API key is invalid or expired\n`;
+                        result.textContent += `Go to Supabase Dashboard → Settings → API and get new anon key\n`;
+                    } else if (response.status === 404) {
+                        result.textContent += `\n🚫 This means the 'entities' table doesn't exist\n`;
+                        result.textContent += `The table structure might be different\n`;
+                    } else if (response.status === 403) {
+                        result.textContent += `\n🛡️ This means RLS policies are blocking access\n`;
+                        result.textContent += `Need to check Row Level Security settings\n`;
+                    }
+                } else {
+                    const data = await response.json();
+                    result.textContent += `✅ Success! Response: ${JSON.stringify(data, null, 2)}\n`;
+                }
+
+                // Test 2: Check if project is active
+                result.textContent += `\n🌐 Testing project status...\n`;
+                const healthUrl = 'https://ilotcwtcnlihoprxcdzp.supabase.co/rest/v1/';
+                const healthResponse = await fetch(healthUrl, { headers });
+                result.textContent += `Project Health: ${healthResponse.status}\n`;
+
+            } catch (error) {
+                result.textContent += `💥 Network Error: ${error.message}\n`;
+                result.textContent += `This could mean:\n`;
+                result.textContent += `- Supabase project is paused\n`;
+                result.textContent += `- Network connectivity issues\n`;
+                result.textContent += `- CORS problems\n`;
+            }
+        }
+    </script>
+</body>
+</html>

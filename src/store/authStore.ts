@@ -34,7 +34,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       
       if (session?.user) {
         // Get user profile
-        const { data: userProfile } = await supabase
+        const { data: userProfile, error: profileError } = await supabase
           .from('users')
           .select(`
             *,
@@ -44,7 +44,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           .eq('id', session.user.id)
           .single()
 
-        if (userProfile) {
+        if (!profileError && userProfile) {
           set({
             user: session.user,
             userProfile,
@@ -53,6 +53,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             loading: false,
             initialized: true
           })
+        } else {
+          console.log('User profile not found, loading state:', { profileError, userId: session.user.id })
+          set({ loading: false, initialized: true })
         }
       } else {
         set({ loading: false, initialized: true })
@@ -145,7 +148,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           data: {
             full_name: fullName,
             registration_code: registrationCode
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`
         }
       })
 
@@ -225,19 +229,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   validateRegistrationCode: async (code: string) => {
+    console.log('🔐 AuthStore: Validating registration code:', code)
     try {
       const { data, error } = await supabase
         .from('registration_codes')
-        .select(`
-          *,
-          entity:entities(*),
-          user_group:user_groups(*)
-        `)
+        .select('*')
         .eq('code', code)
         .eq('is_active', true)
         .single()
 
+      console.log('📊 Registration code response:', { data, error })
+
       if (error || !data) {
+        console.error('❌ Code validation failed:', error?.message || 'No data')
         return { valid: false, error: 'Registration code not found' }
       }
 
@@ -251,10 +255,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return { valid: false, error: 'Registration code has reached maximum uses' }
       }
 
+      // Fetch entity and user group separately if needed
+      let entity = null, userGroup = null;
+      
+      if (data.entity_id) {
+        const { data: entityData } = await supabase
+          .from('entities')
+          .select('*')
+          .eq('id', data.entity_id)
+          .single()
+        entity = entityData
+      }
+      
+      if (data.user_group_id) {
+        const { data: groupData } = await supabase
+          .from('user_groups')
+          .select('*')
+          .eq('id', data.user_group_id)
+          .single()
+        userGroup = groupData
+      }
+
       return {
         valid: true,
-        entity: data.entity as Entity,
-        userGroup: data.user_group as UserGroup
+        entity: entity as Entity,
+        userGroup: userGroup as UserGroup
       }
     } catch (error) {
       return { valid: false, error: 'Error validating registration code' }

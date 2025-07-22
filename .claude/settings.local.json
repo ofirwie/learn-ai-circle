@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(npm run dev:*)",
+      "Bash(node:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx vercel:*)",
+      "Bash(cmd:*)",
+      "Bash(npx surge:*)",
+      "WebFetch(domain:isai-7uxy.onrender.com)",
+      "Bash(git add:*)"
+    ],
+    "deny": []
+  }
+}

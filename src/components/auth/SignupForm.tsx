@@ -35,8 +35,10 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSuccess, onSwitchToLog
   }
 
   const validateCode = async (code: string) => {
+    console.log('🔍 Validating registration code:', code)
     try {
       const result = await validateRegistrationCode(code)
+      console.log('📋 Validation result:', result)
       if (result.valid) {
         setCodeValidation({
           valid: true,
@@ -47,31 +49,37 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSuccess, onSwitchToLog
         setCodeValidation({ valid: false })
       }
     } catch (error) {
+      console.error('❌ Code validation error:', error)
       setCodeValidation({ valid: false })
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('🚀 Signup form submitted', formData)
     setError('')
 
     // Validation
     if (formData.password !== formData.confirmPassword) {
+      console.log('❌ Passwords do not match')
       setError('Passwords do not match')
       return
     }
 
     if (formData.password.length < 6) {
+      console.log('❌ Password too short')
       setError('Password must be at least 6 characters')
       return
     }
 
     if (!codeValidation?.valid) {
+      console.log('❌ Invalid registration code', codeValidation)
       setError('Please enter a valid registration code')
       return
     }
 
     setIsLoading(true)
+    console.log('📝 Attempting signup...')
 
     try {
       const result = await signUp(
@@ -81,12 +89,17 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSuccess, onSwitchToLog
         formData.registrationCode
       )
       
+      console.log('📬 Signup result:', result)
+      
       if (result.success) {
+        console.log('✅ Signup successful!')
         onSuccess?.()
       } else {
+        console.error('❌ Signup failed:', result.error)
         setError(result.error || 'Registration failed')
       }
     } catch (err) {
+      console.error('💥 Signup exception:', err)
       setError('An unexpected error occurred')
     } finally {
       setIsLoading(false)
