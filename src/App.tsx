@@ -359,31 +359,6 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Newsletter Widget */}
-                    <div className="letsai-widget letsai-newsletter-widget">
-                      <div className="letsai-newsletter-header">
-                        <h4>Weekly AI Insights</h4>
-                        <p>Get the latest AI news and expert insights delivered to your inbox</p>
-                      </div>
-                      <form className="letsai-newsletter-form">
-                        <input type="email" placeholder="Enter your email address" required />
-                        <button type="submit">Subscribe Now</button>
-                      </form>
-                      <div className="letsai-newsletter-features">
-                        <div className="letsai-feature-item">
-                          <span className="letsai-feature-check">✓</span>
-                          <span>Weekly curated content</span>
-                        </div>
-                        <div className="letsai-feature-item">
-                          <span className="letsai-feature-check">✓</span>
-                          <span>Expert insights & tutorials</span>
-                        </div>
-                        <div className="letsai-feature-item">
-                          <span className="letsai-feature-check">✓</span>
-                          <span>No spam, unsubscribe anytime</span>
-                        </div>
-                      </div>
-                    </div>
 
                     {/* Tools Widget */}
                     <div className="letsai-widget letsai-tools-widget">
@@ -782,76 +757,15 @@ function App() {
               </div>
             </div>
 
-            {/* Quick Links */}
+            {/* Simple Site Navigation */}
             <div className="footer-column">
-              <h6>Quick Links</h6>
+              <h6>Site Navigation</h6>
               <ul className="footer-links">
-                <li><a href="/courses">AI Courses</a></li>
-                <li><a href="/tools">AI Tools</a></li>
-                <li><a href="/guides">Business Guides</a></li>
-                <li><a href="/news">Latest News</a></li>
-                <li><a href="/tutorials">Tutorials</a></li>
-                <li><a href="/webinars">Live Webinars</a></li>
+                <li><a href="#" onClick={() => setCurrentView('home')}>Home</a></li>
+                <li><a href="#" onClick={() => setCurrentView('articles')}>Articles</a></li>
+                <li><a href="#" onClick={() => setCurrentView('guides')}>Guides</a></li>
+                <li><a href="#" onClick={() => setCurrentView('tools')}>Tool Reviews</a></li>
               </ul>
-            </div>
-
-            {/* Resources */}
-            <div className="footer-column">
-              <h6>Resources</h6>
-              <ul className="footer-links">
-                <li><a href="/blog">Expert Blog</a></li>
-                <li><a href="/case-studies">Case Studies</a></li>
-                <li><a href="/whitepapers">Whitepapers</a></li>
-                <li><a href="/downloads">Free Downloads</a></li>
-                <li><a href="/support">Help Center</a></li>
-                <li><a href="/community">Community</a></li>
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div className="footer-column">
-              <h6>Company</h6>
-              <ul className="footer-links">
-                <li><a href="/about">About Us</a></li>
-                <li><a href="/careers">Careers</a></li>
-                <li><a href="/press">Press</a></li>
-                <li><a href="/partners">Partners</a></li>
-                <li><a href="/contact">Contact</a></li>
-                <li><a href="/enterprise">Enterprise</a></li>
-              </ul>
-            </div>
-
-            {/* Contact Info */}
-            <div className="footer-column contact-info">
-              <h6>Contact & Connect</h6>
-              <div className="contact-details">
-                <div className="contact-item">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                  </svg>
-                  <span>ofir.wienerman@gmail.com</span>
-                </div>
-                <div className="contact-item">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                  </svg>
-                  <span>LinkedIn Profile</span>
-                </div>
-                <div className="contact-item">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                  </svg>
-                  <span>San Francisco, CA</span>
-                </div>
-              </div>
-              
-              <div className="newsletter-signup">
-                <h6>Newsletter</h6>
-                <form className="footer-newsletter">
-                  <input type="email" placeholder="Your email address" />
-                  <button type="submit">Subscribe</button>
-                </form>
-              </div>
             </div>
           </div>
 

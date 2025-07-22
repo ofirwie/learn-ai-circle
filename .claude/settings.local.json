@@ -19,7 +19,9 @@
       "Bash(git remote get-url:*)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(npm run deploy:*)",
+      "Bash(npm run:*)"
     ],
     "deny": []
   }
