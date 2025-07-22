@@ -30,6 +30,7 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
   const [imagePreview, setImagePreview] = useState('')
   const [featured, setFeatured] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [showMarkdownImport, setShowMarkdownImport] = useState(false)
@@ -153,9 +154,12 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
       return
     }
 
+    let timeoutId: NodeJS.Timeout | null = null
+
     try {
       setSaving(true)
       setError(null)
+      setSuccessMessage(null)
 
       // Auto-generate excerpt if not provided
       const finalExcerpt = excerpt.trim() || ArticleService.generateExcerpt(content, 200)
@@ -178,15 +182,68 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
         published_at: status === 'published' ? new Date().toISOString() : undefined
       }
 
-      const article = await ArticleService.createArticle(articleData)
-      onSuccess(article)
+      // Create timeout promise
+      const timeoutPromise = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error('Request timed out. Please check your internet connection and try again.'))
+        }, 30000) // 30 second timeout
+      })
+
+      // Race between API call and timeout
+      const article = await Promise.race([
+        ArticleService.createArticle(articleData),
+        timeoutPromise
+      ])
+
+      // Clear timeout if successful
+      if (timeoutId) clearTimeout(timeoutId)
+      
+      // Reset retry count on success
+      setRetryCount(0)
+      
+      onSuccess(article as any)
       handleClose()
     } catch (err) {
       console.error('Error saving article:', err)
-      setError(err instanceof Error ? err.message : 'Failed to save article')
+      
+      // Clear timeout on error
+      if (timeoutId) clearTimeout(timeoutId)
+      
+      // Provide specific error messages
+      let errorMessage = 'Failed to save article'
+      
+      if (err instanceof Error) {
+        if (err.message.includes('timeout')) {
+          errorMessage = 'Request timed out. Please check your internet connection and try again.'
+        } else if (err.message.includes('network')) {
+          errorMessage = 'Network error. Please check your internet connection.'
+        } else if (err.message.includes('duplicate')) {
+          errorMessage = 'An article with this title already exists. Please choose a different title.'
+        } else if (err.message.includes('permission')) {
+          errorMessage = 'You do not have permission to publish articles. Please contact support.'
+        } else {
+          errorMessage = err.message
+        }
+      }
+      
+      setError(errorMessage)
+      
+      // Show retry option for network errors
+      if (err instanceof Error && (err.message.includes('timeout') || err.message.includes('network'))) {
+        setTimeout(() => {
+          if (retryCount < 2) {
+            setRetryCount(prev => prev + 1)
+          }
+        }, 2000)
+      }
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleRetry = async (status: 'draft' | 'published') => {
+    console.log(`Retrying article save (attempt ${retryCount + 1})...`)
+    await handleSave(status)
   }
 
   const handleClose = () => {
@@ -205,6 +262,7 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
     setFeatured(false)
     setError(null)
     setSuccessMessage(null)
+    setRetryCount(0)
     setShowMarkdownImport(false)
     setParsedData(null)
     setMarkdownFile(null)
@@ -743,17 +801,17 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
               disabled={saving}
               style={{
                 backgroundColor: 'transparent',
-                color: '#64748b',
-                border: '1px solid #d1d5db',
+                color: saving ? '#ef4444' : '#64748b',
+                border: saving ? '1px solid #ef4444' : '1px solid #d1d5db',
                 padding: '12px 24px',
                 borderRadius: '8px',
-                cursor: saving ? 'not-allowed' : 'pointer',
+                cursor: saving ? 'pointer' : 'pointer',
                 fontSize: '14px',
                 fontWeight: '500',
-                opacity: saving ? 0.5 : 1
+                opacity: 1
               }}
             >
-              Cancel
+              {saving ? 'Force Cancel' : 'Cancel'}
             </button>
 
             <div style={{ display: 'flex', gap: '12px' }}>
@@ -772,7 +830,7 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
                   opacity: saving || !title.trim() || !content.trim() || !author.trim() ? 0.5 : 1
                 }}
               >
-                {saving ? 'Saving...' : 'Save as Draft'}
+                {saving ? 'Saving...' : retryCount > 0 ? 'Retry Save Draft' : 'Save as Draft'}
               </button>
 
               <button
@@ -790,7 +848,7 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
                   opacity: saving || !title.trim() || !content.trim() || !author.trim() ? 0.5 : 1
                 }}
               >
-                {saving ? 'Publishing...' : 'Publish Article'}
+                {saving ? 'Publishing...' : retryCount > 0 ? 'Retry Publish' : 'Publish Article'}
               </button>
             </div>
           </div>
