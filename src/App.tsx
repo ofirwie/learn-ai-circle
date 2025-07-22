@@ -91,35 +91,8 @@ function App() {
     )
   }
 
-  // Show authentication forms if user is not logged in
-  if (!user) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        backgroundColor: '#f8fafc',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px'
-      }}>
-        {authView === 'login' ? (
-          <LoginForm
-            onSuccess={() => {
-              // User will be automatically redirected after successful login
-            }}
-            onSwitchToSignup={() => setAuthView('signup')}
-          />
-        ) : (
-          <SignupForm
-            onSuccess={() => {
-              // User will be automatically redirected after successful signup
-            }}
-            onSwitchToLogin={() => setAuthView('login')}
-          />
-        )}
-      </div>
-    )
-  }
+  // Don't force login - show content to everyone
+  // Authentication will be handled separately if needed
 
   // Main navigation component
   const renderNavigation = () => (
@@ -202,49 +175,72 @@ function App() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-end',
-            gap: '2px'
-          }}>
-            <span style={{
-              color: '#e2e8f0',
-              fontSize: '14px',
-              fontWeight: '600'
-            }}>
-              {userProfile?.full_name}
-            </span>
-            <span style={{
-              color: '#94a3b8',
-              fontSize: '12px'
-            }}>
-              {entity?.name} • {userGroup?.name}
-            </span>
-          </div>
-          
-          <button
-            onClick={signOut}
-            style={{
-              backgroundColor: '#ef4444',
-              color: 'white',
-              border: 'none',
-              padding: '8px 12px',
-              borderRadius: '6px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              transition: 'all 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ef4444'}
-          >
-            <LogOut size={14} />
-            Sign Out
-          </button>
+          {user ? (
+            <>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-end',
+                gap: '2px'
+              }}>
+                <span style={{
+                  color: '#e2e8f0',
+                  fontSize: '14px',
+                  fontWeight: '600'
+                }}>
+                  {userProfile?.full_name}
+                </span>
+                <span style={{
+                  color: '#94a3b8',
+                  fontSize: '12px'
+                }}>
+                  {entity?.name} • {userGroup?.name}
+                </span>
+              </div>
+              
+              <button
+                onClick={signOut}
+                style={{
+                  backgroundColor: '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ef4444'}
+              >
+                <LogOut size={14} />
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setAuthView('login')}
+              style={{
+                backgroundColor: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
+            >
+              Sign In
+            </button>
+          )}
         </div>
       </div>
     </nav>
