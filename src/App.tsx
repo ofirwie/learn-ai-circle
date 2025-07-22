@@ -1,41 +1,39 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useAuthStore } from './store/authStore'
+import { SignupForm } from './components/auth/SignupForm'
+import { LoginForm } from './components/auth/LoginForm'
 
 function App() {
   const [currentView, setCurrentView] = useState('home')
   const [showAuth, setShowAuth] = useState(false)
   const [authView, setAuthView] = useState('login')
+  const { user, loading, initialized, initialize, signOut } = useAuthStore()
   
+  useEffect(() => {
+    initialize()
+  }, [])
+  
+  if (!initialized) {
+    return (
+      <div className="loading-screen">
+        <div className="spinner" />
+        <p>Loading ISAI...</p>
+      </div>
+    )
+  }
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#ffffff',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-    }}>
-      {/* Simple Navigation */}
-      <nav style={{
-        backgroundColor: '#1e293b',
-        padding: '0 20px',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-      }}>
-        <div style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '70px'
-        }}>
-          <h1 style={{
-            color: '#3b82f6',
-            fontSize: '28px',
-            fontWeight: '700',
-            margin: '0',
-            cursor: 'pointer'
-          }}>
-            🧠 ISAI
-          </h1>
+    <div className="app">
+      {/* Modern Navigation */}
+      <nav className="modern-nav">
+        <div className="nav-container">
+          <div className="brand-logo">
+            <div className="logo-icon">🧠</div>
+            <h1 className="brand-text">ISAI</h1>
+            <span className="brand-tagline">AI Knowledge Hub</span>
+          </div>
           
-          <div style={{ display: 'flex', gap: '30px' }}>
+          <div className="nav-links">
             {[
               { key: 'home', label: 'Home', icon: '🏠' },
               { key: 'guides', label: 'Guides', icon: '📖' },
@@ -49,42 +47,32 @@ function App() {
               <button
                 key={key}
                 onClick={() => setCurrentView(key)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: currentView === key ? '#3b82f6' : '#94a3b8',
-                  fontSize: '16px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  padding: '8px 12px',
-                  borderRadius: '6px'
-                }}
+                className={`nav-link ${currentView === key ? 'nav-link-active' : ''}`}
               >
                 {icon} {label}
               </button>
             ))}
           </div>
           
-          <button
-            onClick={() => setShowAuth(true)}
-            style={{
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              padding: '8px 16px',
-              borderRadius: '6px',
-              fontSize: '14px',
-              fontWeight: '600',
-              cursor: 'pointer'
-            }}
-          >
-            Sign In
-          </button>
+          <div className="auth-section">
+            {user ? (
+              <div className="user-menu">
+                <span className="welcome-text">Welcome back!</span>
+                <button onClick={signOut} className="btn btn-logout">
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => setShowAuth(true)} className="btn btn-primary">
+                Sign In
+              </button>
+            )}
+          </div>
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main style={{ padding: '40px 20px' }}>
+      {/* Hero & Main Content */}
+      <main className="main-content">
         {currentView === 'home' && (
           <div style={{ textAlign: 'center' }}>
             <h1 style={{ fontSize: '36px', color: '#1f2937', marginBottom: '20px', fontWeight: '700' }}>
@@ -236,98 +224,122 @@ function App() {
         )}
         
         {currentView === 'prompts' && (
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: '32px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>
-              ⚡ AI Prompts & Prefixes
-            </h2>
-            <p style={{ color: '#6b7280', fontSize: '18px', marginBottom: '40px' }}>
-              Ready-to-use prompts and shortcuts to boost your productivity.
-            </p>
-            <div style={{ textAlign: 'center', padding: '60px 20px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
-              <div style={{ fontSize: '64px', marginBottom: '20px' }}>⚡</div>
-              <h3 style={{ fontSize: '24px', marginBottom: '12px', color: '#1f2937' }}>Coming Soon</h3>
-              <p style={{ color: '#6b7280' }}>AI prompts library is being curated for you.</p>
-            </div>
+          <div className="page-transition">
+            <section className="page-header">
+              <div className="page-icon">⚡</div>
+              <h1 className="page-title">AI Prompts & Prefixes</h1>
+              <p className="page-subtitle">
+                Ready-to-use prompts and shortcuts to boost your productivity
+              </p>
+            </section>
+            
+            <section className="content-section">
+              <div className="coming-soon-card">
+                <div className="coming-soon-icon">⚡</div>
+                <h3>Coming Soon</h3>
+                <p>AI prompts library is being curated for you.</p>
+              </div>
+            </section>
           </div>
         )}
         
         {currentView === 'tools' && (
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: '32px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>
-              🔧 AI Tools
-            </h2>
-            <p style={{ color: '#6b7280', fontSize: '18px', marginBottom: '40px' }}>
-              Reviews and guides for AI tools and software.
-            </p>
-            <div style={{ textAlign: 'center', padding: '60px 20px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
-              <div style={{ fontSize: '64px', marginBottom: '20px' }}>🔧</div>
-              <h3 style={{ fontSize: '24px', marginBottom: '12px', color: '#1f2937' }}>Coming Soon</h3>
-              <p style={{ color: '#6b7280' }}>AI tools reviews are being prepared.</p>
-            </div>
+          <div className="page-transition">
+            <section className="page-header">
+              <div className="page-icon">🔧</div>
+              <h1 className="page-title">AI Tools</h1>
+              <p className="page-subtitle">
+                Reviews and guides for AI tools and software
+              </p>
+            </section>
+            
+            <section className="content-section">
+              <div className="coming-soon-card">
+                <div className="coming-soon-icon">🔧</div>
+                <h3>Coming Soon</h3>
+                <p>AI tools reviews are being prepared.</p>
+              </div>
+            </section>
           </div>
         )}
         
         {currentView === 'articles' && (
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: '32px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>
-              📄 Articles
-            </h2>
-            <p style={{ color: '#6b7280', fontSize: '18px', marginBottom: '40px' }}>
-              In-depth articles covering AI topics, tools, and techniques.
-            </p>
-            <div style={{ textAlign: 'center', padding: '60px 20px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
-              <div style={{ fontSize: '64px', marginBottom: '20px' }}>📄</div>
-              <h3 style={{ fontSize: '24px', marginBottom: '12px', color: '#1f2937' }}>Coming Soon</h3>
-              <p style={{ color: '#6b7280' }}>Articles are being created for your knowledge base.</p>
-            </div>
+          <div className="page-transition">
+            <section className="page-header">
+              <div className="page-icon">📄</div>
+              <h1 className="page-title">Articles</h1>
+              <p className="page-subtitle">
+                In-depth articles covering AI topics, tools, and techniques
+              </p>
+            </section>
+            
+            <section className="content-section">
+              <div className="coming-soon-card">
+                <div className="coming-soon-icon">📄</div>
+                <h3>Coming Soon</h3>
+                <p>Articles are being created for your knowledge base.</p>
+              </div>
+            </section>
           </div>
         )}
         
         {currentView === 'videos' && (
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: '32px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>
-              🎥 Video Content
-            </h2>
-            <p style={{ color: '#6b7280', fontSize: '18px', marginBottom: '40px' }}>
-              Educational videos, tutorials, and demonstrations.
-            </p>
-            <div style={{ textAlign: 'center', padding: '60px 20px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
-              <div style={{ fontSize: '64px', marginBottom: '20px' }}>🎥</div>
-              <h3 style={{ fontSize: '24px', marginBottom: '12px', color: '#1f2937' }}>Coming Soon</h3>
-              <p style={{ color: '#6b7280' }}>Video content is being prepared for your library.</p>
-            </div>
+          <div className="page-transition">
+            <section className="page-header">
+              <div className="page-icon">🎥</div>
+              <h1 className="page-title">Video Content</h1>
+              <p className="page-subtitle">
+                Educational videos, tutorials, and demonstrations
+              </p>
+            </section>
+            
+            <section className="content-section">
+              <div className="coming-soon-card">
+                <div className="coming-soon-icon">🎥</div>
+                <h3>Coming Soon</h3>
+                <p>Video content is being prepared for your library.</p>
+              </div>
+            </section>
           </div>
         )}
         
         {currentView === 'news' && (
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: '32px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>
-              📰 AI News
-            </h2>
-            <p style={{ color: '#6b7280', fontSize: '18px', marginBottom: '40px' }}>
-              Latest developments and updates in artificial intelligence.
-            </p>
-            <div style={{ textAlign: 'center', padding: '60px 20px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
-              <div style={{ fontSize: '64px', marginBottom: '20px' }}>📰</div>
-              <h3 style={{ fontSize: '24px', marginBottom: '12px', color: '#1f2937' }}>Coming Soon</h3>
-              <p style={{ color: '#6b7280' }}>AI news updates are being curated for you.</p>
-            </div>
+          <div className="page-transition">
+            <section className="page-header">
+              <div className="page-icon">📰</div>
+              <h1 className="page-title">AI News</h1>
+              <p className="page-subtitle">
+                Latest developments and updates in artificial intelligence
+              </p>
+            </section>
+            
+            <section className="content-section">
+              <div className="coming-soon-card">
+                <div className="coming-soon-icon">📰</div>
+                <h3>Coming Soon</h3>
+                <p>AI news updates are being curated for you.</p>
+              </div>
+            </section>
           </div>
         )}
         
         {currentView === 'forum' && (
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: '32px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>
-              💬 Community Forum
-            </h2>
-            <p style={{ color: '#6b7280', fontSize: '18px', marginBottom: '40px' }}>
-              Connect with your peers and share knowledge.
-            </p>
-            <div style={{ textAlign: 'center', padding: '60px 20px', backgroundColor: '#f8fafc', borderRadius: '12px' }}>
-              <div style={{ fontSize: '64px', marginBottom: '20px' }}>💬</div>
-              <h3 style={{ fontSize: '24px', marginBottom: '12px', color: '#1f2937' }}>Coming Soon</h3>
-              <p style={{ color: '#6b7280' }}>Forum features are being developed for your community.</p>
-            </div>
+          <div className="page-transition">
+            <section className="page-header">
+              <div className="page-icon">💬</div>
+              <h1 className="page-title">Community Forum</h1>
+              <p className="page-subtitle">
+                Connect with your peers and share knowledge
+              </p>
+            </section>
+            
+            <section className="content-section">
+              <div className="coming-soon-card">
+                <div className="coming-soon-icon">💬</div>
+                <h3>Coming Soon</h3>
+                <p>Forum features are being developed for your community.</p>
+              </div>
+            </section>
           </div>
         )}
       </main>
@@ -370,74 +382,27 @@ function App() {
               ×
             </button>
             
-            <h2 style={{
-              fontSize: '24px',
-              fontWeight: '700',
-              color: '#1f2937',
-              marginBottom: '20px',
-              textAlign: 'center'
-            }}>
-              {authView === 'login' ? 'Sign In' : 'Sign Up'}
-            </h2>
+            {authView === 'login' ? (
+              <LoginForm onSuccess={() => setShowAuth(false)} />
+            ) : (
+              <SignupForm onSuccess={() => setShowAuth(false)} />
+            )}
             
-            <form style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <input
-                type="email"
-                placeholder="Email"
-                style={{
-                  padding: '12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '14px'
-                }}
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                style={{
-                  padding: '12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '14px'
-                }}
-              />
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
               <button
-                type="submit"
+                onClick={() => setAuthView(authView === 'login' ? 'signup' : 'login')}
                 style={{
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
+                  background: 'none',
                   border: 'none',
-                  padding: '12px',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer'
+                  color: '#3b82f6',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  fontSize: '14px'
                 }}
               >
-                {authView === 'login' ? 'Sign In' : 'Sign Up'}
+                {authView === 'login' ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
               </button>
-              
-              <p style={{
-                textAlign: 'center',
-                color: '#6b7280',
-                fontSize: '14px'
-              }}>
-                {authView === 'login' ? "Don't have an account? " : "Already have an account? "}
-                <button
-                  type="button"
-                  onClick={() => setAuthView(authView === 'login' ? 'signup' : 'login')}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#3b82f6',
-                    cursor: 'pointer',
-                    textDecoration: 'underline'
-                  }}
-                >
-                  {authView === 'login' ? 'Sign Up' : 'Sign In'}
-                </button>
-              </p>
-            </form>
+            </div>
           </div>
         </div>
       )}
