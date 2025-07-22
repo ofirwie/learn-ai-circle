@@ -6,14 +6,21 @@ import { ArticleService } from './services/articleService'
 import { Article } from './types/content'
 import { ArticleCreator } from './components/Article/ArticleCreator'
 import { ArticleViewer } from './components/Article/ArticleViewer'
+import { InviteCodeManager } from './components/Admin/InviteCodeManager'
 
 function App() {
   const [currentView, setCurrentView] = useState('home')
   const [authView, setAuthView] = useState('login')
   const [articles, setArticles] = useState<Article[]>([])
+  const [guides, setGuides] = useState<Article[]>([])
+  const [toolReviews, setToolReviews] = useState<Article[]>([])
   const [loadingContent, setLoadingContent] = useState(true)
+  const [loadingGuides, setLoadingGuides] = useState(false)
+  const [loadingTools, setLoadingTools] = useState(false)
   const [showArticleCreator, setShowArticleCreator] = useState(false)
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
+  const [showInviteCodeManager, setShowInviteCodeManager] = useState(false)
+  const [openWithImport, setOpenWithImport] = useState(false)
   const { user, loading, initialized, initialize, signOut } = useAuthStore()
   
   useEffect(() => {
@@ -27,6 +34,18 @@ function App() {
     }
   }, [user, initialized])
 
+  // Fetch content by type when view changes
+  useEffect(() => {
+    if (user && initialized) {
+      if (currentView === 'guides' && guides.length === 0) {
+        fetchContentByType('guide', setGuides, setLoadingGuides)
+      }
+      if (currentView === 'tools' && toolReviews.length === 0) {
+        fetchContentByType('tool-review', setToolReviews, setLoadingTools)
+      }
+    }
+  }, [currentView, user, initialized, guides.length, toolReviews.length])
+
   const fetchArticles = async () => {
     try {
       setLoadingContent(true)
@@ -36,6 +55,21 @@ function App() {
       console.error('Failed to fetch articles:', error)
     } finally {
       setLoadingContent(false)
+    }
+  }
+
+  const fetchContentByType = async (contentType: string, setData: (data: Article[]) => void, setLoading: (loading: boolean) => void) => {
+    try {
+      setLoading(true)
+      const result = await ArticleService.getArticles(1, 50, { 
+        status: 'published',
+        category: contentType
+      })
+      setData(result.data)
+    } catch (error) {
+      console.error(`Failed to fetch ${contentType}:`, error)
+    } finally {
+      setLoading(false)
     }
   }
   
@@ -400,77 +434,56 @@ function App() {
             </section>
             
             <section className="content-section">
-              <div className="professional-grid">
-                {[
-                  {
-                    title: 'Getting Started with AI',
-                    description: 'Complete beginner\'s guide to artificial intelligence and machine learning fundamentals.',
-                    category: 'Beginner',
-                    readTime: '10 min read',
-                    thumbnail: '🎯',
-                    color: 'blue'
-                  },
-                  {
-                    title: 'Advanced Prompt Engineering',
-                    description: 'Master the art of crafting effective prompts for ChatGPT, Claude, and other AI models.',
-                    category: 'Advanced',
-                    readTime: '15 min read',
-                    thumbnail: '⚡',
-                    color: 'purple'
-                  },
-                  {
-                    title: 'AI Tools Comparison 2024',
-                    description: 'Comprehensive comparison of the best AI tools, their features, and pricing.',
-                    category: 'Tools',
-                    readTime: '12 min read',
-                    thumbnail: '🔧',
-                    color: 'green'
-                  },
-                  {
-                    title: 'Building AI Workflows',
-                    description: 'Learn to automate tasks and create efficient AI-powered workflows.',
-                    category: 'Intermediate',
-                    readTime: '18 min read',
-                    thumbnail: '🔄',
-                    color: 'orange'
-                  },
-                  {
-                    title: 'AI Ethics & Best Practices',
-                    description: 'Understanding responsible AI use and ethical considerations.',
-                    category: 'Essential',
-                    readTime: '8 min read',
-                    thumbnail: '⚖️',
-                    color: 'red'
-                  },
-                  {
-                    title: 'Custom GPT Development',
-                    description: 'Create your own custom GPTs and AI assistants from scratch.',
-                    category: 'Advanced',
-                    readTime: '25 min read',
-                    thumbnail: '🤖',
-                    color: 'indigo'
-                  }
-                ].map((guide, index) => (
-                  <div key={index} className={`content-card guide-card guide-${guide.color}`}>
-                    <div className="card-thumbnail">
-                      <div className="thumbnail-icon">{guide.thumbnail}</div>
-                    </div>
-                    <div className="card-content">
-                      <div className={`card-badge badge-${guide.color}`}>
-                        {guide.category}
-                      </div>
-                      <h3 className="card-title">{guide.title}</h3>
-                      <p className="card-description">{guide.description}</p>
-                      <div className="card-footer">
-                        <span className="read-time">{guide.readTime}</span>
-                        <button className="card-button">
-                          Read Guide →
-                        </button>
+              {loadingGuides ? (
+                <div className="loading-skeleton-grid">
+                  {Array(6).fill(0).map((_, i) => (
+                    <div key={i} className="article-card-skeleton">
+                      <div className="skeleton-image"></div>
+                      <div className="skeleton-content">
+                        <div className="skeleton-title"></div>
+                        <div className="skeleton-text"></div>
+                        <div className="skeleton-text short"></div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : guides.length > 0 ? (
+                <div className="letsai-grid-layout">
+                  {guides.map((guide) => (
+                    <article key={guide.id} className="modern-article-card" onClick={() => setSelectedArticle(guide)}>
+                      <div className="article-image-container">
+                        {guide.featured_image ? (
+                          <img src={guide.featured_image} alt={guide.title} className="article-image" />
+                        ) : (
+                          <div className="article-image-placeholder guide-placeholder">
+                            <span className="placeholder-icon">📖</span>
+                          </div>
+                        )}
+                        <div className="content-type-badge guide-badge">
+                          <span className="badge-icon">📖</span>
+                          Guide
+                        </div>
+                      </div>
+                      <div className="article-content">
+                        <h2 className="article-title">{guide.title}</h2>
+                        <p className="article-excerpt">{guide.excerpt}</p>
+                        <div className="article-meta">
+                          <span className="article-author">{guide.author}</span>
+                          <span className="article-date">
+                            {new Date(guide.published_at || guide.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-state">
+                  <div className="empty-state-icon">📖</div>
+                  <h3>No Guides Available</h3>
+                  <p>Check back soon for expert-crafted AI guides and tutorials.</p>
+                </div>
+              )}
             </section>
           </div>
         ) : currentView === 'prompts' ? (
@@ -502,11 +515,56 @@ function App() {
             </section>
             
             <section className="content-section">
-              <div className="coming-soon-card">
-                <div className="coming-soon-icon">🔧</div>
-                <h3>Coming Soon</h3>
-                <p>AI tools reviews are being prepared.</p>
-              </div>
+              {loadingTools ? (
+                <div className="loading-skeleton-grid">
+                  {Array(6).fill(0).map((_, i) => (
+                    <div key={i} className="article-card-skeleton">
+                      <div className="skeleton-image"></div>
+                      <div className="skeleton-content">
+                        <div className="skeleton-title"></div>
+                        <div className="skeleton-text"></div>
+                        <div className="skeleton-text short"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : toolReviews.length > 0 ? (
+                <div className="letsai-grid-layout">
+                  {toolReviews.map((tool) => (
+                    <article key={tool.id} className="modern-article-card" onClick={() => setSelectedArticle(tool)}>
+                      <div className="article-image-container">
+                        {tool.featured_image ? (
+                          <img src={tool.featured_image} alt={tool.title} className="article-image" />
+                        ) : (
+                          <div className="article-image-placeholder tool-placeholder">
+                            <span className="placeholder-icon">🔧</span>
+                          </div>
+                        )}
+                        <div className="content-type-badge tool-badge">
+                          <span className="badge-icon">🔧</span>
+                          Tool Review
+                        </div>
+                      </div>
+                      <div className="article-content">
+                        <h2 className="article-title">{tool.title}</h2>
+                        <p className="article-excerpt">{tool.excerpt}</p>
+                        <div className="article-meta">
+                          <span className="article-author">{tool.author}</span>
+                          <span className="article-date">
+                            {new Date(tool.published_at || tool.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-state">
+                  <div className="empty-state-icon">🔧</div>
+                  <h3>No Tool Reviews Available</h3>
+                  <p>Check back soon for in-depth AI tool reviews and comparisons.</p>
+                </div>
+              )}
             </section>
           </div>
         ) : currentView === 'articles' ? (
@@ -520,11 +578,56 @@ function App() {
             </section>
             
             <section className="content-section">
-              <div className="coming-soon-card">
-                <div className="coming-soon-icon">📄</div>
-                <h3>Coming Soon</h3>
-                <p>Articles are being created for your knowledge base.</p>
-              </div>
+              {loadingContent ? (
+                <div className="loading-skeleton-grid">
+                  {Array(6).fill(0).map((_, i) => (
+                    <div key={i} className="article-card-skeleton">
+                      <div className="skeleton-image"></div>
+                      <div className="skeleton-content">
+                        <div className="skeleton-title"></div>
+                        <div className="skeleton-text"></div>
+                        <div className="skeleton-text short"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : articles.filter(article => article.category === 'article').length > 0 ? (
+                <div className="letsai-grid-layout">
+                  {articles.filter(article => article.category === 'article').map((article) => (
+                    <article key={article.id} className="modern-article-card" onClick={() => setSelectedArticle(article)}>
+                      <div className="article-image-container">
+                        {article.featured_image ? (
+                          <img src={article.featured_image} alt={article.title} className="article-image" />
+                        ) : (
+                          <div className="article-image-placeholder article-placeholder">
+                            <span className="placeholder-icon">📄</span>
+                          </div>
+                        )}
+                        <div className="content-type-badge article-badge">
+                          <span className="badge-icon">📄</span>
+                          Article
+                        </div>
+                      </div>
+                      <div className="article-content">
+                        <h2 className="article-title">{article.title}</h2>
+                        <p className="article-excerpt">{article.excerpt}</p>
+                        <div className="article-meta">
+                          <span className="article-author">{article.author}</span>
+                          <span className="article-date">
+                            {new Date(article.published_at || article.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-state">
+                  <div className="empty-state-icon">📄</div>
+                  <h3>No Articles Available</h3>
+                  <p>Check back soon for in-depth AI articles and insights.</p>
+                </div>
+              )}
             </section>
           </div>
         ) : currentView === 'videos' ? (
@@ -597,9 +700,20 @@ function App() {
                   <span className="icon">✍️</span>
                   Create New Article
                 </button>
+                <button className="create-button" onClick={() => {
+                  setOpenWithImport(true)
+                  setShowArticleCreator(true)
+                }}>
+                  <span className="icon">📄</span>
+                  Import from Markdown
+                </button>
                 <button className="create-button" onClick={() => alert('Tips feature coming soon!')}>
                   <span className="icon">💡</span>
                   Create New Tip
+                </button>
+                <button className="create-button" onClick={() => setShowInviteCodeManager(true)}>
+                  <span className="icon">🎟️</span>
+                  Manage Invite Codes
                 </button>
                 <button className="create-button" onClick={() => alert('Manage content coming soon!')}>
                   <span className="icon">📊</span>
@@ -630,35 +744,40 @@ function App() {
       <footer className="site-footer">
         <div className="footer-container">
           <div className="footer-grid">
-            {/* Company Info */}
+            {/* About Me */}
             <div className="footer-column company-info">
-              <h5>ISAI Knowledge Hub</h5>
-              <p>The leading destination for learning and implementing artificial intelligence technologies in the workplace. Empowering businesses with cutting-edge AI knowledge and practical solutions.</p>
-              <div className="social-links">
-                <a href="#" className="social-link facebook">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                </a>
-                <a href="#" className="social-link youtube">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                  </svg>
-                </a>
-                <a href="#" className="social-link instagram">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                  </svg>
-                </a>
-                <a href="#" className="social-link twitter">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                  </svg>
-                </a>
-                <a href="#" className="social-link linkedin">
+              <h5>About Ofir Wienerman</h5>
+              <p>I'm Ofir Wienerman, an AI specialist and consultant with over 20 years of experience in data analytics, business intelligence, and automation. I help organizations and professionals harness practical AI tools to work smarter, not harder.</p>
+              <p style={{ marginTop: '12px', fontSize: '14px', color: '#94a3b8' }}>This site is dedicated to sharing clear, hands-on guides and tips for using AI—no hype, just real-world solutions anyone can implement.</p>
+              <div className="contact-links" style={{ marginTop: '20px' }}>
+                <a href="https://www.linkedin.com/in/ofir-wienerman-8383ba5/" target="_blank" rel="noopener noreferrer" className="contact-link" style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginRight: '20px',
+                  color: '#0077b5',
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                   </svg>
+                  LinkedIn Profile
+                </a>
+                <a href="mailto:ofir.wienerman@gmail.com" className="contact-link" style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  color: '#dc2626',
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                  </svg>
+                  ofir.wienerman@gmail.com
                 </a>
               </div>
             </div>
@@ -704,19 +823,19 @@ function App() {
 
             {/* Contact Info */}
             <div className="footer-column contact-info">
-              <h6>Get in Touch</h6>
+              <h6>Contact & Connect</h6>
               <div className="contact-details">
                 <div className="contact-item">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
                   </svg>
-                  <span>info@isai-hub.com</span>
+                  <span>ofir.wienerman@gmail.com</span>
                 </div>
                 <div className="contact-item">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                   </svg>
-                  <span>+1 (555) 123-4567</span>
+                  <span>LinkedIn Profile</span>
                 </div>
                 <div className="contact-item">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -763,13 +882,25 @@ function App() {
       {showArticleCreator && (
         <ArticleCreator
           isOpen={showArticleCreator}
-          onClose={() => setShowArticleCreator(false)}
+          onClose={() => {
+            setShowArticleCreator(false)
+            setOpenWithImport(false)
+          }}
           onSuccess={(article) => {
             setShowArticleCreator(false)
+            setOpenWithImport(false)
             // Refresh articles list
             fetchArticles()
             alert('Article created successfully!')
           }}
+          highlightImport={openWithImport}
+        />
+      )}
+
+      {/* Invite Code Manager Modal */}
+      {showInviteCodeManager && (
+        <InviteCodeManager
+          onClose={() => setShowInviteCodeManager(false)}
         />
       )}
 
