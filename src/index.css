@@ -358,14 +358,976 @@ body {
 }
 
 /* =================
-   LETSAI MODERN STYLES
+   LETSAI PROFESSIONAL STYLES
    ================= */
 
 /* App Container */
 .app {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* LetsAI Professional Header */
+.letsai-header {
+  background: #2c5aa0; /* LetsAI exact blue */
+  height: 60px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+}
+
+.logo {
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.logo:hover {
+  opacity: 0.9;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  margin-left: 200px; /* Space after logo */
+}
+
+.main-nav a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.main-nav a:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.main-nav a.active {
+  background-color: rgba(255,255,255,0.15);
+  font-weight: 600;
+}
+
+.search-container {
+  position: absolute;
+  right: 200px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  width: 250px;
+  height: 36px;
+  border: none;
+  border-radius: 6px 0 0 6px;
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+  background: #ffffff;
+}
+
+.search-input::placeholder {
+  color: #888888;
+}
+
+.search-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #ff6b35;
+  border-radius: 0 6px 6px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: background-color 0.2s ease;
+}
+
+.search-btn:hover {
+  background: #e55a2b;
+}
+
+.header-right {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cta-button {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.cta-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255,107,53,0.3);
+}
+
+.header-right .user-menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 14px;
+}
+
+.header-right .user-avatar {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* LetsAI Layout */
+.letsai-layout {
+  background: #ffffff;
+}
+
+/* LetsAI Hero Section */
+.letsai-hero-section {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 40px 0;
+  min-height: 600px;
+}
+
+.letsai-hero-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+  height: 100%;
+}
+
+.featured-articles {
+  display: grid;
+  grid-template-rows: 2fr 1fr;
+  gap: 16px;
+}
+
+.featured-main {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  min-height: 360px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.featured-main:hover {
+  transform: translateY(-4px);
+}
+
+.featured-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.featured-main:hover img {
+  opacity: 0.9;
+}
+
+.article-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.9));
+  padding: 40px 24px 24px;
+  color: white;
+}
+
+.article-category {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.featured-main h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+.featured-main p {
+  font-size: 16px;
+  margin: 0 0 16px 0;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.featured-secondary {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+  min-height: 160px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.featured-secondary:hover {
+  transform: translateY(-2px);
+}
+
+.featured-secondary img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+}
+
+.featured-secondary h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.featured-secondary .article-overlay {
+  padding: 20px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+}
+
+.article-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  opacity: 0.9;
+  flex-wrap: wrap;
+}
+
+.article-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shopify-promo {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: 12px;
+  padding: 32px 24px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.shopify-promo:hover {
+  transform: translateY(-4px);
+}
+
+.promo-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.shopify-logo {
+  margin-bottom: 16px;
+}
+
+.shopify-promo h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
+}
+
+.shopify-promo p {
+  font-size: 16px;
+  margin: 0 0 20px 0;
+  opacity: 0.8;
+  line-height: 1.5;
+}
+
+.promo-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  opacity: 0.7;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.promo-cta {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.promo-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+}
+
+.promo-gradient {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(102,126,234,0.1) 100%);
+  pointer-events: none;
+}
+
+/* LetsAI Content Grid */
+.letsai-content-grid {
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  padding: 80px 0;
+}
+
+.letsai-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.letsai-section-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.letsai-section-header h2 {
+  font-size: 42px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  background: linear-gradient(135deg, #2c5aa0 0%, #667eea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.letsai-section-header p {
+  font-size: 18px;
+  color: #666666;
+  margin: 0;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.letsai-grid-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 32px;
+  margin-bottom: 60px;
+}
+
+.letsai-content-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.letsai-content-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+
+.letsai-card-image {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+}
+
+.letsai-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.letsai-content-card:hover .letsai-card-image img {
+  transform: scale(1.08);
+}
+
+.letsai-card-overlay {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+}
+
+.letsai-card-category {
+  background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%);
+  color: #2c5aa0;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+
+.letsai-card-content {
+  padding: 28px 24px 24px;
+}
+
+.letsai-card-content h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: #1a1a1a;
+  line-height: 1.4;
+  transition: color 0.3s ease;
+}
+
+.letsai-content-card:hover .letsai-card-content h3 {
+  color: #2c5aa0;
+}
+
+.letsai-card-content p {
+  font-size: 16px;
+  color: #666666;
+  margin: 0 0 20px 0;
+  line-height: 1.6;
+}
+
+.letsai-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 16px;
+}
+
+.meta-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.category {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.category.tools {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: #1976d2;
+}
+
+.category.strategy {
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+  color: #7b1fa2;
+}
+
+.category.tutorial {
+  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+  color: #388e3c;
+}
+
+.category.automation {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffcc02 100%);
+  color: #f57c00;
+}
+
+.category.ethics {
+  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+  color: #c2185b;
+}
+
+.category.education {
+  background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+  color: #00695c;
+}
+
+.read-time {
+  color: #888888;
+  font-weight: 500;
+}
+
+.meta-right .date {
+  color: #888888;
+  font-weight: 500;
+}
+
+.letsai-load-more-section {
+  text-align: center;
+}
+
+.letsai-load-more-btn {
+  background: linear-gradient(135deg, #2c5aa0 0%, #667eea 100%);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(44,90,160,0.3);
+}
+
+.letsai-load-more-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(44,90,160,0.4);
+}
+
+/* LetsAI Layout with Sidebar */
+.letsai-main-content {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 48px;
+  align-items: start;
+}
+
+.letsai-articles-section {
+  width: 100%;
+}
+
+/* LetsAI Sidebar */
+.letsai-sidebar {
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+}
+
+.letsai-widget {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.05);
+  transition: transform 0.3s ease;
+}
+
+.letsai-widget:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+/* Webinar Widget */
+.letsai-webinar-widget {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 28px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.letsai-widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.letsai-live-indicator {
+  background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  animation: pulse 2s infinite;
+}
+
+.letsai-widget-header h4 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.letsai-widget-content h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+.letsai-widget-content p {
+  font-size: 14px;
+  margin: 0 0 16px 0;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.letsai-webinar-time {
+  background: rgba(255,255,255,0.2);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.letsai-join-btn {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  color: #667eea;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.letsai-join-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255,255,255,0.3);
+}
+
+.letsai-webinar-gradient {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 100%);
+  pointer-events: none;
+}
+
+/* Popular Widget */
+.letsai-popular-widget {
+  padding: 28px 24px;
+}
+
+.letsai-popular-widget h4 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 24px 0;
+  color: #1a1a1a;
+}
+
+.letsai-popular-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+.letsai-popular-item:hover {
+  background-color: #f8f9fa;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.letsai-popular-item:last-child {
+  border-bottom: none;
+}
+
+.letsai-popular-number {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #2c5aa0 0%, #667eea 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.letsai-popular-content {
+  flex: 1;
+}
+
+.letsai-popular-content h5 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: #1a1a1a;
+  line-height: 1.3;
+}
+
+.letsai-popular-views {
+  font-size: 12px;
+  color: #666666;
+}
+
+.letsai-popular-trend {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.letsai-trending-up {
+  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+  border-radius: 2px;
+  position: relative;
+}
+
+.letsai-trending-down {
+  background: linear-gradient(135deg, #f44336 0%, #ef5350 100%);
+  border-radius: 2px;
+}
+
+.letsai-trending-steady {
+  background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+  border-radius: 2px;
+}
+
+/* Newsletter Widget */
+.letsai-newsletter-widget {
+  padding: 28px 24px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.letsai-newsletter-header h4 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #1a1a1a;
+}
+
+.letsai-newsletter-header p {
+  font-size: 14px;
+  color: #666666;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.letsai-newsletter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.letsai-newsletter-form input {
+  padding: 12px 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.letsai-newsletter-form input:focus {
+  border-color: #2c5aa0;
+}
+
+.letsai-newsletter-form button {
+  background: linear-gradient(135deg, #2c5aa0 0%, #667eea 100%);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+.letsai-newsletter-form button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(44,90,160,0.3);
+}
+
+.letsai-newsletter-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.letsai-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #666666;
+}
+
+.letsai-feature-check {
+  color: #4caf50;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+/* Tools Widget */
+.letsai-tools-widget {
+  padding: 28px 24px;
+}
+
+.letsai-tools-widget h4 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 24px 0;
+  color: #1a1a1a;
+}
+
+.letsai-tool-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
+
+.letsai-tool-item:hover {
+  background-color: #f8f9fa;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.letsai-tool-item:last-child {
+  border-bottom: none;
+}
+
+.letsai-tool-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.letsai-tool-chatgpt {
+  background: linear-gradient(135deg, #10a37f 0%, #26d0ce 100%);
+}
+
+.letsai-tool-midjourney {
+  background: linear-gradient(135deg, #1e1e1e 0%, #4a4a4a 100%);
+}
+
+.letsai-tool-github {
+  background: linear-gradient(135deg, #24292e 0%, #586069 100%);
+}
+
+.letsai-tool-info {
+  flex: 1;
+}
+
+.letsai-tool-info h6 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 2px 0;
+  color: #1a1a1a;
+}
+
+.letsai-tool-info span {
+  font-size: 12px;
+  color: #666666;
+}
+
+.letsai-tool-rating {
+  background: linear-gradient(135deg, #ffc107 0%, #ffeb3b 100%);
+  color: #1a1a1a;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.letsai-view-all-tools {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  color: #2c5aa0;
+  border: 2px solid #e9ecef;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 16px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.letsai-view-all-tools:hover {
+  background: linear-gradient(135deg, #2c5aa0 0%, #667eea 100%);
+  color: white;
+  border-color: #2c5aa0;
 }
 
 /* Loading Screen */
@@ -375,8 +1337,8 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: var(--gradient-modern);
-  color: white;
+  background: #f8f9fa;
+  color: #2c5aa0;
 }
 
 .loading-screen p {
@@ -981,31 +1943,39 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .hero-section {
-    flex-direction: column;
-    text-align: center;
-    gap: 40px;
-    padding: 60px 24px;
-  }
-  
-  .hero-title {
-    font-size: 42px;
-  }
-  
-  .nav-links {
+  .main-nav {
     display: none;
   }
   
-  .brand-text {
-    font-size: 24px;
+  .search-container {
+    right: 120px;
   }
   
-  .features-grid {
+  .search-input {
+    width: 180px;
+  }
+  
+  .letsai-hero-content {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .letsai-main-content {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  
+  .letsai-sidebar {
+    width: 100%;
+    position: static;
+  }
+  
+  .letsai-grid-layout {
     grid-template-columns: 1fr;
   }
   
-  .professional-grid {
-    grid-template-columns: 1fr;
+  .letsai-section-header h2 {
+    font-size: 32px;
   }
 }
 
@@ -1039,4 +2009,177 @@ body {
   color: #6b7280;
   margin: 0;
   line-height: 1.6;
+}/* LetsAI Professional Footer */
+.letsai-site-footer {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: #ffffff;
+  padding: 60px 0 20px;
+  margin-top: 80px;
+}
+
+.letsai-footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.letsai-footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.letsai-footer-column h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  color: #ffffff;
+}
+
+.letsai-footer-column h4 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: #ffffff;
+}
+
+.letsai-footer-column p {
+  color: #b3c5d9;
+  line-height: 1.6;
+  margin: 0 0 20px 0;
+}
+
+.letsai-footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.letsai-footer-column li {
+  margin-bottom: 8px;
+}
+
+.letsai-footer-column a {
+  color: #b3c5d9;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.letsai-footer-column a:hover {
+  color: #ffffff;
+}
+
+.letsai-social-links {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.letsai-social-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #ffffff;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.letsai-social-links a:hover {
+  background: #2c5aa0;
+  transform: translateY(-2px);
+}
+
+.letsai-footer-newsletter {
+  margin-top: 20px;
+}
+
+.letsai-footer-newsletter input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.1);
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.letsai-footer-newsletter input::placeholder {
+  color: #b3c5d9;
+}
+
+.letsai-footer-newsletter button {
+  background: #ff6b35;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.3s ease;
+}
+
+.letsai-footer-newsletter button:hover {
+  background: #e55a2b;
+}
+
+.letsai-footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.2);
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.letsai-footer-legal {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.letsai-footer-legal a {
+  color: #b3c5d9;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.letsai-footer-legal a:hover {
+  color: #ffffff;
+}
+
+.letsai-footer-badges {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.letsai-footer-badge {
+  background: rgba(255,255,255,0.1);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #b3c5d9;
+}
+
+@media (max-width: 768px) {
+  .letsai-footer-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .letsai-footer-bottom {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .letsai-footer-legal {
+    justify-content: center;
+  }
 }
