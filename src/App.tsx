@@ -257,147 +257,54 @@ function App() {
 
     return (
       <div>
+        {/* Compact Hero Section */}
         <section style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 35%, #f093fb 70%, #f5576c 100%)',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white',
-          padding: '100px 20px',
-          textAlign: 'center',
-          position: 'relative',
-          overflow: 'hidden'
+          padding: '60px 20px 40px 20px',
+          textAlign: 'center'
         }}>
-          {/* Background Pattern */}
           <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.08) 0%, transparent 50%)',
-            pointerEvents: 'none'
-          }} />
-          <div style={{
-            maxWidth: '900px',
-            margin: '0 auto',
-            position: 'relative',
-            zIndex: 1
+            maxWidth: '1200px',
+            margin: '0 auto'
           }}>
             <h2 style={{
-              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-              fontWeight: '800',
-              marginBottom: '24px',
-              lineHeight: '1.1',
-              letterSpacing: '-0.02em',
-              textShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+              fontSize: '2.5rem',
+              fontWeight: '700',
+              marginBottom: '16px',
+              lineHeight: '1.1'
             }}>
-              Welcome to ISAI
+              ISAI AI Knowledge Hub
             </h2>
             <p style={{
-              fontSize: 'clamp(1.125rem, 2vw, 1.375rem)',
-              opacity: '0.95',
-              marginBottom: '40px',
-              lineHeight: '1.6',
-              fontWeight: '400',
-              maxWidth: '600px',
-              margin: '0 auto 40px auto'
+              fontSize: '1.125rem',
+              opacity: '0.9',
+              marginBottom: '0'
             }}>
               Your comprehensive AI Knowledge Hub for {entity?.name}
             </p>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: '16px',
-              flexWrap: 'wrap'
-            }}>
-              <button
-                onClick={() => setCurrentView('guides')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  backgroundColor: 'rgba(255,255,255,0.15)',
-                  color: 'white',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  padding: '14px 28px',
-                  borderRadius: '2rem',
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  backdropFilter: 'blur(10px)',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.25)'
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                  e.currentTarget.style.boxShadow = '0 8px 15px rgba(0, 0, 0, 0.2)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)'
-                }}
-              >
-                <BookOpen size={18} />
-                Browse Guides
-              </button>
-              <button
-                onClick={() => setCurrentView('prompts')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  backgroundColor: 'rgba(255,255,255,0.15)',
-                  color: 'white',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  padding: '14px 28px',
-                  borderRadius: '2rem',
-                  fontSize: '15px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  backdropFilter: 'blur(10px)',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.25)'
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                  e.currentTarget.style.boxShadow = '0 8px 15px rgba(0, 0, 0, 0.2)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)'
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)'
-                }}
-              >
-                <span style={{ fontSize: '18px' }}>⚡</span>
-                Explore Prompts
-              </button>
-            </div>
           </div>
         </section>
 
-        {/* Featured Content */}
-        {!loading && mixedContent.length > 0 && (
-          <section className="page-transition" style={{
-            padding: '60px 20px',
-            backgroundColor: '#f8fafc'
+        {/* Main Content Grid - LetsAI Style */}
+        <section style={{
+          padding: '40px 20px',
+          backgroundColor: 'white'
+        }}>
+          <div style={{
+            maxWidth: '1200px',
+            margin: '0 auto'
           }}>
+            {/* Content-Rich Grid Layout */}
             <div style={{
-              maxWidth: '1200px',
-              margin: '0 auto'
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              gap: '20px',
+              marginBottom: '40px'
             }}>
-              <h3 style={{
-                fontSize: '32px',
-                fontWeight: '700',
-                textAlign: 'center',
-                marginBottom: '40px',
-                color: '#1f2937'
-              }}>
-                Featured Content
-              </h3>
-              
-              <div className="professional-grid">
-                {mixedContent.map((item) => (
+              {/* Show all content types mixed together for immediate discovery */}
+              {!loading && mixedContent.length > 0 ? (
+                mixedContent.slice(0, 12).map((item) => (
                   <ArticleCard
                     key={item.id}
                     id={item.id}
@@ -414,36 +321,11 @@ function App() {
                     readTime={item.readTime}
                     publishedAt={item.publishedAt}
                     featured={item.featured}
-                    onClick={() => console.log('Open article:', item.id)}
+                    onClick={() => console.log('Open content:', item.id)}
                   />
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Latest Articles */}
-        {!loading && articles.length > 0 && (
-          <section style={{
-            padding: '60px 20px',
-            backgroundColor: 'white'
-          }}>
-            <div style={{
-              maxWidth: '1200px',
-              margin: '0 auto'
-            }}>
-              <h3 style={{
-                fontSize: '32px',
-                fontWeight: '700',
-                textAlign: 'center',
-                marginBottom: '40px',
-                color: '#1f2937'
-              }}>
-                Latest Articles
-              </h3>
-              
-              <div className="professional-grid">
-                {articles.map((article) => (
+                ))
+              ) : articles.length > 0 ? (
+                articles.slice(0, 12).map((article) => (
                   <ArticleCard
                     key={article.id}
                     id={article.id}
@@ -462,11 +344,87 @@ function App() {
                     featured={article.featured}
                     onClick={() => console.log('Open article:', article.id)}
                   />
-                ))}
-              </div>
+                ))
+              ) : (
+                // Show placeholder content if no real content exists
+                <div style={{
+                  gridColumn: '1 / -1',
+                  textAlign: 'center',
+                  padding: '60px 20px',
+                  color: '#6b7280'
+                }}>
+                  <div style={{ fontSize: '64px', marginBottom: '20px' }}>📚</div>
+                  <h3 style={{ color: '#1f2937', marginBottom: '12px', fontSize: '24px' }}>
+                    Content is Loading...
+                  </h3>
+                  <p style={{ fontSize: '16px' }}>
+                    Your AI knowledge base is being prepared with guides, articles, and tools.
+                  </p>
+                </div>
+              )}
             </div>
-          </section>
-        )}
+
+            {/* Quick Navigation Categories */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '16px',
+              marginTop: '40px'
+            }}>
+              {[
+                { key: 'guides', label: 'AI Guides', icon: '📖', color: '#3b82f6', description: 'Step-by-step tutorials' },
+                { key: 'prompts', label: 'Prompts', icon: '⚡', color: '#8b5cf6', description: 'Ready-to-use prompts' },
+                { key: 'tools', label: 'AI Tools', icon: '🔧', color: '#06b6d4', description: 'Tool reviews & guides' },
+                { key: 'news', label: 'AI News', icon: '📰', color: '#10b981', description: 'Latest developments' }
+              ].map(({ key, label, icon, color, description }) => (
+                <button
+                  key={key}
+                  onClick={() => setCurrentView(key as ViewType)}
+                  style={{
+                    background: 'white',
+                    border: `2px solid ${color}`,
+                    borderRadius: '12px',
+                    padding: '20px',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)'
+                    e.currentTarget.style.backgroundColor = color
+                    e.currentTarget.style.color = 'white'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)'
+                    e.currentTarget.style.backgroundColor = 'white'
+                    e.currentTarget.style.color = 'inherit'
+                  }}
+                >
+                  <div style={{ fontSize: '32px', marginBottom: '12px' }}>{icon}</div>
+                  <h4 style={{ 
+                    fontSize: '18px', 
+                    fontWeight: '600', 
+                    marginBottom: '8px',
+                    color: 'inherit'
+                  }}>
+                    {label}
+                  </h4>
+                  <p style={{ 
+                    fontSize: '14px', 
+                    margin: '0',
+                    opacity: 0.8,
+                    color: 'inherit'
+                  }}>
+                    {description}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* Loading State */}
         {loading && (

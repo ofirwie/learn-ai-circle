@@ -80,9 +80,9 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
       className={`article-card ${featured ? 'featured' : ''}`}
       style={{
         background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
-        borderRadius: '1.5rem',
+        borderRadius: '16px',
         overflow: 'hidden',
-        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
         cursor: 'pointer',
         transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         position: 'relative',
@@ -96,15 +96,15 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
         })
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)'
-        e.currentTarget.style.boxShadow = '0 25px 50px -12px rgb(0 0 0 / 0.25), 0 10px 15px -3px rgb(102 126 234 / 0.1)'
+        e.currentTarget.style.transform = 'translateY(-4px)'
+        e.currentTarget.style.boxShadow = '0 10px 15px -3px rgb(0 0 0 / 0.15), 0 4px 6px -4px rgb(0 0 0 / 0.1)'
         e.currentTarget.style.borderColor = '#d1d5db'
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.transform = featured ? 'scale(1.01)' : 'scale(1)'
+        e.currentTarget.style.transform = 'scale(1)'
         e.currentTarget.style.boxShadow = featured 
-          ? '0 20px 25px -5px rgb(102 126 234 / 0.15), 0 8px 10px -6px rgb(102 126 234 / 0.1)'
-          : '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'
+          ? '0 8px 10px -4px rgb(102 126 234 / 0.15)'
+          : '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
         e.currentTarget.style.borderColor = featured ? '#667eea' : '#e5e7eb'
       }}
     >
@@ -149,12 +149,13 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
 
       {/* Image */}
       <div style={{
-        height: '200px',
+        height: '180px',
         backgroundImage: `url(${displayImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundColor: '#f3f4f6',
-        position: 'relative'
+        position: 'relative',
+        borderRadius: '12px 12px 0 0'
       }}>
         {/* Content Type Badge */}
         <div style={{
@@ -177,7 +178,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
       </div>
 
       {/* Content */}
-      <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
         {/* Category */}
         {category && (
           <div style={{
@@ -194,11 +195,11 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
 
         {/* Title */}
         <h3 style={{
-          fontSize: '18px',
-          fontWeight: '700',
+          fontSize: '16px',
+          fontWeight: '600',
           color: '#1f2937',
           lineHeight: '1.4',
-          marginBottom: '12px',
+          marginBottom: '10px',
           display: '-webkit-box',
           WebkitLineClamp: 2,
           WebkitBoxOrient: 'vertical',
