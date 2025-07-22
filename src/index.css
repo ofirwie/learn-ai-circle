@@ -504,17 +504,30 @@ body {
 .header-right .user-menu {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   color: white;
   font-size: 14px;
 }
 
-.header-right .user-avatar {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 50%;
+.header-right .user-menu span {
+  font-weight: 500;
+}
+
+.logout-button {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-button:hover {
+  background: rgba(255,255,255,0.2);
+  transform: translateY(-1px);
 }
 
 /* LetsAI Layout */

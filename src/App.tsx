@@ -58,8 +58,10 @@ function App() {
           <div className="header-right">
             {user ? (
               <div className="user-menu">
-                <span>Welcome back</span>
-                <div className="user-avatar" onClick={signOut}></div>
+                <span>Welcome back, {user.email?.split('@')[0]}</span>
+                <button className="logout-button" onClick={signOut}>
+                  Logout
+                </button>
               </div>
             ) : (
               <button className="cta-button" onClick={() => setShowAuth(true)}>
