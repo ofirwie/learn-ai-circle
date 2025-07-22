@@ -805,8 +805,8 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
             </button>
 
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              {/* 5 Test Buttons */}
-              {[1, 2, 3, 4, 5].map(num => (
+              {/* 6 Test Buttons */}
+              {[1, 2, 3, 4, 5, 6].map(num => (
                 <button
                   key={num}
                   onClick={async () => {
@@ -826,7 +826,7 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
                   }}
                   disabled={saving}
                   style={{
-                    backgroundColor: ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#6366f1'][num - 1],
+                    backgroundColor: ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#ec4899'][num - 1],
                     color: 'white',
                     border: 'none',
                     padding: '8px 12px',

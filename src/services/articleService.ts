@@ -483,6 +483,37 @@ ${'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium do
     return this.createArticle(testArticle)
   }
 
+  static async createTestArticle6(): Promise<Article> {
+    console.log('🧪6 ArticleService: Creating test with MULTIPLE YOUTUBE VIDEOS...')
+    
+    const contentWithMultipleVideos = `
+# 3 Innovative AI Tools Test
+
+<a href="https://www.youtube.com/watch?v=1YtB1yrKvXM" target="_blank">Video 1</a>
+<a href="https://www.youtube.com/watch?v=gmJeo_1lI6g" target="_blank">Video 2</a>
+<a href="https://www.youtube.com/watch?v=V9TGgD03nQI" target="_blank">Video 3</a>
+<a href="https://www.youtube.com/watch?v=CB_2FWwSU0Y" target="_blank">Video 4</a>
+<a href="https://www.youtube.com/watch?v=YhTgj7_cuJM" target="_blank">Video 5</a>
+<a href="https://www.youtube.com/watch?v=0vmp4N2Tce0" target="_blank">Video 6</a>
+
+This mimics your markdown with multiple YouTube links and HTML.
+    `
+    
+    const testArticle = {
+      title: `Test 6 - Multiple Videos ${new Date().getTime()}`,
+      slug: '',
+      content: contentWithMultipleVideos,
+      excerpt: 'Test with multiple YouTube videos like your markdown',
+      author: 'Ofir Wienerman',
+      category: 'tool-review',
+      status: 'draft' as const,
+      featured: false,
+      tags: ['AI', 'Tools', 'Review', 'YouTube', 'Multiple']
+    }
+    
+    return this.createArticle(testArticle)
+  }
+
   // Get categories with article counts
   static async getCategories(): Promise<Array<{ category: string; count: number }>> {
     const { data, error } = await supabase
