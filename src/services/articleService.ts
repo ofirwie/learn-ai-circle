@@ -2,43 +2,107 @@ import { supabase } from './supabase'
 import { Article, ArticleFilters } from '../types/content'
 
 export class ArticleService {
-  // Timeout wrapper for Supabase operations
-  private static async withTimeout<T>(promise: Promise<T>, timeoutMs: number = 25000): Promise<T> {
+  // Enhanced timeout wrapper with longer default and better error messages
+  private static async withTimeout<T>(promise: Promise<T>, timeoutMs: number = 45000): Promise<T> {
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => {
-        reject(new Error('Operation timed out. Please check your internet connection.'))
+        reject(new Error('Operation timed out after 45 seconds. This may indicate a slow connection or server issue. Please try again.'))
       }, timeoutMs)
     })
 
     return Promise.race([promise, timeoutPromise])
   }
 
-  // Create a new article with retry logic
+  // Create a new article with retry logic and detailed logging
   static async createArticle(article: Omit<Article, 'id' | 'created_at' | 'updated_at' | 'view_count'>, retryCount: number = 0): Promise<Article> {
-    console.log('🚀 ArticleService: Creating article...', { title: article.title, status: article.status })
+    const startTime = Date.now()
+    console.log('🚀 ArticleService: Creating article...', { 
+      title: article.title, 
+      status: article.status,
+      contentLength: article.content?.length || 0,
+      retryAttempt: retryCount,
+      timestamp: new Date().toISOString()
+    })
     
     try {
+      // Step 1: Connection health check
+      console.log('🔍 ArticleService: Testing connection...')
+      const connectionStart = Date.now()
+      
+      try {
+        const healthCheck = await supabase.from('articles').select('id').limit(1)
+        console.log('✅ ArticleService: Connection test completed', {
+          duration: Date.now() - connectionStart,
+          success: !!healthCheck.data
+        })
+      } catch (connErr) {
+        console.error('❌ ArticleService: Connection test failed:', connErr)
+        throw new Error(`Connection test failed: ${connErr}`)
+      }
+
+      // Step 2: Prepare article data with logging
+      console.log('📝 ArticleService: Preparing article data...')
+      const prepStart = Date.now()
+      
+      const articleData = {
+        ...article,
+        view_count: 0,
+        published_at: article.status === 'published' ? new Date().toISOString() : null
+      }
+      
+      console.log('📊 ArticleService: Article data prepared', {
+        duration: Date.now() - prepStart,
+        dataSize: JSON.stringify(articleData).length,
+        hasImages: !!article.featured_image,
+        hasYouTube: !!article.youtube_video_id,
+        tagCount: Array.isArray(article.tags) ? article.tags.length : 0
+      })
+
+      // Step 3: Execute Supabase operation with detailed timing
+      console.log('🗄️ ArticleService: Executing Supabase insert...')
+      const dbStart = Date.now()
+      
       const supabaseOperation = supabase
         .from('articles')
-        .insert({
-          ...article,
-          view_count: 0,
-          published_at: article.status === 'published' ? new Date().toISOString() : null
-        })
+        .insert(articleData)
         .select()
         .single()
 
-      const { data, error } = await this.withTimeout(supabaseOperation, 25000)
+      const { data, error } = await this.withTimeout(supabaseOperation, 45000)
+      
+      console.log('📈 ArticleService: Supabase operation completed', {
+        duration: Date.now() - dbStart,
+        totalDuration: Date.now() - startTime,
+        success: !error,
+        dataReturned: !!data
+      })
 
       if (error) {
-        console.error('❌ ArticleService: Supabase error:', error)
+        console.error('❌ ArticleService: Supabase error details:', {
+          error,
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          totalDuration: Date.now() - startTime
+        })
         throw new Error(`Error creating article: ${error.message}`)
       }
 
-      console.log('✅ ArticleService: Article created successfully:', data.id)
+      console.log('✅ ArticleService: Article created successfully', {
+        id: data.id,
+        totalDuration: Date.now() - startTime,
+        retryAttempt: retryCount
+      })
       return data
     } catch (err) {
-      console.error('💥 ArticleService: Exception during create:', err)
+      console.error('💥 ArticleService: Exception during create:', {
+        error: err,
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined,
+        totalDuration: Date.now() - startTime,
+        retryAttempt: retryCount
+      })
       
       // Retry logic for timeout/network errors
       if (retryCount < 2 && err instanceof Error && 
@@ -313,6 +377,24 @@ export class ArticleService {
     const lastSpace = truncated.lastIndexOf(' ')
     
     return truncated.substring(0, lastSpace) + '...'
+  }
+
+  // Debug function: Create minimal test article to isolate timeout issues
+  static async createTestArticle(): Promise<Article> {
+    console.log('🧪 ArticleService: Creating test article for debugging...')
+    
+    const testArticle = {
+      title: `Debug Test ${new Date().getTime()}`,
+      slug: '', // Will be auto-generated
+      content: 'This is a minimal test article to debug timeout issues.',
+      excerpt: 'Test excerpt',
+      author: 'Debug System',
+      category: 'article',
+      status: 'draft' as const,
+      featured: false
+    }
+    
+    return this.createArticle(testArticle)
   }
 
   // Get categories with article counts

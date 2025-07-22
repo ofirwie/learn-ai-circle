@@ -804,7 +804,40 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
               {saving ? 'Force Cancel' : 'Cancel'}
             </button>
 
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              {/* Debug Test Button */}
+              <button
+                onClick={async () => {
+                  try {
+                    setSaving(true)
+                    setError(null)
+                    console.log('🧪 Running debug test article creation...')
+                    const testArticle = await ArticleService.createTestArticle()
+                    setSuccessMessage(`✅ Debug test successful! Article ID: ${testArticle.id}`)
+                    setTimeout(() => setSuccessMessage(null), 5000)
+                  } catch (err) {
+                    console.error('🚨 Debug test failed:', err)
+                    setError(`Debug test failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                  } finally {
+                    setSaving(false)
+                  }
+                }}
+                disabled={saving}
+                style={{
+                  backgroundColor: '#8b5cf6',
+                  color: 'white',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '6px',
+                  cursor: saving ? 'not-allowed' : 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  opacity: saving ? 0.5 : 1
+                }}
+              >
+                🧪 Debug Test
+              </button>
+
               <button
                 onClick={() => handleSave('draft')}
                 disabled={saving || !title.trim() || !content.trim() || !author.trim()}
