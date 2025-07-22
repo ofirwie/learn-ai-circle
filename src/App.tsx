@@ -473,9 +473,7 @@ function App() {
               </div>
             </section>
           </div>
-        )}
-        
-        {currentView === 'prompts' && (
+        ) : currentView === 'prompts' ? (
           <div className="page-transition">
             <section className="page-header">
               <div className="page-icon">⚡</div>
@@ -529,9 +527,7 @@ function App() {
               </div>
             </section>
           </div>
-        )}
-        
-        {currentView === 'videos' && (
+        ) : currentView === 'videos' ? (
           <div className="page-transition">
             <section className="page-header">
               <div className="page-icon">🎥</div>
