@@ -74,152 +74,165 @@ function App() {
       {/* Hero & Main Content */}
       <main className="main-content">
         {currentView === 'home' && (
-          <div style={{ textAlign: 'center' }}>
-            <h1 style={{ fontSize: '36px', color: '#1f2937', marginBottom: '20px', fontWeight: '700' }}>
-              🚀 ISAI AI Knowledge Hub - STEP 3 COMPLETE! 🚀
-            </h1>
-            <div style={{ 
-              backgroundColor: '#10b981', 
-              color: 'white', 
-              padding: '24px', 
-              borderRadius: '12px',
-              marginBottom: '20px',
-              fontSize: '20px',
-              fontWeight: '600'
-            }}>
-              ✅ Full Navigation + Login + Professional Content Sections!
-            </div>
-            <div style={{ 
-              backgroundColor: '#3b82f6', 
-              color: 'white', 
-              padding: '15px', 
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontFamily: 'monospace',
-              marginBottom: '20px'
-            }}>
-              🕒 Deployment: {new Date().toISOString()}
-            </div>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-              gap: '16px',
-              marginTop: '20px'
-            }}>
-              <div style={{
-                backgroundColor: '#f0f9ff',
-                border: '1px solid #0ea5e9',
-                borderRadius: '8px',
-                padding: '16px',
-                textAlign: 'center'
-              }}>
-                <div style={{ fontSize: '24px', marginBottom: '8px' }}>🔐</div>
-                <div style={{ fontWeight: '600', color: '#0ea5e9' }}>Login System</div>
-                <div style={{ fontSize: '14px', color: '#6b7280' }}>Working Modal</div>
+          <div className="page-transition">
+            {/* Hero Section */}
+            <section className="hero-section">
+              <div className="hero-content">
+                <div className="hero-badge">
+                  <span className="badge-icon">🚀</span>
+                  <span>LetsAI Knowledge Hub</span>
+                </div>
+                <h1 className="hero-title">
+                  Master AI with 
+                  <span className="gradient-text">Professional Guidance</span>
+                </h1>
+                <p className="hero-subtitle">
+                  Comprehensive resources, expert tutorials, and cutting-edge tools 
+                  to accelerate your AI journey
+                </p>
+                <div className="hero-buttons">
+                  <button onClick={() => setCurrentView('guides')} className="btn btn-primary btn-hero">
+                    Explore Guides
+                  </button>
+                  <button onClick={() => setCurrentView('tools')} className="btn btn-secondary btn-hero">
+                    Browse Tools
+                  </button>
+                </div>
               </div>
-              <div style={{
-                backgroundColor: '#f0fdf4',
-                border: '1px solid #22c55e',
-                borderRadius: '8px',
-                padding: '16px',
-                textAlign: 'center'
-              }}>
-                <div style={{ fontSize: '24px', marginBottom: '8px' }}>📖</div>
-                <div style={{ fontWeight: '600', color: '#22c55e' }}>Guides Section</div>
-                <div style={{ fontSize: '14px', color: '#6b7280' }}>With Demo Cards</div>
+              <div className="hero-visual">
+                <div className="floating-cards">
+                  <div className="floating-card card-1">
+                    <div className="card-icon">🧠</div>
+                    <div className="card-text">AI Learning</div>
+                  </div>
+                  <div className="floating-card card-2">
+                    <div className="card-icon">⚡</div>
+                    <div className="card-text">Fast Results</div>
+                  </div>
+                  <div className="floating-card card-3">
+                    <div className="card-icon">🎯</div>
+                    <div className="card-text">Expert Tips</div>
+                  </div>
+                </div>
               </div>
-              <div style={{
-                backgroundColor: '#fef7ff',
-                border: '1px solid #a855f7',
-                borderRadius: '8px',
-                padding: '16px',
-                textAlign: 'center'
-              }}>
-                <div style={{ fontSize: '24px', marginBottom: '8px' }}>🧭</div>
-                <div style={{ fontWeight: '600', color: '#a855f7' }}>Full Navigation</div>
-                <div style={{ fontSize: '14px', color: '#6b7280' }}>8 Sections</div>
+            </section>
+
+            {/* Features Grid */}
+            <section className="features-section">
+              <h2 className="section-title">Everything You Need</h2>
+              <div className="features-grid">
+                <div className="feature-card" onClick={() => setCurrentView('guides')}>
+                  <div className="feature-icon">📚</div>
+                  <h3>Comprehensive Guides</h3>
+                  <p>Step-by-step tutorials from beginner to advanced levels</p>
+                  <div className="feature-arrow">→</div>
+                </div>
+                <div className="feature-card" onClick={() => setCurrentView('prompts')}>
+                  <div className="feature-icon">⚡</div>
+                  <h3>Ready-to-Use Prompts</h3>
+                  <p>Proven prompts for ChatGPT, Claude, and other AI tools</p>
+                  <div className="feature-arrow">→</div>
+                </div>
+                <div className="feature-card" onClick={() => setCurrentView('tools')}>
+                  <div className="feature-icon">🔧</div>
+                  <h3>Tool Reviews</h3>
+                  <p>Honest reviews and comparisons of AI tools and platforms</p>
+                  <div className="feature-arrow">→</div>
+                </div>
+                <div className="feature-card" onClick={() => setCurrentView('videos')}>
+                  <div className="feature-icon">🎥</div>
+                  <h3>Video Tutorials</h3>
+                  <p>Visual learning with hands-on demonstrations</p>
+                  <div className="feature-arrow">→</div>
+                </div>
               </div>
-            </div>
-            <p style={{ marginTop: '24px', color: '#6b7280', fontSize: '16px', textAlign: 'center' }}>
-              🎯 Try all navigation sections! The Guides section has demo content cards.
-            </p>
+            </section>
           </div>
         )}
         
         {currentView === 'guides' && (
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: '32px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>
-              📖 Professional Guides
-            </h2>
-            <p style={{ color: '#6b7280', fontSize: '18px', marginBottom: '40px' }}>
-              Comprehensive guides and tutorials to help you master AI tools and techniques.
-            </p>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '24px'
-            }}>
-              {[
-                {
-                  title: 'Getting Started with AI',
-                  description: 'Complete beginner\'s guide to artificial intelligence and machine learning.',
-                  category: 'Beginner',
-                  readTime: '10 min read'
-                },
-                {
-                  title: 'Advanced Prompt Engineering',
-                  description: 'Master the art of crafting effective prompts for AI models.',
-                  category: 'Advanced',
-                  readTime: '15 min read'
-                },
-                {
-                  title: 'AI Tools Comparison',
-                  description: 'Compare the best AI tools available in 2024.',
-                  category: 'Tools',
-                  readTime: '12 min read'
-                }
-              ].map((guide, index) => (
-                <div key={index} style={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '12px',
-                  padding: '24px',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-                }}
-                >
-                  <div style={{
-                    backgroundColor: '#eff6ff',
-                    color: '#2563eb',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    display: 'inline-block',
-                    marginBottom: '12px'
-                  }}>
-                    {guide.category}
+          <div className="page-transition">
+            <section className="page-header">
+              <div className="page-icon">📖</div>
+              <h1 className="page-title">Professional Guides</h1>
+              <p className="page-subtitle">
+                Master AI with our comprehensive, expert-crafted guides and tutorials
+              </p>
+            </section>
+            
+            <section className="content-section">
+              <div className="professional-grid">
+                {[
+                  {
+                    title: 'Getting Started with AI',
+                    description: 'Complete beginner\'s guide to artificial intelligence and machine learning fundamentals.',
+                    category: 'Beginner',
+                    readTime: '10 min read',
+                    thumbnail: '🎯',
+                    color: 'blue'
+                  },
+                  {
+                    title: 'Advanced Prompt Engineering',
+                    description: 'Master the art of crafting effective prompts for ChatGPT, Claude, and other AI models.',
+                    category: 'Advanced',
+                    readTime: '15 min read',
+                    thumbnail: '⚡',
+                    color: 'purple'
+                  },
+                  {
+                    title: 'AI Tools Comparison 2024',
+                    description: 'Comprehensive comparison of the best AI tools, their features, and pricing.',
+                    category: 'Tools',
+                    readTime: '12 min read',
+                    thumbnail: '🔧',
+                    color: 'green'
+                  },
+                  {
+                    title: 'Building AI Workflows',
+                    description: 'Learn to automate tasks and create efficient AI-powered workflows.',
+                    category: 'Intermediate',
+                    readTime: '18 min read',
+                    thumbnail: '🔄',
+                    color: 'orange'
+                  },
+                  {
+                    title: 'AI Ethics & Best Practices',
+                    description: 'Understanding responsible AI use and ethical considerations.',
+                    category: 'Essential',
+                    readTime: '8 min read',
+                    thumbnail: '⚖️',
+                    color: 'red'
+                  },
+                  {
+                    title: 'Custom GPT Development',
+                    description: 'Create your own custom GPTs and AI assistants from scratch.',
+                    category: 'Advanced',
+                    readTime: '25 min read',
+                    thumbnail: '🤖',
+                    color: 'indigo'
+                  }
+                ].map((guide, index) => (
+                  <div key={index} className={`content-card guide-card guide-${guide.color}`}>
+                    <div className="card-thumbnail">
+                      <div className="thumbnail-icon">{guide.thumbnail}</div>
+                    </div>
+                    <div className="card-content">
+                      <div className={`card-badge badge-${guide.color}`}>
+                        {guide.category}
+                      </div>
+                      <h3 className="card-title">{guide.title}</h3>
+                      <p className="card-description">{guide.description}</p>
+                      <div className="card-footer">
+                        <span className="read-time">{guide.readTime}</span>
+                        <button className="card-button">
+                          Read Guide →
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937', marginBottom: '8px' }}>
-                    {guide.title}
-                  </h3>
-                  <p style={{ color: '#6b7280', marginBottom: '12px', lineHeight: '1.5' }}>
-                    {guide.description}
-                  </p>
-                  <div style={{ color: '#9ca3af', fontSize: '14px' }}>
-                    {guide.readTime}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </section>
           </div>
         )}
         
