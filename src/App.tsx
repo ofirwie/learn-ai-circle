@@ -38,43 +38,21 @@ function App() {
               Home
             </a>
             <a href="#" onClick={() => setCurrentView('news')} className={currentView === 'news' ? 'active' : ''}>
-              AI News
+              News
             </a>
-            <a href="#" onClick={() => setCurrentView('courses')} className={currentView === 'courses' ? 'active' : ''}>
-              Professional Courses
+            <a href="#" onClick={() => setCurrentView('articles')} className={currentView === 'articles' ? 'active' : ''}>
+              Articles
             </a>
-            <a href="#" onClick={() => setCurrentView('tools')} className={currentView === 'tools' ? 'active' : ''}>
-              AI Tools
-            </a>
-            <a href="#" onClick={() => setCurrentView('archives')} className={currentView === 'archives' ? 'active' : ''}>
-              AI Archives
+            <a href="#" onClick={() => setCurrentView('forum')} className={currentView === 'forum' ? 'active' : ''}>
+              Forum
             </a>
             <a href="#" onClick={() => setCurrentView('guides')} className={currentView === 'guides' ? 'active' : ''}>
-              Business Guides
+              Guides
             </a>
-            <a href="#" onClick={() => setCurrentView('academy')} className={currentView === 'academy' ? 'active' : ''}>
-              AI Academy
-            </a>
-            <a href="#" onClick={() => setCurrentView('experts')} className={currentView === 'experts' ? 'active' : ''}>
-              Expert Calls
-            </a>
-            <a href="#" onClick={() => setCurrentView('about')} className={currentView === 'about' ? 'active' : ''}>
-              About
-            </a>
-            <a href="#" onClick={() => setCurrentView('contact')} className={currentView === 'contact' ? 'active' : ''}>
-              Contact
+            <a href="#" onClick={() => setCurrentView('tools')} className={currentView === 'tools' ? 'active' : ''}>
+              Tools Review
             </a>
           </nav>
-          
-          {/* Search Bar */}
-          <div className="search-container">
-            <input type="text" placeholder="Search..." className="search-input" />
-            <button className="search-btn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </button>
-          </div>
           
           {/* Right Side Elements */}
           <div className="header-right">
@@ -444,7 +422,7 @@ function App() {
           <div className="page-transition">
             <section className="page-header">
               <div className="page-icon">📖</div>
-              <h1 className="page-title">Professional Guides</h1>
+              <h1 className="page-title">Guides</h1>
               <p className="page-subtitle">
                 Master AI with our comprehensive, expert-crafted guides and tutorials
               </p>
@@ -550,7 +528,7 @@ function App() {
           <div className="page-transition">
             <section className="page-header">
               <div className="page-icon">🔧</div>
-              <h1 className="page-title">AI Tools</h1>
+              <h1 className="page-title">Tools Review</h1>
               <p className="page-subtitle">
                 Reviews and guides for AI tools and software
               </p>
@@ -610,7 +588,7 @@ function App() {
           <div className="page-transition">
             <section className="page-header">
               <div className="page-icon">📰</div>
-              <h1 className="page-title">AI News</h1>
+              <h1 className="page-title">News</h1>
               <p className="page-subtitle">
                 Latest developments and updates in artificial intelligence
               </p>
