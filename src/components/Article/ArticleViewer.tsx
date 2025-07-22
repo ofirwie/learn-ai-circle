@@ -33,8 +33,64 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
     }
   }
 
-  // Render the article content with proper styling for embeds
+  // Convert YouTube links to embeds and render content properly
   const renderContent = (content: string) => {
+    // Convert YouTube links to proper embeds
+    let processedContent = content
+    
+    // Convert YouTube anchor links to embeds
+    const youtubeAnchorRegex = /<a[^>]*href="https:\/\/www\.youtube\.com\/watch\?v=([^"&]+)"[^>]*>([^<]+)<\/a>/gi
+    processedContent = processedContent.replace(youtubeAnchorRegex, (match, videoId, linkText) => {
+      return `
+        <div class="youtube-embed" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 600px; margin: 20px auto; border-radius: 12px;">
+          <iframe 
+            src="https://www.youtube.com/embed/${videoId}" 
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px;"
+            frameborder="0" 
+            allowfullscreen
+            title="${linkText}">
+          </iframe>
+        </div>
+        <p style="text-align: center; margin: 10px 0; font-size: 14px; color: #64748b;">
+          <strong>${linkText}</strong>
+        </p>
+      `
+    })
+    
+    // Convert bare YouTube URLs to embeds
+    const youtubeUrlRegex = /https:\/\/www\.youtube\.com\/watch\?v=([^?\s&]+)/gi
+    processedContent = processedContent.replace(youtubeUrlRegex, (match, videoId) => {
+      return `
+        <div class="youtube-embed" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 600px; margin: 20px auto; border-radius: 12px;">
+          <iframe 
+            src="https://www.youtube.com/embed/${videoId}" 
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px;"
+            frameborder="0" 
+            allowfullscreen>
+          </iframe>
+        </div>
+      `
+    })
+    
+    // Convert markdown-style formatting to HTML
+    processedContent = processedContent
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // **bold**
+      .replace(/\*(.*?)\*/g, '<em>$1</em>') // *italic*
+      .replace(/^### (.*$)/gm, '<h3>$1</h3>') // ### heading
+      .replace(/^## (.*$)/gm, '<h2>$1</h2>') // ## heading  
+      .replace(/^# (.*$)/gm, '<h1>$1</h1>') // # heading
+      .replace(/^- (.*$)/gm, '<li>$1</li>') // - list item
+      .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>') // wrap lists
+      .replace(/\n\n/g, '</p><p>') // paragraphs
+      .replace(/^(.+)$/gm, '<p>$1</p>') // wrap remaining text
+      .replace(/<p><h/g, '<h') // fix heading paragraphs
+      .replace(/<\/h([1-6])><\/p>/g, '</h$1>') // fix heading paragraphs
+      .replace(/<p><ul>/g, '<ul>') // fix list paragraphs
+      .replace(/<\/ul><\/p>/g, '</ul>') // fix list paragraphs
+      .replace(/<p><div/g, '<div') // fix div paragraphs
+      .replace(/<\/div><\/p>/g, '</div>') // fix div paragraphs
+      .replace(/---/g, '<hr>') // horizontal rules
+    
     return (
       <>
         <style>
@@ -47,13 +103,21 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
               display: block !important;
               border-radius: 12px !important;
             }
-            .article-content div[style*="position: relative"][style*="padding-bottom"] {
+            .article-content .youtube-embed {
               max-width: 600px !important;
               margin: 20px auto !important;
-              padding-bottom: 33.75% !important;
+              border-radius: 12px !important;
             }
             .article-content p {
               margin-bottom: 1em;
+              line-height: 1.6;
+            }
+            .article-content h1 {
+              font-size: 28px;
+              font-weight: 700;
+              margin-top: 40px;
+              margin-bottom: 20px;
+              color: #1e293b;
             }
             .article-content h2 {
               font-size: 24px;
@@ -69,18 +133,28 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
               margin-bottom: 12px;
               color: #334155;
             }
-            .article-content ul, .article-content ol {
+            .article-content ul {
               margin-bottom: 16px;
               padding-left: 24px;
             }
             .article-content li {
               margin-bottom: 8px;
+              line-height: 1.6;
+            }
+            .article-content hr {
+              border: none;
+              border-top: 1px solid #e2e8f0;
+              margin: 32px 0;
+            }
+            .article-content strong {
+              font-weight: 600;
+              color: #1e293b;
             }
           `}
         </style>
         <div 
           className="article-content"
-          dangerouslySetInnerHTML={{ __html: content }}
+          dangerouslySetInnerHTML={{ __html: processedContent }}
           style={{
             fontSize: '16px',
             lineHeight: '1.7',

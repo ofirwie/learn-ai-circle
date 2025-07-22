@@ -116,13 +116,19 @@ function App() {
       <header className="letsai-header">
         <div className="header-container">
           {/* Logo */}
-          <a href="#" className="logo" onClick={() => setCurrentView('home')}>
+          <a href="#" className="logo" onClick={() => {
+            setCurrentView('home')
+            setSelectedArticle(null)
+          }}>
             ISAI Knowledge Hub
           </a>
           
           {/* Main Navigation */}
           <nav className="main-nav">
-            <a href="#" onClick={() => setCurrentView('home')} className={currentView === 'home' ? 'active' : ''}>
+            <a href="#" onClick={() => {
+              setCurrentView('home')
+              setSelectedArticle(null)
+            }} className={currentView === 'home' ? 'active' : ''}>
               Home
             </a>
             <a href="#" onClick={() => setCurrentView('news')} className={currentView === 'news' ? 'active' : ''}>
@@ -181,7 +187,39 @@ function App() {
                       <>
                         {/* Main featured article */}
                         <article className="featured-main" onClick={() => setSelectedArticle(articles[0])} style={{ cursor: 'pointer' }}>
-                          <img src={articles[0].featured_image || "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop&crop=center"} alt={articles[0].title} />
+                          <img 
+                            src={
+                              articles[0].featured_image || 
+                              (articles[0].youtube_video_id ? `https://img.youtube.com/vi/${articles[0].youtube_video_id}/maxresdefault.jpg` : 
+                              "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop&crop=center")
+                            } 
+                            alt={articles[0].title}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }}
+                          />
+                          {articles[0].youtube_video_id && (
+                            <div className="video-play-icon-large" style={{
+                              position: 'absolute',
+                              top: '50%',
+                              left: '50%',
+                              transform: 'translate(-50%, -50%)',
+                              backgroundColor: 'rgba(0,0,0,0.8)',
+                              borderRadius: '50%',
+                              width: '80px',
+                              height: '80px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'white',
+                              fontSize: '32px',
+                              zIndex: 2
+                            }}>
+                              ▶
+                            </div>
+                          )}
                           <div className="article-overlay">
                             <div className="article-category">{articles[0].category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}</div>
                             <h2>{articles[0].title}</h2>
@@ -196,7 +234,39 @@ function App() {
                         
                         {articles[1] && (
                           <article className="featured-secondary" onClick={() => setSelectedArticle(articles[1])} style={{ cursor: 'pointer' }}>
-                            <img src={articles[1].featured_image || "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=200&fit=crop&crop=center"} alt={articles[1].title} />
+                            <img 
+                              src={
+                                articles[1].featured_image || 
+                                (articles[1].youtube_video_id ? `https://img.youtube.com/vi/${articles[1].youtube_video_id}/mqdefault.jpg` : 
+                                "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=200&fit=crop&crop=center")
+                              } 
+                              alt={articles[1].title}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
+                              }}
+                            />
+                            {articles[1].youtube_video_id && (
+                              <div className="video-play-icon" style={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                backgroundColor: 'rgba(0,0,0,0.8)',
+                                borderRadius: '50%',
+                                width: '60px',
+                                height: '60px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
+                                fontSize: '24px',
+                                zIndex: 2
+                              }}>
+                                ▶
+                              </div>
+                            )}
                             <div className="article-overlay">
                               <div className="article-category">{articles[1].category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}</div>
                               <h3>{articles[1].title}</h3>
@@ -259,11 +329,43 @@ function App() {
                           >
                             <div className="letsai-card-image">
                               <img 
-                                src={article.featured_image || `https://images.unsplash.com/photo-${index % 2 === 0 ? '1573164713714-d95e436ab8d6' : '1556761175-b413da4baf72'}?w=400&h=220&fit=crop&crop=center`} 
-                                alt={article.title} 
+                                src={
+                                  article.featured_image || 
+                                  (article.youtube_video_id ? `https://img.youtube.com/vi/${article.youtube_video_id}/mqdefault.jpg` : 
+                                  `https://images.unsplash.com/photo-${index % 2 === 0 ? '1573164713714-d95e436ab8d6' : '1556761175-b413da4baf72'}?w=320&h=180&fit=crop&crop=center`)
+                                } 
+                                alt={article.title}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'cover'
+                                }}
+                                onError={(e) => {
+                                  // Fallback to a default image if loading fails
+                                  e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDMyMCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iMTgwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNDQgOTBMMTY4IDEwNkg5NkwxMTIgODRMMTQ0IDkwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'
+                                }}
                               />
                               <div className="letsai-card-overlay">
                                 <span className="letsai-card-category">{article.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}</span>
+                                {article.youtube_video_id && (
+                                  <div className="video-play-icon" style={{
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                    backgroundColor: 'rgba(0,0,0,0.7)',
+                                    borderRadius: '50%',
+                                    width: '48px',
+                                    height: '48px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white',
+                                    fontSize: '20px'
+                                  }}>
+                                    ▶
+                                  </div>
+                                )}
                               </div>
                             </div>
                             <div className="letsai-card-content">
@@ -761,7 +863,10 @@ function App() {
             <div className="footer-column">
               <h6>Site Navigation</h6>
               <ul className="footer-links">
-                <li><a href="#" onClick={() => setCurrentView('home')}>Home</a></li>
+                <li><a href="#" onClick={() => {
+                  setCurrentView('home')
+                  setSelectedArticle(null)
+                }}>Home</a></li>
                 <li><a href="#" onClick={() => setCurrentView('articles')}>Articles</a></li>
                 <li><a href="#" onClick={() => setCurrentView('guides')}>Guides</a></li>
                 <li><a href="#" onClick={() => setCurrentView('tools')}>Tool Reviews</a></li>
