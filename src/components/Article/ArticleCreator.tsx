@@ -154,12 +154,16 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
       return
     }
 
-    let timeoutId: NodeJS.Timeout | null = null
-
     try {
       setSaving(true)
       setError(null)
       setSuccessMessage(null)
+      
+      // Quick connection test before proceeding
+      console.log('🔍 Testing connection before save...')
+      if (!navigator.onLine) {
+        throw new Error('No internet connection. Please check your connection and try again.')
+      }
 
       // Auto-generate excerpt if not provided
       const finalExcerpt = excerpt.trim() || ArticleService.generateExcerpt(content, 200)
@@ -182,21 +186,8 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
         published_at: status === 'published' ? new Date().toISOString() : undefined
       }
 
-      // Create timeout promise
-      const timeoutPromise = new Promise((_, reject) => {
-        timeoutId = setTimeout(() => {
-          reject(new Error('Request timed out. Please check your internet connection and try again.'))
-        }, 30000) // 30 second timeout
-      })
-
-      // Race between API call and timeout
-      const article = await Promise.race([
-        ArticleService.createArticle(articleData),
-        timeoutPromise
-      ])
-
-      // Clear timeout if successful
-      if (timeoutId) clearTimeout(timeoutId)
+      // ArticleService now handles timeouts internally
+      const article = await ArticleService.createArticle(articleData)
       
       // Reset retry count on success
       setRetryCount(0)
@@ -206,8 +197,7 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
     } catch (err) {
       console.error('Error saving article:', err)
       
-      // Clear timeout on error
-      if (timeoutId) clearTimeout(timeoutId)
+      // Error handling
       
       // Provide specific error messages
       let errorMessage = 'Failed to save article'

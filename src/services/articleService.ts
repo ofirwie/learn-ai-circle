@@ -2,23 +2,64 @@ import { supabase } from './supabase'
 import { Article, ArticleFilters } from '../types/content'
 
 export class ArticleService {
-  // Create a new article
-  static async createArticle(article: Omit<Article, 'id' | 'created_at' | 'updated_at' | 'view_count'>): Promise<Article> {
-    const { data, error } = await supabase
-      .from('articles')
-      .insert({
-        ...article,
-        view_count: 0,
-        published_at: article.status === 'published' ? new Date().toISOString() : null
-      })
-      .select()
-      .single()
+  // Timeout wrapper for Supabase operations
+  private static async withTimeout<T>(promise: Promise<T>, timeoutMs: number = 25000): Promise<T> {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        reject(new Error('Operation timed out. Please check your internet connection.'))
+      }, timeoutMs)
+    })
 
-    if (error) {
-      throw new Error(`Error creating article: ${error.message}`)
+    return Promise.race([promise, timeoutPromise])
+  }
+
+  // Create a new article with retry logic
+  static async createArticle(article: Omit<Article, 'id' | 'created_at' | 'updated_at' | 'view_count'>, retryCount: number = 0): Promise<Article> {
+    console.log('🚀 ArticleService: Creating article...', { title: article.title, status: article.status })
+    
+    try {
+      const supabaseOperation = supabase
+        .from('articles')
+        .insert({
+          ...article,
+          view_count: 0,
+          published_at: article.status === 'published' ? new Date().toISOString() : null
+        })
+        .select()
+        .single()
+
+      const { data, error } = await this.withTimeout(supabaseOperation, 25000)
+
+      if (error) {
+        console.error('❌ ArticleService: Supabase error:', error)
+        throw new Error(`Error creating article: ${error.message}`)
+      }
+
+      console.log('✅ ArticleService: Article created successfully:', data.id)
+      return data
+    } catch (err) {
+      console.error('💥 ArticleService: Exception during create:', err)
+      
+      // Retry logic for timeout/network errors
+      if (retryCount < 2 && err instanceof Error && 
+          (err.message.includes('timeout') || err.message.includes('network') || err.message.includes('fetch'))) {
+        console.log(`🔄 ArticleService: Retrying... (attempt ${retryCount + 1})`);
+        await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Exponential backoff
+        return this.createArticle(article, retryCount + 1);
+      }
+      
+      if (err instanceof Error) {
+        if (err.message.includes('timeout') || err.message.includes('timed out')) {
+          throw new Error('Request timed out after multiple attempts. Please check your internet connection and try again.')
+        }
+        if (err.message.includes('network') || err.message.includes('fetch')) {
+          throw new Error('Network error persists. Please check your internet connection and try again.')
+        }
+        throw err
+      }
+      
+      throw new Error('An unexpected error occurred while saving the article.')
     }
-
-    return data
   }
 
   // Get all articles with filters
