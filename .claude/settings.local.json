@@ -9,7 +9,10 @@
       "Bash(cmd:*)",
       "Bash(npx surge:*)",
       "WebFetch(domain:isai-7uxy.onrender.com)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:isai-hub.vercel.app)"
     ],
     "deny": []
   }
