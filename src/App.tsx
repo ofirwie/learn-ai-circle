@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react'
 import { useAuthStore } from './store/authStore'
 import { SignupForm } from './components/auth/SignupForm'
 import { LoginForm } from './components/auth/LoginForm'
-import { ContentService } from './services/contentService'
-import { AIContentItem } from './types/content'
+import { ArticleService } from './services/articleService'
+import { Article } from './types/content'
 import { ArticleCreator } from './components/Article/ArticleCreator'
+import { ArticleViewer } from './components/Article/ArticleViewer'
 
 function App() {
   const [currentView, setCurrentView] = useState('home')
   const [authView, setAuthView] = useState('login')
-  const [articles, setArticles] = useState<AIContentItem[]>([])
+  const [articles, setArticles] = useState<Article[]>([])
   const [loadingContent, setLoadingContent] = useState(true)
   const [showArticleCreator, setShowArticleCreator] = useState(false)
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
   const { user, loading, initialized, initialize, signOut } = useAuthStore()
   
   useEffect(() => {
@@ -28,7 +30,7 @@ function App() {
   const fetchArticles = async () => {
     try {
       setLoadingContent(true)
-      const result = await ContentService.getContentItems(1, 10, { status: 'published' })
+      const result = await ArticleService.getArticles(1, 20, { status: 'published' })
       setArticles(result.data)
     } catch (error) {
       console.error('Failed to fetch articles:', error)
@@ -123,7 +125,13 @@ function App() {
 
       {/* Hero & Main Content */}
       <main className="main-content">
-        {currentView === 'home' && (
+        {selectedArticle ? (
+          <ArticleViewer
+            article={selectedArticle}
+            onBack={() => setSelectedArticle(null)}
+            onRelatedClick={(article) => setSelectedArticle(article)}
+          />
+        ) : currentView === 'home' ? (
           <div className="letsai-layout">
             {/* LetsAI Hero Section */}
             <section className="letsai-hero-section">
@@ -138,29 +146,29 @@ function App() {
                     {articles.length > 0 ? (
                       <>
                         {/* Main featured article */}
-                        <article className="featured-main">
-                          <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop&crop=center" alt={articles[0].title} />
+                        <article className="featured-main" onClick={() => setSelectedArticle(articles[0])} style={{ cursor: 'pointer' }}>
+                          <img src={articles[0].featured_image || "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop&crop=center"} alt={articles[0].title} />
                           <div className="article-overlay">
                             <div className="article-category">{articles[0].category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}</div>
                             <h2>{articles[0].title}</h2>
-                            <p>{articles[0].summary || articles[0].content_snippet}</p>
+                            <p>{articles[0].excerpt || articles[0].title}</p>
                             <div className="article-meta">
-                              <span className="date">{new Date(articles[0].scraped_at).toLocaleDateString()}</span>
-                              <span className="author">by ISAI Team</span>
-                              <span className="read-time">{articles[0].difficulty === 'advanced' ? '10 min read' : '5 min read'}</span>
+                              <span className="date">{new Date(articles[0].created_at).toLocaleDateString()}</span>
+                              <span className="author">by {articles[0].author}</span>
+                              <span className="read-time">{articles[0].read_time || 5} min read</span>
                             </div>
                           </div>
                         </article>
                         
                         {articles[1] && (
-                          <article className="featured-secondary">
-                            <img src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=200&fit=crop&crop=center" alt={articles[1].title} />
+                          <article className="featured-secondary" onClick={() => setSelectedArticle(articles[1])} style={{ cursor: 'pointer' }}>
+                            <img src={articles[1].featured_image || "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=200&fit=crop&crop=center"} alt={articles[1].title} />
                             <div className="article-overlay">
                               <div className="article-category">{articles[1].category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}</div>
                               <h3>{articles[1].title}</h3>
                               <div className="article-meta">
-                                <span className="date">{new Date(articles[1].scraped_at).toLocaleDateString()}</span>
-                                <span className="author">by ISAI Team</span>
+                                <span className="date">{new Date(articles[1].created_at).toLocaleDateString()}</span>
+                                <span className="author">by {articles[1].author}</span>
                               </div>
                             </div>
                           </article>
@@ -208,11 +216,16 @@ function App() {
                         ))
                       ) : (
                         // Render real articles from Supabase, starting from index 2 (skip the first 2 used in hero)
-                        articles.slice(2, 8).map((article, index) => (
-                          <article key={article.id} className="letsai-content-card">
+                        articles.slice(2, 14).map((article, index) => (
+                          <article 
+                            key={article.id} 
+                            className="letsai-content-card" 
+                            onClick={() => setSelectedArticle(article)}
+                            style={{ cursor: 'pointer' }}
+                          >
                             <div className="letsai-card-image">
                               <img 
-                                src={`https://images.unsplash.com/photo-${index % 2 === 0 ? '1573164713714-d95e436ab8d6' : '1556761175-b413da4baf72'}?w=400&h=220&fit=crop&crop=center`} 
+                                src={article.featured_image || `https://images.unsplash.com/photo-${index % 2 === 0 ? '1573164713714-d95e436ab8d6' : '1556761175-b413da4baf72'}?w=400&h=220&fit=crop&crop=center`} 
                                 alt={article.title} 
                               />
                               <div className="letsai-card-overlay">
@@ -221,16 +234,16 @@ function App() {
                             </div>
                             <div className="letsai-card-content">
                               <h3>{article.title}</h3>
-                              <p>{article.summary || article.content_snippet}</p>
+                              <p>{article.excerpt || article.title}</p>
                               <div className="letsai-card-meta">
                                 <div className="meta-left">
                                   <span className={`category ${article.category || 'general'}`}>
                                     {article.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'General'}
                                   </span>
-                                  <span className="read-time">{article.difficulty === 'advanced' ? '15 min read' : article.difficulty === 'intermediate' ? '10 min read' : '5 min read'}</span>
+                                  <span className="read-time">{article.read_time || 5} min read</span>
                                 </div>
                                 <div className="meta-right">
-                                  <span className="date">{new Date(article.scraped_at).toLocaleDateString()}</span>
+                                  <span className="date">{new Date(article.created_at).toLocaleDateString()}</span>
                                 </div>
                               </div>
                             </div>
@@ -261,11 +274,11 @@ function App() {
                         ) : articles.length > 0 ? (
                           <div className="latest-articles-list">
                             {articles.slice(0, 3).map((article) => (
-                              <div key={article.id} className="latest-article-item">
+                              <div key={article.id} className="latest-article-item" onClick={() => setSelectedArticle(article)} style={{ cursor: 'pointer' }}>
                                 <h5>{article.title}</h5>
                                 <div className="article-meta-small">
                                   <span className="category-badge">{article.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}</span>
-                                  <span className="date-small">{new Date(article.scraped_at).toLocaleDateString()}</span>
+                                  <span className="date-small">{new Date(article.created_at).toLocaleDateString()}</span>
                                 </div>
                               </div>
                             ))}
@@ -294,18 +307,18 @@ function App() {
                             </article>
                           ))
                         ) : (
-                          // Show top 5 articles by innovation score
+                          // Show top 5 articles by view count
                           articles
-                            .sort((a, b) => (b.innovation_score || 0) - (a.innovation_score || 0))
+                            .sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
                             .slice(0, 5)
                             .map((article, index) => (
-                              <article key={article.id} className="letsai-popular-item">
+                              <article key={article.id} className="letsai-popular-item" onClick={() => setSelectedArticle(article)} style={{ cursor: 'pointer' }}>
                                 <div className="letsai-popular-number">{index + 1}</div>
                                 <div className="letsai-popular-content">
                                   <h5>{article.title.length > 35 ? article.title.substring(0, 35) + '...' : article.title}</h5>
-                                  <span className="letsai-popular-views">{article.innovation_score ? `${article.innovation_score}/10 score` : 'New article'}</span>
+                                  <span className="letsai-popular-views">{article.view_count || 0} views</span>
                                 </div>
-                                <div className={`letsai-popular-trend ${article.innovation_score >= 8 ? 'letsai-trending-up' : article.innovation_score >= 6 ? 'letsai-trending-steady' : 'letsai-trending-down'}`}></div>
+                                <div className={`letsai-popular-trend ${article.view_count >= 100 ? 'letsai-trending-up' : article.view_count >= 50 ? 'letsai-trending-steady' : 'letsai-trending-down'}`}></div>
                               </article>
                             ))
                         )}
@@ -376,9 +389,7 @@ function App() {
               </div>
             </section>
           </div>
-        )}
-        
-        {currentView === 'guides' && (
+        ) : currentView === 'guides' ? (
           <div className="page-transition">
             <section className="page-header">
               <div className="page-icon">📖</div>
@@ -482,9 +493,7 @@ function App() {
               </div>
             </section>
           </div>
-        )}
-        
-        {currentView === 'tools' && (
+        ) : currentView === 'tools' ? (
           <div className="page-transition">
             <section className="page-header">
               <div className="page-icon">🔧</div>
@@ -502,9 +511,7 @@ function App() {
               </div>
             </section>
           </div>
-        )}
-        
-        {currentView === 'articles' && (
+        ) : currentView === 'articles' ? (
           <div className="page-transition">
             <section className="page-header">
               <div className="page-icon">📄</div>
@@ -542,9 +549,7 @@ function App() {
               </div>
             </section>
           </div>
-        )}
-        
-        {currentView === 'news' && (
+        ) : currentView === 'news' ? (
           <div className="page-transition">
             <section className="page-header">
               <div className="page-icon">📰</div>
@@ -562,9 +567,7 @@ function App() {
               </div>
             </section>
           </div>
-        )}
-        
-        {currentView === 'forum' && (
+        ) : currentView === 'forum' ? (
           <div className="page-transition">
             <section className="page-header">
               <div className="page-icon">💬</div>
@@ -582,9 +585,7 @@ function App() {
               </div>
             </section>
           </div>
-        )}
-        
-        {currentView === 'admin' && (
+        ) : currentView === 'admin' ? (
           <div className="page-transition">
             <section className="page-header">
               <div className="page-icon">⚙️</div>
@@ -626,7 +627,7 @@ function App() {
               </div>
             </section>
           </div>
-        )}
+        ) : null}
       </main>
 
       {/* LetsAI Professional Footer */}
