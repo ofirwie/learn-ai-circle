@@ -2,16 +2,38 @@ import React, { useState, useEffect } from 'react'
 import { useAuthStore } from './store/authStore'
 import { SignupForm } from './components/auth/SignupForm'
 import { LoginForm } from './components/auth/LoginForm'
+import { ContentService } from './services/contentService'
+import { AIContentItem } from './types/content'
 
 function App() {
   const [currentView, setCurrentView] = useState('home')
-  const [showAuth, setShowAuth] = useState(false)
   const [authView, setAuthView] = useState('login')
+  const [articles, setArticles] = useState<AIContentItem[]>([])
+  const [loadingContent, setLoadingContent] = useState(true)
   const { user, loading, initialized, initialize, signOut } = useAuthStore()
   
   useEffect(() => {
     initialize()
   }, [])
+
+  // Fetch articles when user is authenticated
+  useEffect(() => {
+    if (user && initialized) {
+      fetchArticles()
+    }
+  }, [user, initialized])
+
+  const fetchArticles = async () => {
+    try {
+      setLoadingContent(true)
+      const result = await ContentService.getContentItems(1, 10, { status: 'published' })
+      setArticles(result.data)
+    } catch (error) {
+      console.error('Failed to fetch articles:', error)
+    } finally {
+      setLoadingContent(false)
+    }
+  }
   
   if (!initialized) {
     return (
@@ -22,6 +44,34 @@ function App() {
     )
   }
 
+  // If user is not logged in, show login page
+  if (!user) {
+    return (
+      <div className="login-page">
+        <div className="login-container">
+          <div className="login-header">
+            <h1>ISAI Knowledge Hub</h1>
+            <p>Private Access Required</p>
+          </div>
+          {authView === 'login' ? (
+            <LoginForm onSuccess={() => {}} />
+          ) : (
+            <SignupForm onSuccess={() => {}} />
+          )}
+          <div className="auth-switch">
+            <button
+              onClick={() => setAuthView(authView === 'login' ? 'signup' : 'login')}
+              className="auth-switch-btn"
+            >
+              {authView === 'login' ? "Need to register? Sign Up" : "Already have an account? Sign In"}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // User is logged in - show main app
   return (
     <div className="app">
       {/* LetsAI Professional Header */}
@@ -56,18 +106,12 @@ function App() {
           
           {/* Right Side Elements */}
           <div className="header-right">
-            {user ? (
-              <div className="user-menu">
-                <span>Welcome back, {user.email?.split('@')[0]}</span>
-                <button className="logout-button" onClick={signOut}>
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <button className="cta-button" onClick={() => setShowAuth(true)}>
-                Free Registration
+            <div className="user-menu">
+              <span>Welcome back, {user.email?.split('@')[0]}</span>
+              <button className="logout-button" onClick={signOut}>
+                Logout
               </button>
-            )}
+            </div>
           </div>
         </div>
       </header>
@@ -79,35 +123,52 @@ function App() {
             {/* LetsAI Hero Section */}
             <section className="letsai-hero-section">
               <div className="letsai-hero-content">
-                <div className="featured-articles">
-                  {/* Main featured article */}
-                  <article className="featured-main">
-                    <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop&crop=center" alt="HD Video Tutorial" />
-                    <div className="article-overlay">
-                      <div className="article-category">Tutorial</div>
-                      <h2>Creating HD Videos with Advanced AI Tools like Veo3</h2>
-                      <p>Learn how to produce professional-quality videos using cutting-edge AI technology</p>
-                      <div className="article-meta">
-                        <span className="date">July 22, 2025</span>
-                        <span className="author">by Expert Team</span>
-                        <span className="read-time">8 min read</span>
+{loadingContent ? (
+                  <div className="content-loading">
+                    <div className="spinner" />
+                    <p>Loading latest articles...</p>
+                  </div>
+                ) : (
+                  <div className="featured-articles">
+                    {articles.length > 0 ? (
+                      <>
+                        {/* Main featured article */}
+                        <article className="featured-main">
+                          <img src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop&crop=center" alt={articles[0].title} />
+                          <div className="article-overlay">
+                            <div className="article-category">{articles[0].category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}</div>
+                            <h2>{articles[0].title}</h2>
+                            <p>{articles[0].summary || articles[0].content_snippet}</p>
+                            <div className="article-meta">
+                              <span className="date">{new Date(articles[0].scraped_at).toLocaleDateString()}</span>
+                              <span className="author">by ISAI Team</span>
+                              <span className="read-time">{articles[0].difficulty === 'advanced' ? '10 min read' : '5 min read'}</span>
+                            </div>
+                          </div>
+                        </article>
+                        
+                        {articles[1] && (
+                          <article className="featured-secondary">
+                            <img src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=200&fit=crop&crop=center" alt={articles[1].title} />
+                            <div className="article-overlay">
+                              <div className="article-category">{articles[1].category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}</div>
+                              <h3>{articles[1].title}</h3>
+                              <div className="article-meta">
+                                <span className="date">{new Date(articles[1].scraped_at).toLocaleDateString()}</span>
+                                <span className="author">by ISAI Team</span>
+                              </div>
+                            </div>
+                          </article>
+                        )}
+                      </>
+                    ) : (
+                      <div className="no-content">
+                        <h3>No articles available</h3>
+                        <p>Check back soon for the latest AI content.</p>
                       </div>
-                    </div>
-                  </article>
-                  
-                  {/* Secondary article */}
-                  <article className="featured-secondary">
-                    <img src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=200&fit=crop&crop=center" alt="Vanyard Tutorial" />
-                    <div className="article-overlay">
-                      <div className="article-category">Guide</div>
-                      <h3>How to Use Vanyard for Rapid Video Creation with Multiple Perspectives</h3>
-                      <div className="article-meta">
-                        <span className="date">July 21, 2025</span>
-                        <span className="author">by Sarah Chen</span>
-                      </div>
-                    </div>
-                  </article>
-                </div>
+                    )}
+                  </div>
+                )}
                 
               </div>
             </section>
@@ -123,143 +184,54 @@ function App() {
                 <div className="letsai-main-content">
                   <div className="letsai-articles-section">
                     <div className="letsai-grid-layout">
-                  {/* Article 1 */}
-                  <article className="letsai-content-card">
-                    <div className="letsai-card-image">
-                      <img src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=400&h=220&fit=crop&crop=center" alt="Google Drive AI Integration" />
-                      <div className="letsai-card-overlay">
-                        <span className="letsai-card-category">Integration</span>
-                      </div>
-                    </div>
-                    <div className="letsai-card-content">
-                      <h3>How to Integrate Google Drive with AI Tools</h3>
-                      <p>A comprehensive guide to efficiently combining Google Drive with artificial intelligence tools for enhanced content management and workflow automation.</p>
-                      <div className="letsai-card-meta">
-                        <div className="meta-left">
-                          <span className="category tools">Tools</span>
-                          <span className="read-time">5 min read</span>
-                        </div>
-                        <div className="meta-right">
-                          <span className="date">Jul 22, 2025</span>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-
-                  {/* Article 2 */}
-                  <article className="letsai-content-card">
-                    <div className="letsai-card-image">
-                      <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?w=400&h=220&fit=crop&crop=center" alt="AI Business Strategy" />
-                      <div className="letsai-card-overlay">
-                        <span className="letsai-card-category">Strategy</span>
-                      </div>
-                    </div>
-                    <div className="letsai-card-content">
-                      <h3>AI Strategy for Small Business Success</h3>
-                      <p>Implementing artificial intelligence technologies in small and medium businesses - a practical and actionable guide for sustainable growth.</p>
-                      <div className="letsai-card-meta">
-                        <div className="meta-left">
-                          <span className="category strategy">Strategy</span>
-                          <span className="read-time">8 min read</span>
-                        </div>
-                        <div className="meta-right">
-                          <span className="date">Jul 21, 2025</span>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-
-                  {/* Article 3 */}
-                  <article className="letsai-content-card">
-                    <div className="letsai-card-image">
-                      <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=220&fit=crop&crop=center" alt="Advanced ChatGPT Techniques" />
-                      <div className="letsai-card-overlay">
-                        <span className="letsai-card-category">Tutorial</span>
-                      </div>
-                    </div>
-                    <div className="letsai-card-content">
-                      <h3>Advanced ChatGPT Prompt Engineering</h3>
-                      <p>Master the art of prompt engineering to unlock ChatGPT's full potential for complex problem-solving and creative content generation.</p>
-                      <div className="letsai-card-meta">
-                        <div className="meta-left">
-                          <span className="category tutorial">Tutorial</span>
-                          <span className="read-time">12 min read</span>
-                        </div>
-                        <div className="meta-right">
-                          <span className="date">Jul 20, 2025</span>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-
-                  {/* Article 4 */}
-                  <article className="letsai-content-card">
-                    <div className="letsai-card-image">
-                      <img src="https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=400&h=220&fit=crop&crop=center" alt="AI Automation Workflow" />
-                      <div className="letsai-card-overlay">
-                        <span className="letsai-card-category">Automation</span>
-                      </div>
-                    </div>
-                    <div className="letsai-card-content">
-                      <h3>Building AI-Powered Automation Workflows</h3>
-                      <p>Step-by-step guide to creating intelligent automation systems that adapt and learn from your business processes.</p>
-                      <div className="letsai-card-meta">
-                        <div className="meta-left">
-                          <span className="category automation">Automation</span>
-                          <span className="read-time">15 min read</span>
-                        </div>
-                        <div className="meta-right">
-                          <span className="date">Jul 19, 2025</span>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-
-                  {/* Article 5 */}
-                  <article className="letsai-content-card">
-                    <div className="letsai-card-image">
-                      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=220&fit=crop&crop=center" alt="AI Ethics in Business" />
-                      <div className="letsai-card-overlay">
-                        <span className="letsai-card-category">Ethics</span>
-                      </div>
-                    </div>
-                    <div className="letsai-card-content">
-                      <h3>Ethical AI Implementation in Business</h3>
-                      <p>Navigate the complex landscape of AI ethics, ensuring responsible implementation while maximizing business value and customer trust.</p>
-                      <div className="letsai-card-meta">
-                        <div className="meta-left">
-                          <span className="category ethics">Ethics</span>
-                          <span className="read-time">10 min read</span>
-                        </div>
-                        <div className="meta-right">
-                          <span className="date">Jul 18, 2025</span>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-
-                  {/* Article 6 */}
-                  <article className="letsai-content-card">
-                    <div className="letsai-card-image">
-                      <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=220&fit=crop&crop=center" alt="Machine Learning Basics" />
-                      <div className="letsai-card-overlay">
-                        <span className="letsai-card-category">Education</span>
-                      </div>
-                    </div>
-                    <div className="letsai-card-content">
-                      <h3>Machine Learning Fundamentals for Business</h3>
-                      <p>Demystify machine learning concepts and discover practical applications that can transform your business operations and decision-making.</p>
-                      <div className="letsai-card-meta">
-                        <div className="meta-left">
-                          <span className="category education">Education</span>
-                          <span className="read-time">20 min read</span>
-                        </div>
-                        <div className="meta-right">
-                          <span className="date">Jul 17, 2025</span>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
+                      {loadingContent ? (
+                        // Loading skeleton for articles
+                        Array.from({length: 6}).map((_, index) => (
+                          <article key={index} className="letsai-content-card loading">
+                            <div className="letsai-card-image">
+                              <div className="skeleton-image"></div>
+                            </div>
+                            <div className="letsai-card-content">
+                              <div className="skeleton-line skeleton-title"></div>
+                              <div className="skeleton-line skeleton-text"></div>
+                              <div className="skeleton-line skeleton-text short"></div>
+                              <div className="letsai-card-meta">
+                                <div className="skeleton-line skeleton-meta"></div>
+                              </div>
+                            </div>
+                          </article>
+                        ))
+                      ) : (
+                        // Render real articles from Supabase, starting from index 2 (skip the first 2 used in hero)
+                        articles.slice(2, 8).map((article, index) => (
+                          <article key={article.id} className="letsai-content-card">
+                            <div className="letsai-card-image">
+                              <img 
+                                src={`https://images.unsplash.com/photo-${index % 2 === 0 ? '1573164713714-d95e436ab8d6' : '1556761175-b413da4baf72'}?w=400&h=220&fit=crop&crop=center`} 
+                                alt={article.title} 
+                              />
+                              <div className="letsai-card-overlay">
+                                <span className="letsai-card-category">{article.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}</span>
+                              </div>
+                            </div>
+                            <div className="letsai-card-content">
+                              <h3>{article.title}</h3>
+                              <p>{article.summary || article.content_snippet}</p>
+                              <div className="letsai-card-meta">
+                                <div className="meta-left">
+                                  <span className={`category ${article.category || 'general'}`}>
+                                    {article.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'General'}
+                                  </span>
+                                  <span className="read-time">{article.difficulty === 'advanced' ? '15 min read' : article.difficulty === 'intermediate' ? '10 min read' : '5 min read'}</span>
+                                </div>
+                                <div className="meta-right">
+                                  <span className="date">{new Date(article.scraped_at).toLocaleDateString()}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </article>
+                        ))
+                      )}
                     </div>
                     
                     <div className="letsai-load-more-section">
@@ -290,50 +262,34 @@ function App() {
                     <div className="letsai-widget letsai-popular-widget">
                       <h4>Most Popular This Week</h4>
                       <div className="letsai-popular-list">
-                        <article className="letsai-popular-item">
-                          <div className="letsai-popular-number">1</div>
-                          <div className="letsai-popular-content">
-                            <h5>ChatGPT Beginner's Complete Guide</h5>
-                            <span className="letsai-popular-views">2.5K views</span>
-                          </div>
-                          <div className="letsai-popular-trend letsai-trending-up"></div>
-                        </article>
-                        
-                        <article className="letsai-popular-item">
-                          <div className="letsai-popular-number">2</div>
-                          <div className="letsai-popular-content">
-                            <h5>AI Tools for Content Creation</h5>
-                            <span className="letsai-popular-views">1.8K views</span>
-                          </div>
-                          <div className="letsai-popular-trend letsai-trending-up"></div>
-                        </article>
-                        
-                        <article className="letsai-popular-item">
-                          <div className="letsai-popular-number">3</div>
-                          <div className="letsai-popular-content">
-                            <h5>Machine Learning for Startups</h5>
-                            <span className="letsai-popular-views">1.2K views</span>
-                          </div>
-                          <div className="letsai-popular-trend letsai-trending-down"></div>
-                        </article>
-                        
-                        <article className="letsai-popular-item">
-                          <div className="letsai-popular-number">4</div>
-                          <div className="letsai-popular-content">
-                            <h5>Ethical AI Implementation</h5>
-                            <span className="letsai-popular-views">980 views</span>
-                          </div>
-                          <div className="letsai-popular-trend letsai-trending-up"></div>
-                        </article>
-                        
-                        <article className="letsai-popular-item">
-                          <div className="letsai-popular-number">5</div>
-                          <div className="letsai-popular-content">
-                            <h5>AI Automation Workflows</h5>
-                            <span className="letsai-popular-views">756 views</span>
-                          </div>
-                          <div className="letsai-popular-trend letsai-trending-steady"></div>
-                        </article>
+                        {loadingContent ? (
+                          // Loading skeleton for popular articles
+                          Array.from({length: 5}).map((_, index) => (
+                            <article key={index} className="letsai-popular-item loading">
+                              <div className="letsai-popular-number">{index + 1}</div>
+                              <div className="letsai-popular-content">
+                                <div className="skeleton-line skeleton-title"></div>
+                                <div className="skeleton-line skeleton-meta short"></div>
+                              </div>
+                              <div className="letsai-popular-trend skeleton-trend"></div>
+                            </article>
+                          ))
+                        ) : (
+                          // Show top 5 articles by innovation score
+                          articles
+                            .sort((a, b) => (b.innovation_score || 0) - (a.innovation_score || 0))
+                            .slice(0, 5)
+                            .map((article, index) => (
+                              <article key={article.id} className="letsai-popular-item">
+                                <div className="letsai-popular-number">{index + 1}</div>
+                                <div className="letsai-popular-content">
+                                  <h5>{article.title.length > 35 ? article.title.substring(0, 35) + '...' : article.title}</h5>
+                                  <span className="letsai-popular-views">{article.innovation_score ? `${article.innovation_score}/10 score` : 'New article'}</span>
+                                </div>
+                                <div className={`letsai-popular-trend ${article.innovation_score >= 8 ? 'letsai-trending-up' : article.innovation_score >= 6 ? 'letsai-trending-steady' : 'letsai-trending-down'}`}></div>
+                              </article>
+                            ))
+                        )}
                       </div>
                     </div>
 
@@ -743,68 +699,6 @@ function App() {
         </div>
       </footer>
 
-      {/* Simple Login Modal */}
-      {showAuth && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '16px',
-            padding: '32px',
-            maxWidth: '400px',
-            width: '90%',
-            position: 'relative'
-          }}>
-            <button
-              onClick={() => setShowAuth(false)}
-              style={{
-                position: 'absolute',
-                top: '16px',
-                right: '16px',
-                background: 'none',
-                border: 'none',
-                fontSize: '24px',
-                cursor: 'pointer',
-                color: '#6b7280'
-              }}
-            >
-              ×
-            </button>
-            
-            {authView === 'login' ? (
-              <LoginForm onSuccess={() => setShowAuth(false)} />
-            ) : (
-              <SignupForm onSuccess={() => setShowAuth(false)} />
-            )}
-            
-            <div style={{ textAlign: 'center', marginTop: '20px' }}>
-              <button
-                onClick={() => setAuthView(authView === 'login' ? 'signup' : 'login')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#3b82f6',
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                  fontSize: '14px'
-                }}
-              >
-                {authView === 'login' ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
