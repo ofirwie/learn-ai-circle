@@ -4,12 +4,14 @@ import { SignupForm } from './components/auth/SignupForm'
 import { LoginForm } from './components/auth/LoginForm'
 import { ContentService } from './services/contentService'
 import { AIContentItem } from './types/content'
+import { ArticleCreator } from './components/Article/ArticleCreator'
 
 function App() {
   const [currentView, setCurrentView] = useState('home')
   const [authView, setAuthView] = useState('login')
   const [articles, setArticles] = useState<AIContentItem[]>([])
   const [loadingContent, setLoadingContent] = useState(true)
+  const [showArticleCreator, setShowArticleCreator] = useState(false)
   const { user, loading, initialized, initialize, signOut } = useAuthStore()
   
   useEffect(() => {
@@ -108,6 +110,9 @@ function App() {
           <div className="header-right">
             <div className="user-menu">
               <span>Welcome back, {user.email?.split('@')[0]}</span>
+              <button className="admin-button" onClick={() => setCurrentView('admin')}>
+                Admin Panel
+              </button>
               <button className="logout-button" onClick={signOut}>
                 Logout
               </button>
@@ -241,21 +246,35 @@ function App() {
                   
                   {/* LetsAI Sidebar */}
                   <aside className="letsai-sidebar">
-                    {/* Live Webinar Widget */}
-                    <div className="letsai-widget letsai-webinar-widget">
+                    {/* Latest Articles Widget */}
+                    <div className="letsai-widget letsai-latest-widget">
                       <div className="letsai-widget-header">
-                        <span className="letsai-live-indicator">LIVE</span>
-                        <h4>Live Webinar</h4>
+                        <span className="letsai-new-indicator">NEW</span>
+                        <h4>Latest Articles</h4>
                       </div>
                       <div className="letsai-widget-content">
-                        <h3>AI in Business Transformation</h3>
-                        <p>Join our expert panel discussion on implementing AI strategies</p>
-                        <div className="letsai-webinar-time">
-                          <span>Starting in: 2h 15m</span>
-                        </div>
-                        <button className="letsai-join-btn">Join Now</button>
+                        {loadingContent ? (
+                          <div className="loading-latest">
+                            <div className="skeleton-line"></div>
+                            <div className="skeleton-line short"></div>
+                          </div>
+                        ) : articles.length > 0 ? (
+                          <div className="latest-articles-list">
+                            {articles.slice(0, 3).map((article) => (
+                              <div key={article.id} className="latest-article-item">
+                                <h5>{article.title}</h5>
+                                <div className="article-meta-small">
+                                  <span className="category-badge">{article.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}</span>
+                                  <span className="date-small">{new Date(article.scraped_at).toLocaleDateString()}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="no-articles">No articles available yet. Check back soon!</p>
+                        )}
+                        <button className="letsai-view-all-btn">View All Articles</button>
                       </div>
-                      <div className="letsai-webinar-gradient"></div>
                     </div>
 
                     {/* Popular Articles Widget */}
@@ -564,6 +583,50 @@ function App() {
             </section>
           </div>
         )}
+        
+        {currentView === 'admin' && (
+          <div className="page-transition">
+            <section className="page-header">
+              <div className="page-icon">⚙️</div>
+              <h1 className="page-title">Admin Panel</h1>
+              <p className="page-subtitle">
+                Manage content, create articles, and monitor your knowledge hub
+              </p>
+            </section>
+            
+            <section className="content-section">
+              <div className="admin-actions">
+                <button className="create-button" onClick={() => setShowArticleCreator(true)}>
+                  <span className="icon">✍️</span>
+                  Create New Article
+                </button>
+                <button className="create-button" onClick={() => alert('Tips feature coming soon!')}>
+                  <span className="icon">💡</span>
+                  Create New Tip
+                </button>
+                <button className="create-button" onClick={() => alert('Manage content coming soon!')}>
+                  <span className="icon">📊</span>
+                  Manage Content
+                </button>
+              </div>
+              
+              <div className="admin-stats">
+                <div className="stat-card">
+                  <h3>Total Articles</h3>
+                  <p className="stat-number">{articles.length}</p>
+                </div>
+                <div className="stat-card">
+                  <h3>Published</h3>
+                  <p className="stat-number">{articles.filter(a => a.published).length}</p>
+                </div>
+                <div className="stat-card">
+                  <h3>Categories</h3>
+                  <p className="stat-number">{new Set(articles.map(a => a.category)).size}</p>
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
       </main>
 
       {/* LetsAI Professional Footer */}
@@ -698,6 +761,20 @@ function App() {
           </div>
         </div>
       </footer>
+
+      {/* Article Creator Modal */}
+      {showArticleCreator && (
+        <ArticleCreator
+          isOpen={showArticleCreator}
+          onClose={() => setShowArticleCreator(false)}
+          onSuccess={(article) => {
+            setShowArticleCreator(false)
+            // Refresh articles list
+            fetchArticles()
+            alert('Article created successfully!')
+          }}
+        />
+      )}
 
     </div>
   )
