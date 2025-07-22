@@ -6,6 +6,7 @@ import { ArticleCard } from './components/cards/ArticleCard'
 import { FeaturedVideoCard } from './components/cards/FeaturedVideoCard'
 import { CompactCard } from './components/cards/CompactCard'
 import { useArticles, useContent, useMixedContent } from './hooks/useContent'
+import { demoContent } from './data/demoContent'
 import { 
   Brain, 
   Users, 
@@ -93,8 +94,8 @@ function App() {
     )
   }
 
-  // Don't force login - show content to everyone
-  // Authentication will be handled separately if needed
+  // Show authentication modal if requested
+  const [showAuth, setShowAuth] = useState(false)
 
   // Main navigation component
   const renderNavigation = () => (
@@ -225,7 +226,10 @@ function App() {
             </>
           ) : (
             <button
-              onClick={() => setAuthView('login')}
+              onClick={() => {
+                setAuthView('login')
+                setShowAuth(true)
+              }}
               style={{
                 backgroundColor: '#3b82f6',
                 color: 'white',
@@ -254,7 +258,7 @@ function App() {
     const { articles } = useArticles({ limit: 20 })
 
     // Get video content for featured display
-    const allContent = mixedContent.length > 0 ? mixedContent : articles.map(a => ({
+    let allContent = mixedContent.length > 0 ? mixedContent : articles.map(a => ({
       ...a,
       contentType: a.youtube_video_id ? 'video' : 'article',
       youtubeVideoId: a.youtube_video_id,
@@ -262,6 +266,11 @@ function App() {
       viewCount: a.view_count,
       publishedAt: a.published_at || a.created_at
     }))
+
+    // Use demo content if no real content exists
+    if (allContent.length === 0) {
+      allContent = demoContent
+    }
 
     const videoContent = allContent.filter(item => item.youtubeVideoId)
     const featuredVideo = videoContent[0]
@@ -954,6 +963,62 @@ function App() {
       <main>
         {renderContent()}
       </main>
+
+      {/* Authentication Modal */}
+      {showAuth && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '400px',
+            width: '90%',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setShowAuth(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                fontSize: '24px',
+                cursor: 'pointer',
+                color: '#6b7280'
+              }}
+            >
+              ×
+            </button>
+            {authView === 'login' ? (
+              <LoginForm
+                onSuccess={() => {
+                  setShowAuth(false)
+                }}
+                onSwitchToSignup={() => setAuthView('signup')}
+              />
+            ) : (
+              <SignupForm
+                onSuccess={() => {
+                  setShowAuth(false)
+                }}
+                onSwitchToLogin={() => setAuthView('login')}
+              />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
