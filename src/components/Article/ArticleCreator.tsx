@@ -805,38 +805,41 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
             </button>
 
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              {/* Debug Test Button */}
-              <button
-                onClick={async () => {
-                  try {
-                    setSaving(true)
-                    setError(null)
-                    console.log('🧪 Running debug test article creation...')
-                    const testArticle = await ArticleService.createTestArticle()
-                    setSuccessMessage(`✅ Debug test successful! Article ID: ${testArticle.id}`)
-                    setTimeout(() => setSuccessMessage(null), 5000)
-                  } catch (err) {
-                    console.error('🚨 Debug test failed:', err)
-                    setError(`Debug test failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
-                  } finally {
-                    setSaving(false)
-                  }
-                }}
-                disabled={saving}
-                style={{
-                  backgroundColor: '#8b5cf6',
-                  color: 'white',
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '6px',
-                  cursor: saving ? 'not-allowed' : 'pointer',
-                  fontSize: '12px',
-                  fontWeight: '500',
-                  opacity: saving ? 0.5 : 1
-                }}
-              >
-                🧪 Debug Test
-              </button>
+              {/* 5 Test Buttons */}
+              {[1, 2, 3, 4, 5].map(num => (
+                <button
+                  key={num}
+                  onClick={async () => {
+                    try {
+                      setSaving(true)
+                      setError(null)
+                      console.log(`🧪${num} Running test ${num}...`)
+                      const testArticle = await (ArticleService as any)[`createTestArticle${num}`]()
+                      setSuccessMessage(`✅ Test ${num} successful! Article ID: ${testArticle.id}`)
+                      setTimeout(() => setSuccessMessage(null), 5000)
+                    } catch (err) {
+                      console.error(`🚨 Test ${num} failed:`, err)
+                      setError(`Test ${num} failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
+                    } finally {
+                      setSaving(false)
+                    }
+                  }}
+                  disabled={saving}
+                  style={{
+                    backgroundColor: ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#6366f1'][num - 1],
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    cursor: saving ? 'not-allowed' : 'pointer',
+                    fontSize: '11px',
+                    fontWeight: '500',
+                    opacity: saving ? 0.5 : 1
+                  }}
+                >
+                  🧪{num}
+                </button>
+              ))}
 
               <button
                 onClick={() => handleSave('draft')}

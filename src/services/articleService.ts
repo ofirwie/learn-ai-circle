@@ -379,15 +379,101 @@ export class ArticleService {
     return truncated.substring(0, lastSpace) + '...'
   }
 
-  // Debug function: Create minimal test article to isolate timeout issues
-  static async createTestArticle(): Promise<Article> {
-    console.log('🧪 ArticleService: Creating test article for debugging...')
+  // Debug functions: Create different test articles to isolate timeout cause
+  static async createTestArticle1(): Promise<Article> {
+    console.log('🧪1 ArticleService: Creating MINIMAL test article...')
     
     const testArticle = {
-      title: `Debug Test ${new Date().getTime()}`,
-      slug: '', // Will be auto-generated
-      content: 'This is a minimal test article to debug timeout issues.',
-      excerpt: 'Test excerpt',
+      title: `Test 1 - Minimal ${new Date().getTime()}`,
+      slug: '',
+      content: 'Short content.',
+      excerpt: 'Short excerpt',
+      author: 'Debug System',
+      category: 'article',
+      status: 'draft' as const,
+      featured: false
+    }
+    
+    return this.createArticle(testArticle)
+  }
+
+  static async createTestArticle2(): Promise<Article> {
+    console.log('🧪2 ArticleService: Creating MEDIUM LENGTH test article...')
+    
+    const mediumContent = 'This is a longer test article. '.repeat(50) + 'It has much more content to test if content length causes timeouts. '.repeat(25) + 'This should be a few paragraphs worth of text to see where the threshold is.'
+    
+    const testArticle = {
+      title: `Test 2 - Medium Length ${new Date().getTime()}`,
+      slug: '',
+      content: mediumContent,
+      excerpt: 'Medium length test excerpt',
+      author: 'Debug System',
+      category: 'article',
+      status: 'draft' as const,
+      featured: false
+    }
+    
+    return this.createArticle(testArticle)
+  }
+
+  static async createTestArticle3(): Promise<Article> {
+    console.log('🧪3 ArticleService: Creating test article WITH IMAGE...')
+    
+    const testArticle = {
+      title: `Test 3 - With Image ${new Date().getTime()}`,
+      slug: '',
+      content: 'This test article includes a featured image to test if images cause timeouts.',
+      excerpt: 'Test with image',
+      author: 'Debug System',
+      category: 'article',
+      status: 'draft' as const,
+      featured: false,
+      featured_image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=800&q=80'
+    }
+    
+    return this.createArticle(testArticle)
+  }
+
+  static async createTestArticle4(): Promise<Article> {
+    console.log('🧪4 ArticleService: Creating test article WITH YOUTUBE...')
+    
+    const testArticle = {
+      title: `Test 4 - With YouTube ${new Date().getTime()}`,
+      slug: '',
+      content: 'This test article includes a YouTube video to test if video embeds cause timeouts.',
+      excerpt: 'Test with YouTube',
+      author: 'Debug System',
+      category: 'article',
+      status: 'draft' as const,
+      featured: false,
+      youtube_video_id: '1YtB1yrKvXM'
+    }
+    
+    return this.createArticle(testArticle)
+  }
+
+  static async createTestArticle5(): Promise<Article> {
+    console.log('🧪5 ArticleService: Creating LARGE test article...')
+    
+    const largeContent = `
+# Large Test Article
+
+This is a very large test article to simulate importing markdown files.
+
+${'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. '.repeat(100)}
+
+## Section 2
+${'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. '.repeat(75)}
+
+## Section 3
+${'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium. '.repeat(50)}
+    `.trim()
+    
+    const testArticle = {
+      title: `Test 5 - Large Content ${new Date().getTime()}`,
+      slug: '',
+      content: largeContent,
+      excerpt: 'Very large test article',
       author: 'Debug System',
       category: 'article',
       status: 'draft' as const,
