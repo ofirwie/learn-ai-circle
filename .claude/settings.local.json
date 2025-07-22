@@ -13,7 +13,9 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "WebFetch(domain:isai-hub.vercel.app)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "WebFetch(domain:ofirwie.github.io)",
+      "Bash(npm run preview:*)"
     ],
     "deny": []
   }
