@@ -257,7 +257,7 @@ function App() {
     return (
       <div style={{ padding: '40px', textAlign: 'center' }}>
         <h1 style={{ fontSize: '32px', color: '#1f2937' }}>WORKING VERSION - v2.1.0-LetsAI</h1>
-        <p style={{ fontSize: '18px', color: '#6b7280' }}>If you see this, the app is working</p>
+        <p style={{ fontSize: '18px', color: '#6b7280' }}>If you see this, the app is working - UPDATED!</p>
         <div style={{ 
           backgroundColor: '#ef4444', 
           color: 'white', 
@@ -265,7 +265,17 @@ function App() {
           borderRadius: '8px',
           margin: '20px 0'
         }}>
-          This confirms the new code is running!
+          This confirms the new code is running! ✅ Branch merge successful
+        </div>
+        <div style={{ 
+          backgroundColor: '#10b981', 
+          color: 'white', 
+          padding: '15px', 
+          borderRadius: '8px',
+          margin: '10px 0',
+          fontSize: '14px'
+        }}>
+          🚀 Deployment timestamp: {new Date().toISOString()}
         </div>
       </div>
     )
