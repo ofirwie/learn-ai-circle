@@ -3,6 +3,8 @@ import { useAuthStore } from './store/authStore'
 import { LoginForm } from './components/auth/LoginForm'
 import { SignupForm } from './components/auth/SignupForm'
 import { ArticleCard } from './components/cards/ArticleCard'
+import { FeaturedVideoCard } from './components/cards/FeaturedVideoCard'
+import { CompactCard } from './components/cards/CompactCard'
 import { useArticles, useContent, useMixedContent } from './hooks/useContent'
 import { 
   Brain, 
@@ -246,193 +248,279 @@ function App() {
     </nav>
   )
 
-  // Hero section for home page
+  // Hero section for home page - LetsAI Style
   const HomeContent = () => {
-    const { mixedContent, loading } = useMixedContent({ limit: 6, featured: true })
-    const { articles } = useArticles({ limit: 8 })
+    const { mixedContent, loading } = useMixedContent({ limit: 20 })
+    const { articles } = useArticles({ limit: 20 })
+
+    // Get video content for featured display
+    const allContent = mixedContent.length > 0 ? mixedContent : articles.map(a => ({
+      ...a,
+      contentType: a.youtube_video_id ? 'video' : 'article',
+      youtubeVideoId: a.youtube_video_id,
+      featuredImage: a.featured_image,
+      viewCount: a.view_count,
+      publishedAt: a.published_at || a.created_at
+    }))
+
+    const videoContent = allContent.filter(item => item.youtubeVideoId)
+    const featuredVideo = videoContent[0]
+    const otherContent = allContent.filter(item => item.id !== featuredVideo?.id)
 
     return (
-      <div>
-        {/* Compact Hero Section */}
+      <div style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+        {/* Minimal Header */}
         <section style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
-          padding: '60px 20px 40px 20px',
-          textAlign: 'center'
+          backgroundColor: 'white',
+          borderBottom: '1px solid #e5e7eb',
+          padding: '20px'
         }}>
           <div style={{
-            maxWidth: '1200px',
-            margin: '0 auto'
+            maxWidth: '1400px',
+            margin: '0 auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
           }}>
-            <h2 style={{
-              fontSize: '2.5rem',
-              fontWeight: '700',
-              marginBottom: '16px',
-              lineHeight: '1.1'
-            }}>
-              ISAI AI Knowledge Hub
-            </h2>
-            <p style={{
-              fontSize: '1.125rem',
-              opacity: '0.9',
-              marginBottom: '0'
-            }}>
-              Your comprehensive AI Knowledge Hub for {entity?.name}
-            </p>
-          </div>
-        </section>
-
-        {/* Main Content Grid - LetsAI Style */}
-        <section style={{
-          padding: '40px 20px',
-          backgroundColor: 'white'
-        }}>
-          <div style={{
-            maxWidth: '1200px',
-            margin: '0 auto'
-          }}>
-            {/* Content-Rich Grid Layout */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '20px',
-              marginBottom: '40px'
-            }}>
-              {/* Show all content types mixed together for immediate discovery */}
-              {!loading && mixedContent.length > 0 ? (
-                mixedContent.slice(0, 12).map((item) => (
-                  <ArticleCard
-                    key={item.id}
-                    id={item.id}
-                    title={item.title}
-                    excerpt={item.excerpt}
-                    content={item.content}
-                    featuredImage={item.featuredImage}
-                    youtubeVideoId={item.youtubeVideoId}
-                    author={item.author}
-                    category={item.category}
-                    contentType={item.contentType}
-                    tags={item.tags}
-                    viewCount={item.viewCount}
-                    readTime={item.readTime}
-                    publishedAt={item.publishedAt}
-                    featured={item.featured}
-                    onClick={() => console.log('Open content:', item.id)}
-                  />
-                ))
-              ) : articles.length > 0 ? (
-                articles.slice(0, 12).map((article) => (
-                  <ArticleCard
-                    key={article.id}
-                    id={article.id}
-                    title={article.title}
-                    excerpt={article.excerpt}
-                    content={article.content}
-                    featuredImage={article.featured_image}
-                    youtubeVideoId={article.youtube_video_id}
-                    author={article.author}
-                    category={article.category}
-                    contentType={article.youtube_video_id ? 'video' : 'article'}
-                    tags={article.tags}
-                    viewCount={article.view_count}
-                    readTime={article.read_time}
-                    publishedAt={article.published_at || article.created_at}
-                    featured={article.featured}
-                    onClick={() => console.log('Open article:', article.id)}
-                  />
-                ))
-              ) : (
-                // Show placeholder content if no real content exists
-                <div style={{
-                  gridColumn: '1 / -1',
-                  textAlign: 'center',
-                  padding: '60px 20px',
-                  color: '#6b7280'
-                }}>
-                  <div style={{ fontSize: '64px', marginBottom: '20px' }}>📚</div>
-                  <h3 style={{ color: '#1f2937', marginBottom: '12px', fontSize: '24px' }}>
-                    Content is Loading...
-                  </h3>
-                  <p style={{ fontSize: '16px' }}>
-                    Your AI knowledge base is being prepared with guides, articles, and tools.
-                  </p>
-                </div>
-              )}
+            <div>
+              <h1 style={{
+                fontSize: '24px',
+                fontWeight: '700',
+                color: '#1f2937',
+                margin: 0
+              }}>
+                ISAI Knowledge Hub
+              </h1>
+              <p style={{
+                fontSize: '14px',
+                color: '#6b7280',
+                margin: '4px 0 0 0'
+              }}>
+                AI Resources for {entity?.name || 'Everyone'}
+              </p>
             </div>
 
-            {/* Quick Navigation Categories */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-              gap: '16px',
-              marginTop: '40px'
-            }}>
-              {[
-                { key: 'guides', label: 'AI Guides', icon: '📖', color: '#3b82f6', description: 'Step-by-step tutorials' },
-                { key: 'prompts', label: 'Prompts', icon: '⚡', color: '#8b5cf6', description: 'Ready-to-use prompts' },
-                { key: 'tools', label: 'AI Tools', icon: '🔧', color: '#06b6d4', description: 'Tool reviews & guides' },
-                { key: 'news', label: 'AI News', icon: '📰', color: '#10b981', description: 'Latest developments' }
-              ].map(({ key, label, icon, color, description }) => (
+            {/* Quick filters */}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              {['All', 'Videos', 'Articles', 'Tools', 'Prompts'].map((filter) => (
                 <button
-                  key={key}
-                  onClick={() => setCurrentView(key as ViewType)}
+                  key={filter}
                   style={{
-                    background: 'white',
-                    border: `2px solid ${color}`,
-                    borderRadius: '12px',
-                    padding: '20px',
-                    textAlign: 'left',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    border: 'none',
+                    backgroundColor: filter === 'All' ? '#3b82f6' : '#f3f4f6',
+                    color: filter === 'All' ? 'white' : '#6b7280',
+                    fontSize: '14px',
+                    fontWeight: '500',
                     cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                    transition: 'all 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)'
-                    e.currentTarget.style.backgroundColor = color
-                    e.currentTarget.style.color = 'white'
+                    if (filter !== 'All') {
+                      e.currentTarget.style.backgroundColor = '#e5e7eb'
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)'
-                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)'
-                    e.currentTarget.style.backgroundColor = 'white'
-                    e.currentTarget.style.color = 'inherit'
+                    if (filter !== 'All') {
+                      e.currentTarget.style.backgroundColor = '#f3f4f6'
+                    }
                   }}
                 >
-                  <div style={{ fontSize: '32px', marginBottom: '12px' }}>{icon}</div>
-                  <h4 style={{ 
-                    fontSize: '18px', 
-                    fontWeight: '600', 
-                    marginBottom: '8px',
-                    color: 'inherit'
-                  }}>
-                    {label}
-                  </h4>
-                  <p style={{ 
-                    fontSize: '14px', 
-                    margin: '0',
-                    opacity: 0.8,
-                    color: 'inherit'
-                  }}>
-                    {description}
-                  </p>
+                  {filter}
                 </button>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Loading State */}
-        {loading && (
-          <section style={{
-            padding: '60px 20px',
-            textAlign: 'center'
+        {/* LetsAI-Style Content Grid */}
+        <section style={{ padding: '24px' }}>
+          <div style={{
+            maxWidth: '1400px',
+            margin: '0 auto'
           }}>
-            <div className="spinner" style={{ width: '40px', height: '40px', margin: '0 auto 16px' }} />
-            <p style={{ color: '#6b7280' }}>Loading content...</p>
-          </section>
-        )}
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '60px' }}>
+                <div className="spinner" style={{ width: '40px', height: '40px', margin: '0 auto 16px' }} />
+                <p style={{ color: '#6b7280' }}>Loading awesome content...</p>
+              </div>
+            ) : (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gridTemplateRows: 'repeat(auto-fill, minmax(180px, 1fr))',
+                gap: '20px',
+                minHeight: '600px'
+              }}>
+                {/* Featured Video - Large Card */}
+                {featuredVideo && featuredVideo.youtubeVideoId && (
+                  <FeaturedVideoCard
+                    id={featuredVideo.id}
+                    title={featuredVideo.title}
+                    youtubeVideoId={featuredVideo.youtubeVideoId}
+                    viewCount={featuredVideo.viewCount || 0}
+                    publishedAt={featuredVideo.publishedAt}
+                    category={featuredVideo.category}
+                    author={featuredVideo.author}
+                    onClick={() => console.log('Open video:', featuredVideo.id)}
+                  />
+                )}
 
+                {/* Regular Content Cards */}
+                {otherContent.slice(0, 8).map((item, index) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      gridColumn: index < 2 ? 'span 1' : 'span 1',
+                      gridRow: index < 2 ? 'span 2' : 'span 1'
+                    }}
+                  >
+                    {index < 2 ? (
+                      <ArticleCard
+                        id={item.id}
+                        title={item.title}
+                        excerpt={item.excerpt}
+                        content={item.content}
+                        featuredImage={item.featuredImage}
+                        youtubeVideoId={item.youtubeVideoId}
+                        author={item.author}
+                        category={item.category}
+                        contentType={item.contentType}
+                        tags={item.tags}
+                        viewCount={item.viewCount}
+                        readTime={item.readTime}
+                        publishedAt={item.publishedAt}
+                        featured={item.featured}
+                        onClick={() => console.log('Open:', item.id)}
+                      />
+                    ) : (
+                      <CompactCard
+                        id={item.id}
+                        title={item.title}
+                        contentType={item.contentType as any}
+                        thumbnail={item.featuredImage}
+                        youtubeVideoId={item.youtubeVideoId}
+                        viewCount={item.viewCount || 0}
+                        duration={item.contentType === 'video' ? '8:45' : undefined}
+                        onClick={() => console.log('Open:', item.id)}
+                      />
+                    )}
+                  </div>
+                ))}
+
+                {/* Trending Section */}
+                <div style={{
+                  gridColumn: 'span 1',
+                  gridRow: 'span 3',
+                  backgroundColor: 'white',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  border: '1px solid #e5e7eb'
+                }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '700',
+                    marginBottom: '16px',
+                    color: '#1f2937',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <TrendingUp size={20} color="#ef4444" />
+                    Trending Now
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {otherContent.slice(8, 13).map((item, index) => (
+                      <div
+                        key={item.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: '12px',
+                          cursor: 'pointer',
+                          padding: '8px',
+                          borderRadius: '8px',
+                          transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <span style={{
+                          fontSize: '20px',
+                          fontWeight: '700',
+                          color: index === 0 ? '#ef4444' : index === 1 ? '#f59e0b' : '#6b7280',
+                          minWidth: '30px'
+                        }}>
+                          {index + 1}
+                        </span>
+                        <div>
+                          <h4 style={{
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#1f2937',
+                            margin: '0 0 4px 0',
+                            lineHeight: '1.4'
+                          }}>
+                            {item.title}
+                          </h4>
+                          <span style={{
+                            fontSize: '12px',
+                            color: '#6b7280'
+                          }}>
+                            {item.viewCount?.toLocaleString() || 0} views
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Show more content below */}
+            {!loading && otherContent.length > 13 && (
+              <div style={{
+                marginTop: '40px'
+              }}>
+                <h2 style={{
+                  fontSize: '24px',
+                  fontWeight: '700',
+                  marginBottom: '20px',
+                  color: '#1f2937'
+                }}>
+                  More Content
+                </h2>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                  gap: '20px'
+                }}>
+                  {otherContent.slice(13).map((item) => (
+                    <ArticleCard
+                      key={item.id}
+                      id={item.id}
+                      title={item.title}
+                      excerpt={item.excerpt}
+                      content={item.content}
+                      featuredImage={item.featuredImage}
+                      youtubeVideoId={item.youtubeVideoId}
+                      author={item.author}
+                      category={item.category}
+                      contentType={item.contentType}
+                      tags={item.tags}
+                      viewCount={item.viewCount}
+                      readTime={item.readTime}
+                      publishedAt={item.publishedAt}
+                      featured={item.featured}
+                      onClick={() => console.log('Open:', item.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
       </div>
     )
   }
