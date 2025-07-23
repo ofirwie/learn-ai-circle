@@ -94,20 +94,35 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
 
   const parseMarkdownFile = async (file: File) => {
     try {
+      console.log('🔵 Import Debug: Starting to parse file:', file.name)
       const content = await file.text()
+      console.log('🔵 Import Debug: File content length:', content.length)
+      console.log('🔵 Import Debug: Content preview:', content.substring(0, 200))
+      
       const validation = MarkdownParser.validateMarkdown(content)
+      console.log('🔵 Import Debug: Validation result:', validation)
       
       if (!validation.valid) {
+        console.log('🔴 Import Debug: Validation failed:', validation.errors)
         setError('Invalid markdown file: ' + validation.errors.join(', '))
         return
       }
       
       const parsed = MarkdownParser.parseMarkdown(content)
+      console.log('🔵 Import Debug: Parsed result:', {
+        title: parsed.title,
+        contentLength: parsed.content.length,
+        contentType: parsed.contentType,
+        videoIds: parsed.youtubeVideoIds?.length || 0
+      })
+      
       setParsedData(parsed)
       setShowMarkdownImport(true)
       setError(null)
+      console.log('🟢 Import Debug: Successfully set parsed data')
     } catch (err) {
-      setError('Failed to parse markdown file')
+      console.log('🔴 Import Debug: Error occurred:', err)
+      setError('Failed to parse markdown file: ' + (err instanceof Error ? err.message : 'Unknown error'))
       console.error('Markdown parsing error:', err)
     }
   }
