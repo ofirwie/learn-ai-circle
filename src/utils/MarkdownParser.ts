@@ -36,8 +36,22 @@ export class MarkdownParser {
       }
     }
     
-    // Don't extract YouTube videos - leave them in the content where they belong
-    // Videos should stay in their original position in the markdown
+    // Extract YouTube video IDs from the content
+    const patterns = [
+      /<iframe[^>]*src="https:\/\/www\.youtube\.com\/embed\/([^"?]+)"/g, // iframe embeds
+      /https:\/\/www\.youtube\.com\/embed\/([^?\s"]+)/g, // direct embed URLs
+      /https:\/\/www\.youtube\.com\/watch\?v=([^&\s"]+)/g, // watch URLs
+      /https:\/\/youtu\.be\/([^?\s"]+)/g // short URLs
+    ]
+    
+    for (const pattern of patterns) {
+      let match
+      while ((match = pattern.exec(markdownContent)) !== null) {
+        if (match[1] && !youtubeVideoIds.includes(match[1])) {
+          youtubeVideoIds.push(match[1])
+        }
+      }
+    }
     
     // Generate excerpt from first paragraph after title
     excerpt = this.generateExcerpt(content)

@@ -112,7 +112,7 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
     }
   }
 
-  const importMarkdownData = () => {
+  const importMarkdownData = async () => {
     if (!parsedData) return
     
     // Populate form fields
@@ -127,19 +127,18 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
       setYoutubeVideoId(parsedData.youtubeVideoIds[0])
     }
     
-    // Close import modal and show success message
+    // Close import modal
     setShowMarkdownImport(false)
     setParsedData(null)
     setMarkdownFile(null)
     
-    // Clear any errors and show success
-    setError(null)
-    setSuccessMessage('✅ Content imported successfully! Review and edit the fields below before publishing.')
+    // Auto-publish after import
+    setSuccessMessage('✅ Content imported! Publishing article...')
     
-    // Clear success message after 5 seconds
+    // Wait a moment for state to update, then auto-save
     setTimeout(() => {
-      setSuccessMessage(null)
-    }, 5000)
+      handleSave('published')
+    }, 500)
   }
 
   const cancelMarkdownImport = () => {
