@@ -15,7 +15,7 @@ import { MarkdownDebugger } from './components/Debug/MarkdownDebugger'
 import { importPerplexityArticle } from './utils/importPerplexityArticle'
 import { importChatGPTAgentArticle } from './utils/importChatGPTAgentArticle'
 import SimplePromptsViewer from './components/prompts/SimplePromptsViewer'
-import SimpleAnalyticsDashboard from './components/dashboard/SimpleAnalyticsDashboard'
+import SimpleAnalyticsDashboard from './components/Dashboard/SimpleAnalyticsDashboard'
 
 function App() {
   const [currentView, setCurrentView] = useState('home')
