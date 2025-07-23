@@ -35,16 +35,8 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
 
   // Enhanced content renderer that properly parses markdown and handles complex formatting
   const renderContent = (content: string) => {
-    // DEBUG: Show what content we're actually getting for ANY article
-    console.log('🔴 ARTICLE DEBUG:', {
-      title: article.title,
-      contentLength: content?.length || 0,
-      hasH3InRawContent: content?.includes('###'),
-      firstH3Pattern: content?.match(/###\s.*$/m)?.[0],
-      allH3Patterns: content?.match(/###\s[^<\n]*/g),
-      h3InHtml: content?.match(/<[^>]*>###[^<]*<\/[^>]*>/g),
-      contentPreview: content?.substring(0, 400)
-    })
+    // Content processing debug (remove after testing)
+    // console.log('🔴 ARTICLE DEBUG:', { title: article.title, contentLength: content?.length || 0 })
     
     if (!content || content.trim() === '') {
       return <div>No content available.</div>
@@ -132,13 +124,8 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       return `<${tag}>${cleanText}</${tag}>`
     })
     
-    // DEBUG: Check if headers were converted
-    console.log('🟢 AFTER HEADER PROCESSING:', {
-      hasH3Tags: processedContent.includes('<h3>'),
-      stillHasH3Patterns: processedContent.includes('###'),
-      h3TagsFound: processedContent.match(/<h3>.*?<\/h3>/g)?.length || 0,
-      firstH3Tag: processedContent.match(/<h3>.*?<\/h3>/)?.[0]
-    })
+    // Header processing debug (remove after testing)
+    // console.log('🟢 AFTER HEADER PROCESSING:', { h3TagsFound: processedContent.match(/<h3>.*?<\/h3>/g)?.length || 0 })
     
     // Step 5: Convert text formatting (order matters!)
     processedContent = processedContent
