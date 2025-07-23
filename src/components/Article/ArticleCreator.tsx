@@ -115,14 +115,6 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
   const importMarkdownData = () => {
     if (!parsedData) return
     
-    // Log what we're importing
-    console.log('📥 Importing markdown data:', {
-      title: parsedData.title,
-      contentLength: parsedData.content?.length || 0,
-      contentType: parsedData.contentType,
-      videoIds: parsedData.youtubeVideoIds
-    })
-    
     // Populate form fields
     setTitle(parsedData.title || '')
     setContent(parsedData.content || '')

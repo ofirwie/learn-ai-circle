@@ -11,6 +11,7 @@ import { ContentManager } from './components/Admin/ContentManager'
 import { VideoEmbedDebugger } from './components/Debug/VideoEmbedDebugger'
 import { SimpleVideoTest } from './components/Debug/SimpleVideoTest'
 import { VideoComparison } from './components/Debug/VideoComparison'
+import { MarkdownDebugger } from './components/Debug/MarkdownDebugger'
 import { importPerplexityArticle } from './utils/importPerplexityArticle'
 import { importChatGPTAgentArticle } from './utils/importChatGPTAgentArticle'
 
@@ -28,6 +29,7 @@ function App() {
   const [showInviteCodeManager, setShowInviteCodeManager] = useState(false)
   const [showContentManager, setShowContentManager] = useState(false)
   const [showVideoDebugger, setShowVideoDebugger] = useState(false)
+  const [showMarkdownDebugger, setShowMarkdownDebugger] = useState(false)
   const [showSimpleVideoTest, setShowSimpleVideoTest] = useState(false)
   const [showVideoComparison, setShowVideoComparison] = useState(false)
   const [openWithImport, setOpenWithImport] = useState(false)
@@ -648,6 +650,10 @@ function App() {
                   <span className="icon">🧪</span>
                   Debug Video Embeds
                 </button>
+                <button className="create-button" onClick={() => setShowMarkdownDebugger(true)}>
+                  <span className="icon">🔍</span>
+                  Debug Markdown Processing
+                </button>
                 <button className="create-button" onClick={() => setShowSimpleVideoTest(true)}>
                   <span className="icon">🎬</span>
                   Simple Video Test
@@ -816,6 +822,13 @@ function App() {
         isOpen={showVideoDebugger}
         onClose={() => setShowVideoDebugger(false)}
       />
+
+      {/* Markdown Debugger Modal */}
+      {showMarkdownDebugger && (
+        <div onClick={() => setShowMarkdownDebugger(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.1)', zIndex: 9998 }}>
+          <MarkdownDebugger />
+        </div>
+      )}
 
       {/* Simple Video Test Modal */}
       <SimpleVideoTest
