@@ -9,7 +9,11 @@ interface DebugStep {
   h3Tags: string[]
 }
 
-export const MarkdownDebugger: React.FC = () => {
+interface MarkdownDebuggerProps {
+  onClose: () => void
+}
+
+export const MarkdownDebugger: React.FC<MarkdownDebuggerProps> = ({ onClose }) => {
   const [file, setFile] = useState<File | null>(null)
   const [debugResult, setDebugResult] = useState<DebugStep[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
@@ -139,26 +143,31 @@ export const MarkdownDebugger: React.FC = () => {
 
   return (
     <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'rgba(0,0,0,0.8)',
-      zIndex: 9999,
-      padding: '20px',
+      background: 'white',
+      borderRadius: '12px',
+      padding: '24px',
+      maxWidth: '1200px',
+      width: '100%',
+      maxHeight: '90vh',
       overflow: 'auto'
     }}>
-      <div style={{
-        background: 'white',
-        borderRadius: '12px',
-        padding: '24px',
-        maxWidth: '1200px',
-        margin: '0 auto'
-      }}>
-        <h2 style={{ margin: '0 0 24px 0', color: '#1e293b' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <h2 style={{ margin: 0, color: '#1e293b' }}>
           Markdown Processing Debugger
         </h2>
+        <button 
+          onClick={onClose}
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '24px',
+            cursor: 'pointer',
+            color: '#64748b'
+          }}
+        >
+          ✕
+        </button>
+      </div>
 
         <div style={{ marginBottom: '24px' }}>
           <input
@@ -251,7 +260,6 @@ export const MarkdownDebugger: React.FC = () => {
             </div>
           </div>
         ))}
-      </div>
     </div>
   )
 }

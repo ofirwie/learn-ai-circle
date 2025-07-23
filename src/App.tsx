@@ -825,8 +825,29 @@ function App() {
 
       {/* Markdown Debugger Modal */}
       {showMarkdownDebugger && (
-        <div onClick={() => setShowMarkdownDebugger(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.1)', zIndex: 9998 }}>
-          <MarkdownDebugger />
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowMarkdownDebugger(false)
+            }
+          }} 
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0, 
+            background: 'rgba(0,0,0,0.8)', 
+            zIndex: 9998,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <div onClick={(e) => e.stopPropagation()}>
+            <MarkdownDebugger onClose={() => setShowMarkdownDebugger(false)} />
+          </div>
         </div>
       )}
 
