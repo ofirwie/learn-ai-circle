@@ -7,6 +7,7 @@ import { Article } from './types/content'
 import { ArticleCreator } from './components/Article/ArticleCreator'
 import { ArticleViewer } from './components/Article/ArticleViewer'
 import { InviteCodeManager } from './components/Admin/InviteCodeManager'
+import { ContentManager } from './components/Admin/ContentManager'
 
 function App() {
   const [currentView, setCurrentView] = useState('home')
@@ -20,6 +21,7 @@ function App() {
   const [showArticleCreator, setShowArticleCreator] = useState(false)
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
   const [showInviteCodeManager, setShowInviteCodeManager] = useState(false)
+  const [showContentManager, setShowContentManager] = useState(false)
   const [openWithImport, setOpenWithImport] = useState(false)
   const { user, loading, initialized, initialize, signOut } = useAuthStore()
   
@@ -193,6 +195,11 @@ function App() {
                             "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop&crop=center")
                           } 
                           alt={articles[0].title}
+                          loading="lazy"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement
+                            target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjQwMCIgY3k9IjIwMCIgcj0iNjAiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTM2MiAxNjBMNDM4IDIwMEwzNjIgMjQwVjE2MFoiIGZpbGw9IiNGOUZBRkIiLz4KPHR5cGU+CjwvZGVmcz4KPC9zdmc+Cg=='
+                          }}
                         />
                         {articles[0].youtube_video_id && (
                           <div className="techcrunch-play-button">▶</div>
@@ -209,7 +216,7 @@ function App() {
 
                     {/* Secondary Articles Grid */}
                     <div className="techcrunch-grid">
-                      {articles.slice(1, 7).map((article) => (
+                      {articles.slice(1, 9).map((article) => (
                         <article 
                           key={article.id} 
                           className="techcrunch-card" 
@@ -223,6 +230,11 @@ function App() {
                                 `https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=320&h=180&fit=crop&crop=center`)
                               } 
                               alt={article.title}
+                              loading="lazy"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement
+                                target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDMyMCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iMTgwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjE2MCIgY3k9IjkwIiByPSIzMCIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTQ1IDc1TDE3NSA5MEwxNDUgMTA1VjcwWiIgZmlsbD0iI0Y5RkFGQiIvPgo8L3N2Zz4K'
+                              }}
                             />
                             {article.youtube_video_id && (
                               <div className="techcrunch-play-button">▶</div>
@@ -248,7 +260,7 @@ function App() {
               <aside className="techcrunch-sidebar">
                 <h2>Latest Headlines</h2>
                 <ul className="techcrunch-headlines">
-                  {articles.slice(0, 10).map((article, index) => (
+                  {articles.slice(9, 19).map((article, index) => (
                     <li 
                       key={article.id} 
                       className="techcrunch-headline-item"
@@ -556,7 +568,7 @@ function App() {
                   <span className="icon">🎟️</span>
                   Manage Invite Codes
                 </button>
-                <button className="create-button" onClick={() => alert('Manage content coming soon!')}>
+                <button className="create-button" onClick={() => setShowContentManager(true)}>
                   <span className="icon">📊</span>
                   Manage Content
                 </button>
@@ -686,6 +698,17 @@ function App() {
           onClose={() => setShowInviteCodeManager(false)}
         />
       )}
+
+      {/* Content Manager Modal */}
+      <ContentManager
+        isOpen={showContentManager}
+        onClose={() => setShowContentManager(false)}
+        onArticleSelect={(article) => {
+          setSelectedArticle(article)
+          setShowContentManager(false)
+          setShowArticleCreator(true)
+        }}
+      />
 
     </div>
   )

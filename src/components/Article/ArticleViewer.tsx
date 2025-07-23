@@ -33,9 +33,13 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
     }
   }
 
-  // Convert YouTube links to embeds and render content properly
+  // Enhanced content renderer that properly parses markdown and handles complex formatting
   const renderContent = (content: string) => {
-    // Convert YouTube links to proper embeds
+    if (!content || content.trim() === '') {
+      return <div>No content available.</div>
+    }
+
+    // Step 1: Convert YouTube links to proper embeds first
     let processedContent = content
     
     // Convert YouTube anchor links to embeds
@@ -72,29 +76,106 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       `
     })
     
-    // Convert markdown-style formatting to HTML
+    // Step 2: Clean up common markdown artifacts and separators
     processedContent = processedContent
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // **bold**
-      .replace(/\*(.*?)\*/g, '<em>$1</em>') // *italic*
-      .replace(/^### (.*$)/gm, '<h3>$1</h3>') // ### heading
-      .replace(/^## (.*$)/gm, '<h2>$1</h2>') // ## heading  
-      .replace(/^# (.*$)/gm, '<h1>$1</h1>') // # heading
-      .replace(/^- (.*$)/gm, '<li>$1</li>') // - list item
-      .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>') // wrap lists
-      .replace(/\n\n/g, '</p><p>') // paragraphs
-      .replace(/^(.+)$/gm, '<p>$1</p>') // wrap remaining text
-      .replace(/<p><h/g, '<h') // fix heading paragraphs
-      .replace(/<\/h([1-6])><\/p>/g, '</h$1>') // fix heading paragraphs
-      .replace(/<p><ul>/g, '<ul>') // fix list paragraphs
-      .replace(/<\/ul><\/p>/g, '</ul>') // fix list paragraphs
-      .replace(/<p><div/g, '<div') // fix div paragraphs
-      .replace(/<\/div><\/p>/g, '</div>') // fix div paragraphs
-      .replace(/---/g, '<hr>') // horizontal rules
+      .replace(/^---+\s*/gm, '') // Remove leading dashes
+      .replace(/\s*---+\s*$/gm, '') // Remove trailing dashes
+      .replace(/^\s*---+\s*$/gm, '<hr>') // Convert standalone dashes to HR
     
+    // Step 3: Convert markdown headers (process from most specific to least)
+    processedContent = processedContent
+      .replace(/^#{6}\s+(.+)$/gm, '<h6>$1</h6>')
+      .replace(/^#{5}\s+(.+)$/gm, '<h5>$1</h5>')
+      .replace(/^#{4}\s+(.+)$/gm, '<h4>$1</h4>')
+      .replace(/^#{3}\s+(.+)$/gm, '<h3>$1</h3>')
+      .replace(/^#{2}\s+(.+)$/gm, '<h2>$1</h2>')
+      .replace(/^#{1}\s+(.+)$/gm, '<h1>$1</h1>')
+    
+    // Step 4: Convert bold and italic text
+    processedContent = processedContent
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>') // **bold**
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>') // *italic*
+      .replace(/__([^_]+)__/g, '<strong>$1</strong>') // __bold__
+      .replace(/_([^_]+)_/g, '<em>$1</em>') // _italic_
+    
+    // Step 5: Convert bullet lists
+    const lines = processedContent.split('\n')
+    const processedLines: string[] = []
+    let inList = false
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      const trimmedLine = line.trim()
+      
+      // Check if this is a bullet list item
+      if (trimmedLine.match(/^[-*+]\s+/)) {
+        if (!inList) {
+          processedLines.push('<ul>')
+          inList = true
+        }
+        const listContent = trimmedLine.replace(/^[-*+]\s+/, '')
+        processedLines.push(`<li>${listContent}</li>`)
+      } else {
+        // Not a list item
+        if (inList) {
+          processedLines.push('</ul>')
+          inList = false
+        }
+        processedLines.push(line)
+      }
+    }
+    
+    // Close any remaining list
+    if (inList) {
+      processedLines.push('</ul>')
+    }
+    
+    processedContent = processedLines.join('\n')
+    
+    // Step 6: Convert numbered lists
+    processedContent = processedContent.replace(/^(\d+)\.\s+(.+)$/gm, '<li>$2</li>')
+    
+    // Step 7: Convert paragraphs (split by double newlines)
+    const paragraphs = processedContent.split(/\n\s*\n/)
+    const htmlParagraphs = paragraphs.map(para => {
+      const trimmed = para.trim()
+      if (!trimmed) return ''
+      
+      // Skip if already wrapped in HTML tags
+      if (trimmed.match(/^<(h[1-6]|ul|ol|li|div|hr|iframe)/i)) {
+        return trimmed
+      }
+      
+      // Wrap in paragraph tags
+      return `<p>${trimmed}</p>`
+    }).filter(p => p !== '')
+    
+    processedContent = htmlParagraphs.join('\n')
+    
+    // Step 8: Clean up formatting issues
+    processedContent = processedContent
+      .replace(/<p>(<h[1-6][^>]*>.*?<\/h[1-6]>)<\/p>/gi, '$1') // Remove p tags around headers
+      .replace(/<p>(<ul>.*?<\/ul>)<\/p>/gs, '$1') // Remove p tags around lists
+      .replace(/<p>(<ol>.*?<\/ol>)<\/p>/gs, '$1') // Remove p tags around ordered lists
+      .replace(/<p>(<hr>)<\/p>/gi, '$1') // Remove p tags around hr
+      .replace(/<p>(<div.*?<\/div>)<\/p>/gs, '$1') // Remove p tags around divs
+      .replace(/\n{3,}/g, '\n\n') // Reduce excessive newlines
+      .replace(/<\/li>\n*<li>/g, '</li><li>') // Clean up list items
+      .trim()
+    
+    // Step 9: Return the processed content with enhanced styling
     return (
       <>
         <style>
           {`
+            .article-content {
+              font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+              font-size: 18px;
+              line-height: 1.8;
+              color: #374151;
+              max-width: none;
+            }
+            
             .article-content iframe {
               max-width: 600px !important;
               width: 100% !important;
@@ -103,64 +184,183 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
               display: block !important;
               border-radius: 12px !important;
             }
+            
             .article-content .youtube-embed {
               max-width: 600px !important;
               margin: 20px auto !important;
               border-radius: 12px !important;
             }
+            
             .article-content p {
-              margin-bottom: 1em;
-              line-height: 1.6;
+              margin-bottom: 1.5em;
+              line-height: 1.8;
+              text-align: left;
+              overflow-wrap: break-word;
+              word-wrap: break-word;
             }
+            
             .article-content h1 {
+              font-size: 32px;
+              font-weight: 700;
+              margin-top: 48px;
+              margin-bottom: 24px;
+              color: #1e293b;
+              line-height: 1.3;
+            }
+            
+            .article-content h2 {
               font-size: 28px;
               font-weight: 700;
               margin-top: 40px;
               margin-bottom: 20px;
               color: #1e293b;
+              line-height: 1.3;
+              border-bottom: 2px solid #e2e8f0;
+              padding-bottom: 8px;
             }
-            .article-content h2 {
+            
+            .article-content h3 {
               font-size: 24px;
-              font-weight: 700;
+              font-weight: 600;
               margin-top: 32px;
               margin-bottom: 16px;
-              color: #1e293b;
+              color: #334155;
+              line-height: 1.4;
             }
-            .article-content h3 {
+            
+            .article-content h4 {
               font-size: 20px;
               font-weight: 600;
               margin-top: 24px;
               margin-bottom: 12px;
-              color: #334155;
+              color: #475569;
+              line-height: 1.4;
             }
+            
+            .article-content h5 {
+              font-size: 18px;
+              font-weight: 600;
+              margin-top: 20px;
+              margin-bottom: 10px;
+              color: #64748b;
+              line-height: 1.4;
+            }
+            
+            .article-content h6 {
+              font-size: 16px;
+              font-weight: 600;
+              margin-top: 16px;
+              margin-bottom: 8px;
+              color: #64748b;
+              line-height: 1.4;
+            }
+            
             .article-content ul {
-              margin-bottom: 16px;
-              padding-left: 24px;
+              margin-bottom: 20px;
+              padding-left: 28px;
+              list-style-type: disc;
             }
+            
+            .article-content ol {
+              margin-bottom: 20px;
+              padding-left: 28px;
+              list-style-type: decimal;
+            }
+            
             .article-content li {
               margin-bottom: 8px;
-              line-height: 1.6;
+              line-height: 1.7;
+              padding-left: 4px;
             }
+            
+            .article-content li p {
+              margin-bottom: 0.5em;
+            }
+            
             .article-content hr {
               border: none;
-              border-top: 1px solid #e2e8f0;
-              margin: 32px 0;
+              border-top: 2px solid #e2e8f0;
+              margin: 40px 0;
+              opacity: 0.6;
             }
+            
             .article-content strong {
-              font-weight: 600;
+              font-weight: 700;
               color: #1e293b;
+            }
+            
+            .article-content em {
+              font-style: italic;
+              color: #475569;
+            }
+            
+            .article-content blockquote {
+              border-left: 4px solid #3b82f6;
+              padding-left: 20px;
+              margin: 24px 0;
+              background: #f8fafc;
+              padding: 16px 20px;
+              border-radius: 8px;
+              font-style: italic;
+              color: #475569;
+            }
+            
+            .article-content code {
+              background: #f1f5f9;
+              padding: 2px 6px;
+              border-radius: 4px;
+              font-family: 'Fira Code', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+              font-size: 14px;
+              color: #e11d48;
+            }
+            
+            .article-content pre {
+              background: #1e293b;
+              color: #e2e8f0;
+              padding: 20px;
+              border-radius: 8px;
+              overflow-x: auto;
+              margin: 20px 0;
+              font-family: 'Fira Code', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+              font-size: 14px;
+              line-height: 1.5;
+            }
+            
+            .article-content a {
+              color: #3b82f6;
+              text-decoration: underline;
+              text-decoration-thickness: 1px;
+              text-underline-offset: 2px;
+            }
+            
+            .article-content a:hover {
+              color: #1d4ed8;
+              text-decoration-thickness: 2px;
+            }
+            
+            .article-content img {
+              max-width: 100%;
+              height: auto;
+              border-radius: 8px;
+              margin: 20px 0;
+              display: block;
+              margin-left: auto;
+              margin-right: auto;
+            }
+            
+            /* First paragraph special styling */
+            .article-content > p:first-of-type {
+              font-size: 20px;
+              font-weight: 400;
+              color: #475569;
+              margin-bottom: 2em;
+              line-height: 1.7;
             }
           `}
         </style>
         <div 
           className="article-content"
           dangerouslySetInnerHTML={{ __html: processedContent }}
-          style={{
-            fontSize: '16px',
-            lineHeight: '1.7',
-            color: '#374151',
-            maxWidth: 'none'
-          }}
         />
       </>
     )

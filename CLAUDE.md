@@ -194,3 +194,6 @@ The project appears to be a complete AI Knowledge Hub implementation with:
 3. Use rich text editor with YouTube support
 4. Publish article
 5. Article appears on home page immediately 
+
+## Deployment Memories
+- **Deployment Command**: `Bash(cd "F:\git\ai-knowledge-hub-fresh" && npm run build && git add . && git commit -m "Debug article display and upload timeout issues…)` (example of how to deploy)
