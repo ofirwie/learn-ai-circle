@@ -17,35 +17,49 @@ export const MarkdownDebugger: React.FC = () => {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
+      console.log('File selected:', selectedFile.name, selectedFile.type)
       setFile(selectedFile)
+      setDebugResult([]) // Clear previous results
       processFile(selectedFile)
     }
   }
 
   const processFile = async (file: File) => {
+    console.log('Starting to process file:', file.name)
     setIsProcessing(true)
     const steps: DebugStep[] = []
 
     try {
       // Step 1: Raw file content
+      console.log('Reading file content...')
       const rawContent = await file.text()
+      console.log('File content length:', rawContent.length)
+      console.log('Raw content preview:', rawContent.substring(0, 200))
+      
       steps.push({
         step: '1. Raw File Content',
-        description: 'Original markdown file content',
-        content: rawContent.substring(0, 500) + '...',
+        description: `Original markdown file content (${rawContent.length} chars)`,
+        content: rawContent.length > 500 ? rawContent.substring(0, 500) + '...' : rawContent,
         h3Patterns: rawContent.match(/^###\s.*$/gm) || [],
         h3Tags: rawContent.match(/<h3>.*?<\/h3>/g) || []
       })
 
+      console.log('Step 1 complete, found h3 patterns:', steps[0].h3Patterns.length)
+
       // Step 2: After MarkdownParser
+      console.log('Running MarkdownParser...')
       const parsed = MarkdownParser.parseMarkdown(rawContent)
+      console.log('Parsed content length:', parsed.content.length)
+      
       steps.push({
         step: '2. After MarkdownParser.parseMarkdown()',
-        description: 'Content after markdown parsing (title removed)',
-        content: parsed.content.substring(0, 500) + '...',
+        description: `Content after markdown parsing (title removed) - ${parsed.content.length} chars`,
+        content: parsed.content.length > 500 ? parsed.content.substring(0, 500) + '...' : parsed.content,
         h3Patterns: parsed.content.match(/^###\s.*$/gm) || [],
         h3Tags: parsed.content.match(/<h3>.*?<\/h3>/g) || []
       })
+
+      console.log('Step 2 complete, h3 patterns:', steps[1].h3Patterns.length)
 
       // Step 3: Simulate ArticleViewer processing
       let processed = parsed.content
@@ -59,12 +73,14 @@ export const MarkdownDebugger: React.FC = () => {
       steps.push({
         step: '3. After cleanup',
         description: 'After removing dashes and artifacts',
-        content: processed.substring(0, 500) + '...',
+        content: processed.length > 500 ? processed.substring(0, 500) + '...' : processed,
         h3Patterns: processed.match(/^###\s.*$/gm) || [],
         h3Tags: processed.match(/<h3>.*?<\/h3>/g) || []
       })
 
-      // Header processing
+      // Header processing - THE KEY STEP
+      console.log('Processing headers...')
+      const beforeHeaders = processed
       processed = processed
         .replace(/^#{6}\s*(.*)$/gm, '<h6>$1</h6>')
         .replace(/^#{5}\s*(.*)$/gm, '<h5>$1</h5>')
@@ -73,13 +89,17 @@ export const MarkdownDebugger: React.FC = () => {
         .replace(/^#{2}\s*(.*)$/gm, '<h2>$1</h2>')
         .replace(/^#{1}\s+(.*)$/gm, '<h1>$1</h1>')
 
+      console.log('Header processing done. Before/after equal?', beforeHeaders === processed)
+
       steps.push({
-        step: '4. After header processing',
-        description: 'After converting ### to <h3> tags',
-        content: processed.substring(0, 500) + '...',
+        step: '4. After header processing ⭐ KEY STEP',
+        description: 'After converting ### to <h3> tags - this should show h3 tags!',
+        content: processed.length > 500 ? processed.substring(0, 500) + '...' : processed,
         h3Patterns: processed.match(/^###\s.*$/gm) || [],
         h3Tags: processed.match(/<h3>.*?<\/h3>/g) || []
       })
+
+      console.log('Step 4 complete, h3 tags found:', steps[3].h3Tags.length)
 
       // Text formatting
       processed = processed
@@ -93,15 +113,26 @@ export const MarkdownDebugger: React.FC = () => {
       steps.push({
         step: '5. Final result',
         description: 'After all text formatting',
-        content: processed.substring(0, 500) + '...',
+        content: processed.length > 500 ? processed.substring(0, 500) + '...' : processed,
         h3Patterns: processed.match(/^###\s.*$/gm) || [],
         h3Tags: processed.match(/<h3>.*?<\/h3>/g) || []
       })
 
+      console.log('All steps complete, setting results...')
       setDebugResult(steps)
+      console.log('Results set, steps count:', steps.length)
+      
     } catch (error) {
       console.error('Debug processing error:', error)
+      setDebugResult([{
+        step: 'ERROR',
+        description: `Processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        content: 'Error occurred during processing',
+        h3Patterns: [],
+        h3Tags: []
+      }])
     } finally {
+      console.log('Processing finished')
       setIsProcessing(false)
     }
   }
