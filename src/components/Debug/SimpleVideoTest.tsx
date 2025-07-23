@@ -14,24 +14,39 @@ export const SimpleVideoTest: React.FC<SimpleVideoTestProps> = ({
   // Test different video IDs and formats
   const videoTests = [
     {
-      name: "Gemini's Test Video",
-      videoId: "FjwSa5mIYho0",
-      description: "Using Gemini's suggested video ID"
+      name: "✅ YOUR WORKING VIDEO",
+      videoId: "cJZigXfPrC0",
+      description: "20 BEST MOVIE TRAILERS 2025 - CONFIRMED WORKING 100%"
     },
     {
       name: "Your Article Video 1", 
       videoId: "1YtB1yrKvXM",
-      description: "From your article content"
+      description: "From your article content - TEST IF STILL WORKS"
     },
     {
       name: "Your Article Video 2",
       videoId: "gmJeo_1lI6g", 
-      description: "From your article content"
+      description: "From your article content - TEST IF STILL WORKS"
     },
     {
-      name: "Simple Test Video",
-      videoId: "dQw4w9WgXcQ",
-      description: "Known working video ID"
+      name: "Your Article Video 3",
+      videoId: "V9TGgD03nQI",
+      description: "From your article content - TEST IF STILL WORKS"
+    },
+    {
+      name: "Your Article Video 4",
+      videoId: "CB_2FWwSU0Y",
+      description: "From your article content - TEST IF STILL WORKS"
+    },
+    {
+      name: "Your Article Video 5",
+      videoId: "YhTgj7_cuJM",
+      description: "From your article content - TEST IF STILL WORKS"
+    },
+    {
+      name: "Your Article Video 6",
+      videoId: "0vmp4N2Tce0",
+      description: "From your article content - TEST IF STILL WORKS"
     }
   ]
 
