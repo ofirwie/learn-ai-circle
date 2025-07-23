@@ -110,26 +110,35 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       .replace(/\s*---+\s*$/gm, '') // Remove trailing dashes
       .replace(/^\s*---+\s*$/gm, '<hr>') // Convert standalone dashes to HR
     
-    // Step 3: Clean up header text formatting BEFORE converting to HTML
-    // Remove **bold** from headers to prevent nested HTML
-    processedContent = processedContent.replace(/^(#{1,6})\s*(.*?)$/gm, (match, hashes, text) => {
+    // Step 3: Handle headers that might be inside HTML tags (like <p>### Header</p>)
+    // First, convert ### patterns anywhere in the content, not just at line start
+    processedContent = processedContent
+      .replace(/(#{6})\s*([^#\n]*?)(?=\s*#{1,6}|\s*##?\s|\s*$)/g, '<h6>$2</h6>')
+      .replace(/(#{5})\s*([^#\n]*?)(?=\s*#{1,6}|\s*##?\s|\s*$)/g, '<h5>$2</h5>')
+      .replace(/(#{4})\s*([^#\n]*?)(?=\s*#{1,6}|\s*##?\s|\s*$)/g, '<h4>$2</h4>')
+      .replace(/(#{3})\s*([^#\n]*?)(?=\s*#{1,6}|\s*##?\s|\s*$)/g, '<h3>$2</h3>')
+      .replace(/(#{2})\s*([^#\n]*?)(?=\s*#{1,6}|\s*##?\s|\s*$)/g, '<h2>$2</h2>')
+      .replace(/(#{1})\s+([^#\n]*?)(?=\s*#{1,6}|\s*##?\s|\s*$)/g, '<h1>$2</h1>')
+    
+    // Step 4: Clean up any remaining bold/italic inside headers  
+    processedContent = processedContent.replace(/<(h[1-6])>([^<]*)<\/\1>/g, (match, tag, text) => {
       const cleanText = text
         .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove **bold**
         .replace(/__([^_]+)__/g, '$1')     // Remove __bold__
         .replace(/\*([^*]+)\*/g, '$1')     // Remove *italic*
         .replace(/_([^_]+)_/g, '$1')       // Remove _italic_
         .replace(/`([^`]+)`/g, '$1')       // Remove `code`
-      return hashes + ' ' + cleanText
+        .trim()
+      return `<${tag}>${cleanText}</${tag}>`
     })
     
-    // Step 4: Convert markdown headers (process most specific first, handle with and without spaces)
-    processedContent = processedContent
-      .replace(/^#{6}\s*(.*)$/gm, '<h6>$1</h6>')
-      .replace(/^#{5}\s*(.*)$/gm, '<h5>$1</h5>')
-      .replace(/^#{4}\s*(.*)$/gm, '<h4>$1</h4>')
-      .replace(/^#{3}\s*(.*)$/gm, '<h3>$1</h3>')
-      .replace(/^#{2}\s*(.*)$/gm, '<h2>$1</h2>')
-      .replace(/^#{1}\s+(.*)$/gm, '<h1>$1</h1>') // H1 requires space to avoid conflicts
+    // DEBUG: Check if headers were converted
+    console.log('🟢 AFTER HEADER PROCESSING:', {
+      hasH3Tags: processedContent.includes('<h3>'),
+      stillHasH3Patterns: processedContent.includes('###'),
+      h3TagsFound: processedContent.match(/<h3>.*?<\/h3>/g)?.length || 0,
+      firstH3Tag: processedContent.match(/<h3>.*?<\/h3>/)?.[0]
+    })
     
     // Step 5: Convert text formatting (order matters!)
     processedContent = processedContent
