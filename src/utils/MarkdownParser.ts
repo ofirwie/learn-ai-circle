@@ -34,20 +34,20 @@ export class MarkdownParser {
       }
     }
     
-    // Extract YouTube video IDs
-    const youtubeRegex = /<iframe[^>]*src="https:\/\/www\.youtube\.com\/embed\/([^"?]+)"/g
-    const alternativeRegex = /https:\/\/www\.youtube\.com\/embed\/([^?\s"]+)/g
+    // Extract YouTube video IDs from multiple formats
+    const patterns = [
+      /<iframe[^>]*src="https:\/\/www\.youtube\.com\/embed\/([^"?]+)"/g, // iframe embeds
+      /https:\/\/www\.youtube\.com\/embed\/([^?\s"]+)/g, // direct embed URLs
+      /https:\/\/www\.youtube\.com\/watch\?v=([^&\s"]+)/g, // watch URLs
+      /https:\/\/youtu\.be\/([^?\s"]+)/g // short URLs
+    ]
     
-    let match
-    while ((match = youtubeRegex.exec(markdownContent)) !== null) {
-      if (match[1] && !youtubeVideoIds.includes(match[1])) {
-        youtubeVideoIds.push(match[1])
-      }
-    }
-    
-    while ((match = alternativeRegex.exec(markdownContent)) !== null) {
-      if (match[1] && !youtubeVideoIds.includes(match[1])) {
-        youtubeVideoIds.push(match[1])
+    for (const pattern of patterns) {
+      let match
+      while ((match = pattern.exec(markdownContent)) !== null) {
+        if (match[1] && !youtubeVideoIds.includes(match[1])) {
+          youtubeVideoIds.push(match[1])
+        }
       }
     }
     
@@ -155,7 +155,8 @@ export class MarkdownParser {
       'review', 'comparison', 'vs', 'features', 'pricing', 'pros and cons',
       'advantages', 'disadvantages', 'tool', 'software', 'platform',
       'best', 'top', 'recommended', 'alternative', 'competitor',
-      'overview', 'analysis', 'evaluation', 'assessment'
+      'overview', 'analysis', 'evaluation', 'assessment', 'ai tool',
+      'essential tool', 'use cases', 'capabilities', 'functionality'
     ]
     
     let guideScore = 0

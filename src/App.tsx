@@ -11,6 +11,7 @@ import { ContentManager } from './components/Admin/ContentManager'
 import { VideoEmbedDebugger } from './components/Debug/VideoEmbedDebugger'
 import { SimpleVideoTest } from './components/Debug/SimpleVideoTest'
 import { VideoComparison } from './components/Debug/VideoComparison'
+import { importPerplexityArticle } from './utils/importPerplexityArticle'
 
 function App() {
   const [currentView, setCurrentView] = useState('home')
@@ -78,6 +79,18 @@ function App() {
       console.error(`Failed to fetch ${contentType}:`, error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleImportPerplexityArticle = async () => {
+    try {
+      const result = await importPerplexityArticle()
+      alert(`✅ Perplexity AI article imported successfully!\nID: ${result.id}\nTitle: ${result.title}`)
+      // Refresh articles
+      fetchArticles()
+    } catch (error) {
+      console.error('Import failed:', error)
+      alert(`❌ Failed to import article: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
   
@@ -629,6 +642,10 @@ function App() {
                 <button className="create-button" onClick={() => setShowVideoComparison(true)}>
                   <span className="icon">🔍</span>
                   Video Comparison
+                </button>
+                <button className="create-button" onClick={handleImportPerplexityArticle}>
+                  <span className="icon">🤖</span>
+                  Import Perplexity AI Article
                 </button>
               </div>
               
