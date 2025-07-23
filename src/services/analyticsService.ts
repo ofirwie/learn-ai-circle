@@ -43,12 +43,28 @@ class AnalyticsService {
   private pageViews: number = 0;
   private interactions: number = 0;
   private heartbeatInterval?: NodeJS.Timeout;
+  private isInitialized: boolean = false;
 
   constructor() {
     this.sessionId = this.generateSessionId();
     this.sessionStartTime = new Date();
-    this.initializeSession();
-    this.startHeartbeat();
+    
+    // Only initialize if we're in a browser environment
+    if (typeof window !== 'undefined') {
+      this.initialize();
+    }
+  }
+
+  private async initialize() {
+    if (this.isInitialized) return;
+    
+    try {
+      await this.initializeSession();
+      this.startHeartbeat();
+      this.isInitialized = true;
+    } catch (error) {
+      console.error('Failed to initialize analytics service:', error);
+    }
   }
 
   private generateSessionId(): string {
@@ -56,6 +72,10 @@ class AnalyticsService {
   }
 
   private getBrowserInfo() {
+    if (typeof navigator === 'undefined') {
+      return { browser: 'Unknown', os: 'Unknown', deviceType: 'Unknown' };
+    }
+    
     const ua = navigator.userAgent;
     const browser = this.detectBrowser(ua);
     const os = this.detectOS(ua);
@@ -88,6 +108,8 @@ class AnalyticsService {
   }
 
   private async initializeSession() {
+    if (typeof window === 'undefined') return;
+    
     const { browser, os, deviceType } = this.getBrowserInfo();
     
     await this.logEvent({
@@ -95,12 +117,12 @@ class AnalyticsService {
       target_type: 'session',
       target_id: this.sessionId,
       metadata: {
-        referrer: document.referrer,
+        referrer: typeof document !== 'undefined' ? document.referrer : '',
         browser,
         os,
         deviceType,
-        screen_resolution: `${screen.width}x${screen.height}`,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        screen_resolution: typeof screen !== 'undefined' ? `${screen.width}x${screen.height}` : 'unknown',
+        timezone: typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'unknown'
       }
     });
   }
@@ -124,13 +146,15 @@ class AnalyticsService {
   // Core event logging method
   async logEvent(event: Omit<AnalyticsEvent, 'id' | 'created_at'>) {
     try {
+      if (typeof window === 'undefined') return;
+
       const { data: { user } } = await supabase.auth.getUser();
       
       const eventData: AnalyticsEvent = {
         ...event,
         user_id: user?.id || null,
         session_id: this.sessionId,
-        user_agent: navigator.userAgent,
+        user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
         created_at: new Date().toISOString()
       };
 
@@ -418,10 +442,12 @@ class AnalyticsService {
 // Export singleton instance
 export const analyticsService = new AnalyticsService();
 
-// Cleanup on page unload
-window.addEventListener('beforeunload', () => {
-  analyticsService.endSession();
-  analyticsService.destroy();
-});
+// Cleanup on page unload (only in browser)
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => {
+    analyticsService.endSession();
+    analyticsService.destroy();
+  });
+}
 
 export default analyticsService;

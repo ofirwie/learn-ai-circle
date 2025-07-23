@@ -39,8 +39,11 @@ class SessionService {
   private pageStartTime = Date.now();
 
   constructor() {
-    this.initializeActivityTracking();
-    this.bindBeforeUnload();
+    // Only initialize browser-specific features if in browser environment
+    if (typeof window !== 'undefined') {
+      this.initializeActivityTracking();
+      this.bindBeforeUnload();
+    }
   }
 
   async startSession(userId: string, entityId?: string): Promise<string> {
@@ -296,6 +299,14 @@ class SessionService {
   }
 
   private getBrowserInfo() {
+    if (typeof navigator === 'undefined') {
+      return {
+        browser: 'Unknown',
+        os: 'Unknown',
+        device_type: 'Unknown'
+      };
+    }
+    
     const ua = navigator.userAgent;
     return {
       browser: this.detectBrowser(ua),
@@ -328,6 +339,8 @@ class SessionService {
   }
 
   private initializeActivityTracking() {
+    if (typeof document === 'undefined') return;
+    
     // Track mouse movements, clicks, and keyboard activity
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
     
@@ -414,6 +427,8 @@ class SessionService {
   }
 
   private bindBeforeUnload() {
+    if (typeof window === 'undefined') return;
+    
     window.addEventListener('beforeunload', () => {
       if (this.currentSession) {
         // Use sendBeacon for reliable tracking on page unload
@@ -459,10 +474,12 @@ class SessionService {
 // Export singleton instance
 export const sessionService = new SessionService();
 
-// Listen for session timeout events
-window.addEventListener('sessionTimeout', () => {
-  // Handle session timeout (redirect to login, show message, etc.)
-  console.log('Session expired due to inactivity');
-});
+// Listen for session timeout events (only in browser)
+if (typeof window !== 'undefined') {
+  window.addEventListener('sessionTimeout', () => {
+    // Handle session timeout (redirect to login, show message, etc.)
+    console.log('Session expired due to inactivity');
+  });
+}
 
 export default sessionService;

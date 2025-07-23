@@ -48,9 +48,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           .single()
 
         if (!profileError && userProfile) {
-          // Restore or start new session
-          if (!sessionService.restoreSession()) {
-            await sessionService.startSession(session.user.id, userProfile.entity_id)
+          // Restore or start new session (only in browser)
+          if (typeof window !== 'undefined') {
+            try {
+              if (!sessionService.restoreSession()) {
+                await sessionService.startSession(session.user.id, userProfile.entity_id)
+              }
+            } catch (error) {
+              console.error('Session initialization error:', error)
+            }
           }
           
           set({
@@ -72,8 +78,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Listen for auth changes
       supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === 'SIGNED_OUT') {
-          // End session and cleanup analytics
-          await sessionService.endSession()
+          // End session and cleanup analytics (only in browser)
+          if (typeof window !== 'undefined') {
+            try {
+              await sessionService.endSession()
+            } catch (error) {
+              console.error('Session cleanup error:', error)
+            }
+          }
           
           set({
             user: null,
@@ -95,8 +107,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             .single()
 
           if (userProfile) {
-            // Start new session
-            await sessionService.startSession(session.user.id, userProfile.entity_id)
+            // Start new session (only in browser)
+            if (typeof window !== 'undefined') {
+              try {
+                await sessionService.startSession(session.user.id, userProfile.entity_id)
+              } catch (error) {
+                console.error('Session start error:', error)
+              }
+            }
             
             set({
               user: session.user,
@@ -135,8 +153,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           .update({ last_login: new Date().toISOString() })
           .eq('id', data.user.id)
         
-        // Log login event
-        await analyticsService.logLogin(data.user.id)
+        // Log login event (only in browser)
+        if (typeof window !== 'undefined') {
+          try {
+            await analyticsService.logLogin(data.user.id)
+          } catch (error) {
+            console.error('Analytics logging error:', error)
+          }
+        }
       }
 
       return { success: true }
@@ -192,12 +216,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         if (profileError) {
           console.error('Profile creation error:', profileError)
         } else {
-          // Log registration analytics
-          await analyticsService.logRegistration(
-            data.user.id, 
-            registrationCode, 
-            codeValidation.entity?.id
-          )
+          // Log registration analytics (only in browser)
+          if (typeof window !== 'undefined') {
+            try {
+              await analyticsService.logRegistration(
+                data.user.id, 
+                registrationCode, 
+                codeValidation.entity?.id
+              )
+            } catch (error) {
+              console.error('Registration analytics error:', error)
+            }
+          }
         }
 
         // Use registration code service to handle usage increment
@@ -216,11 +246,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { userProfile } = get()
     set({ loading: true })
     
-    // End session and log logout
-    if (userProfile) {
-      await analyticsService.logLogout(userProfile.id)
+    // End session and log logout (only in browser)
+    if (typeof window !== 'undefined' && userProfile) {
+      try {
+        await analyticsService.logLogout(userProfile.id)
+        await sessionService.endSession()
+      } catch (error) {
+        console.error('Logout analytics error:', error)
+      }
     }
-    await sessionService.endSession()
     
     await supabase.auth.signOut()
     set({
