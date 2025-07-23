@@ -16,6 +16,7 @@ import { importPerplexityArticle } from './utils/importPerplexityArticle'
 import { importChatGPTAgentArticle } from './utils/importChatGPTAgentArticle'
 import SimplePromptsViewer from './components/prompts/SimplePromptsViewer'
 import SimpleAnalyticsDashboard from './components/Dashboard/SimpleAnalyticsDashboard'
+import SimpleUserManager from './components/Admin/SimpleUserManager'
 
 function App() {
   const [currentView, setCurrentView] = useState('home')
@@ -36,6 +37,7 @@ function App() {
   const [showVideoComparison, setShowVideoComparison] = useState(false)
   const [openWithImport, setOpenWithImport] = useState(false)
   const [showUserAnalytics, setShowUserAnalytics] = useState(false)
+  const [showUserManager, setShowUserManager] = useState(false)
   const { user, loading, initialized, initialize, signOut } = useAuthStore()
   
   useEffect(() => {
@@ -687,6 +689,10 @@ function App() {
                   <span className="icon">📊</span>
                   User Analytics Dashboard
                 </button>
+                <button className="create-button" onClick={() => setShowUserManager(true)}>
+                  <span className="icon">👥</span>
+                  Manage Users
+                </button>
               </div>
               
               <div className="admin-stats">
@@ -935,6 +941,11 @@ function App() {
             <SimpleAnalyticsDashboard />
           </div>
         </div>
+      )}
+
+      {/* User Manager Modal */}
+      {showUserManager && (
+        <SimpleUserManager onClose={() => setShowUserManager(false)} />
       )}
 
     </div>
