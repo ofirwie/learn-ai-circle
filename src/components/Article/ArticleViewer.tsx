@@ -40,9 +40,10 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       title: article.title,
       contentLength: content?.length || 0,
       hasH3InRawContent: content?.includes('###'),
-      firstH3Pattern: content?.match(/^###\s.*$/m)?.[0],
-      allH3Patterns: content?.match(/^###\s.*$/gm),
-      contentPreview: content?.substring(0, 200)
+      firstH3Pattern: content?.match(/###\s.*$/m)?.[0],
+      allH3Patterns: content?.match(/###\s[^<\n]*/g),
+      h3InHtml: content?.match(/<[^>]*>###[^<]*<\/[^>]*>/g),
+      contentPreview: content?.substring(0, 400)
     })
     
     if (!content || content.trim() === '') {
