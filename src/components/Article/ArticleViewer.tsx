@@ -35,17 +35,15 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
 
   // Enhanced content renderer that properly parses markdown and handles complex formatting
   const renderContent = (content: string) => {
-    // DEBUG: Show what content we're actually getting
-    if (article.title.includes('ChatGPT') || article.title.includes('Agent')) {
-      console.log('🔴 REAL ARTICLE DEBUG:', {
-        title: article.title,
-        contentLength: content?.length || 0,
-        hasH3InRawContent: content?.includes('###'),
-        firstH3Pattern: content?.match(/^###\s.*$/m)?.[0],
-        allH3Patterns: content?.match(/^###\s.*$/gm),
-        contentPreview: content?.substring(0, 200)
-      })
-    }
+    // DEBUG: Show what content we're actually getting for ANY article
+    console.log('🔴 ARTICLE DEBUG:', {
+      title: article.title,
+      contentLength: content?.length || 0,
+      hasH3InRawContent: content?.includes('###'),
+      firstH3Pattern: content?.match(/^###\s.*$/m)?.[0],
+      allH3Patterns: content?.match(/^###\s.*$/gm),
+      contentPreview: content?.substring(0, 200)
+    })
     
     if (!content || content.trim() === '') {
       return <div>No content available.</div>
