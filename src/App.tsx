@@ -133,19 +133,34 @@ function App() {
             }} className={currentView === 'home' ? 'active' : ''}>
               Home
             </a>
-            <a href="#" onClick={() => setCurrentView('news')} className={currentView === 'news' ? 'active' : ''}>
+            <a href="#" onClick={() => {
+              setCurrentView('news')
+              setSelectedArticle(null)
+            }} className={currentView === 'news' ? 'active' : ''}>
               News
             </a>
-            <a href="#" onClick={() => setCurrentView('articles')} className={currentView === 'articles' ? 'active' : ''}>
+            <a href="#" onClick={() => {
+              setCurrentView('articles')
+              setSelectedArticle(null)
+            }} className={currentView === 'articles' ? 'active' : ''}>
               Articles
             </a>
-            <a href="#" onClick={() => setCurrentView('forum')} className={currentView === 'forum' ? 'active' : ''}>
+            <a href="#" onClick={() => {
+              setCurrentView('forum')
+              setSelectedArticle(null)
+            }} className={currentView === 'forum' ? 'active' : ''}>
               Forum
             </a>
-            <a href="#" onClick={() => setCurrentView('guides')} className={currentView === 'guides' ? 'active' : ''}>
+            <a href="#" onClick={() => {
+              setCurrentView('guides')
+              setSelectedArticle(null)
+            }} className={currentView === 'guides' ? 'active' : ''}>
               Guides
             </a>
-            <a href="#" onClick={() => setCurrentView('tools')} className={currentView === 'tools' ? 'active' : ''}>
+            <a href="#" onClick={() => {
+              setCurrentView('tools')
+              setSelectedArticle(null)
+            }} className={currentView === 'tools' ? 'active' : ''}>
               Tools Review
             </a>
           </nav>
@@ -154,7 +169,10 @@ function App() {
           <div className="header-right">
             <div className="user-menu">
               <span>Welcome back, {user.email?.split('@')[0]}</span>
-              <button className="admin-button" onClick={() => setCurrentView('admin')}>
+              <button className="admin-button" onClick={() => {
+                setCurrentView('admin')
+                setSelectedArticle(null)
+              }}>
                 Admin Panel
               </button>
               <button className="logout-button" onClick={signOut}>
@@ -192,13 +210,24 @@ function App() {
                           src={
                             articles[0].featured_image || 
                             (articles[0].youtube_video_id ? `https://img.youtube.com/vi/${articles[0].youtube_video_id}/maxresdefault.jpg` : 
-                            "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop&crop=center")
+                            // Use category-specific placeholder for featured article
+                            `data:image/svg+xml;base64,${btoa(`<svg width="800" height="400" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="800" height="400" fill="#F3F4F6"/>
+                              <circle cx="400" cy="200" r="60" fill="#9CA3AF"/>
+                              <text x="400" y="260" text-anchor="middle" fill="#4B5563" font-size="16" font-family="Arial">${articles[0].category?.toUpperCase() || 'FEATURED ARTICLE'}</text>
+                              <path d="M362 160L438 200L362 240V160Z" fill="#F9FAFB"/>
+                            </svg>`)}`)
                           } 
                           alt={articles[0].title}
                           loading="lazy"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement
-                            target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjQwMCIgY3k9IjIwMCIgcj0iNjAiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTM2MiAxNjBMNDM4IDIwMEwzNjIgMjQwVjE2MFoiIGZpbGw9IiNGOUZBRkIiLz4KPHR5cGU+CjwvZGVmcz4KPC9zdmc+Cg=='
+                            target.src = `data:image/svg+xml;base64,${btoa(`<svg width="800" height="400" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="800" height="400" fill="#F3F4F6"/>
+                              <circle cx="400" cy="200" r="60" fill="#9CA3AF"/>
+                              <text x="400" y="260" text-anchor="middle" fill="#4B5563" font-size="16" font-family="Arial">NO IMAGE</text>
+                              <path d="M362 160L438 200L362 240V160Z" fill="#F9FAFB"/>
+                            </svg>`)}`
                           }}
                         />
                         {articles[0].youtube_video_id && (
@@ -227,13 +256,24 @@ function App() {
                               src={
                                 article.featured_image || 
                                 (article.youtube_video_id ? `https://img.youtube.com/vi/${article.youtube_video_id}/mqdefault.jpg` : 
-                                `https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=320&h=180&fit=crop&crop=center`)
+                                // Use category-specific placeholder images instead of random ones
+                                `data:image/svg+xml;base64,${btoa(`<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <rect width="320" height="180" fill="#F3F4F6"/>
+                                  <circle cx="160" cy="90" r="30" fill="#9CA3AF"/>
+                                  <text x="160" y="120" text-anchor="middle" fill="#4B5563" font-size="12" font-family="Arial">${article.category?.toUpperCase() || 'ARTICLE'}</text>
+                                  <path d="M145 75L175 90L145 105V75Z" fill="#F9FAFB"/>
+                                </svg>`)}`)
                               } 
                               alt={article.title}
                               loading="lazy"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement
-                                target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDMyMCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iMTgwIiBmaWxsPSIjRjNGNEY2Ii8+CjxjaXJjbGUgY3g9IjE2MCIgY3k9IjkwIiByPSIzMCIgZmlsbD0iIzlDQTNBRiIvPgo8cGF0aCBkPSJNMTQ1IDc1TDE3NSA5MEwxNDUgMTA1VjcwWiIgZmlsbD0iI0Y5RkFGQiIvPgo8L3N2Zz4K'
+                                target.src = `data:image/svg+xml;base64,${btoa(`<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <rect width="320" height="180" fill="#F3F4F6"/>
+                                  <circle cx="160" cy="90" r="30" fill="#9CA3AF"/>
+                                  <text x="160" y="120" text-anchor="middle" fill="#4B5563" font-size="12" font-family="Arial">NO IMAGE</text>
+                                  <path d="M145 75L175 90L145 105V75Z" fill="#F9FAFB"/>
+                                </svg>`)}`
                               }}
                             />
                             {article.youtube_video_id && (
@@ -643,9 +683,18 @@ function App() {
                   setCurrentView('home')
                   setSelectedArticle(null)
                 }}>Home</a></li>
-                <li><a href="#" onClick={() => setCurrentView('articles')}>Articles</a></li>
-                <li><a href="#" onClick={() => setCurrentView('guides')}>Guides</a></li>
-                <li><a href="#" onClick={() => setCurrentView('tools')}>Tool Reviews</a></li>
+                <li><a href="#" onClick={() => {
+                  setCurrentView('articles')
+                  setSelectedArticle(null)
+                }}>Articles</a></li>
+                <li><a href="#" onClick={() => {
+                  setCurrentView('guides')
+                  setSelectedArticle(null)
+                }}>Guides</a></li>
+                <li><a href="#" onClick={() => {
+                  setCurrentView('tools')
+                  setSelectedArticle(null)
+                }}>Tool Reviews</a></li>
               </ul>
             </div>
           </div>

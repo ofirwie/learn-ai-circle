@@ -28,22 +28,59 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
     if (isOpen) {
       loadArticles()
     }
-  }, [isOpen, filters])
+  }, [isOpen])
+
+  // Separate effect for filters to avoid infinite loading
+  useEffect(() => {
+    if (isOpen) {
+      const timeoutId = setTimeout(() => {
+        loadArticles()
+      }, 300) // Debounce filter changes
+      
+      return () => clearTimeout(timeoutId)
+    }
+  }, [filters.status, filters.category, filters.search])
 
   const loadArticles = async () => {
     try {
       setLoading(true)
       setError(null)
-      const result = await ArticleService.getArticles(1, 50, {
+      
+      console.log('🔍 ContentManager: Starting to load articles...', {
+        filters: filters,
+        isOpen: isOpen,
+        timestamp: new Date().toISOString()
+      })
+      
+      const filterParams = {
         status: filters.status === 'all' ? undefined : filters.status as any,
         category: filters.category === 'all' ? undefined : filters.category,
         search: filters.search || undefined
+      }
+      
+      console.log('📋 ContentManager: Using filter params:', filterParams)
+      
+      const result = await ArticleService.getArticles(1, 50, filterParams)
+      
+      console.log('✅ ContentManager: Articles loaded successfully', {
+        count: result.data?.length || 0,
+        totalCount: result.count || 0,
+        firstArticle: result.data?.[0]?.title || 'none'
       })
-      setArticles(result.data)
+      
+      setArticles(result.data || [])
     } catch (err) {
-      setError('Failed to load articles')
-      console.error('Error loading articles:', err)
+      console.error('❌ ContentManager: Error loading articles:', {
+        error: err,
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined,
+        filters: filters
+      })
+      
+      setError(`Failed to load articles: ${err instanceof Error ? err.message : 'Unknown error'}`)
+      setArticles([]) // Set empty array on error
     } finally {
+      console.log('🏁 ContentManager: Load articles completed')
       setLoading(false)
     }
   }
