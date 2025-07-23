@@ -55,26 +55,43 @@ export class ArticleService {
         dataSize: JSON.stringify(articleData).length,
         hasImages: !!article.featured_image,
         hasYouTube: !!article.youtube_video_id,
-        tagCount: Array.isArray(article.tags) ? article.tags.length : 0
+        tagCount: Array.isArray(article.tags) ? article.tags.length : 0,
+        category: article.category,
+        actualContentPreview: article.content?.substring(0, 100) + '...'
       })
 
       // Step 3: Execute Supabase operation with detailed timing
       console.log('🗄️ ArticleService: Executing Supabase insert...')
       const dbStart = Date.now()
       
-      const supabaseOperation = supabase
-        .from('articles')
-        .insert(articleData)
-        .select()
-        .single()
-
-      const { data, error } = await this.withTimeout(supabaseOperation, 45000)
+      // Create the query first and log it
+      const insertQuery = supabase.from('articles').insert(articleData).select().single()
+      console.log('📋 ArticleService: Query built, starting execution...')
+      
+      // Execute with timeout and more granular timing
+      let dbResult
+      try {
+        console.log('⏰ ArticleService: Starting database operation...')
+        dbResult = await this.withTimeout(insertQuery, 60000) // Increased to 60 seconds
+        console.log('⏰ ArticleService: Database operation returned')
+      } catch (dbErr) {
+        console.error('💥 ArticleService: Database operation failed:', {
+          error: dbErr,
+          message: dbErr instanceof Error ? dbErr.message : 'Unknown error',
+          duration: Date.now() - dbStart,
+          totalDuration: Date.now() - startTime
+        })
+        throw dbErr
+      }
+      
+      const { data, error } = dbResult
       
       console.log('📈 ArticleService: Supabase operation completed', {
         duration: Date.now() - dbStart,
         totalDuration: Date.now() - startTime,
         success: !error,
-        dataReturned: !!data
+        dataReturned: !!data,
+        errorPresent: !!error
       })
 
       if (error) {
@@ -91,6 +108,7 @@ export class ArticleService {
 
       console.log('✅ ArticleService: Article created successfully', {
         id: data.id,
+        category: data.category,
         totalDuration: Date.now() - startTime,
         retryAttempt: retryCount
       })

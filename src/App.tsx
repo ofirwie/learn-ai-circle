@@ -668,9 +668,9 @@ function App() {
                     </div>
                   ))}
                 </div>
-              ) : articles.filter(article => article.category === 'article').length > 0 ? (
+              ) : articles.length > 0 ? (
                 <div className="letsai-grid-layout">
-                  {articles.filter(article => article.category === 'article').map((article) => (
+                  {articles.map((article) => (
                     <article key={article.id} className="modern-article-card" onClick={() => setSelectedArticle(article)}>
                       <div className="article-image-container">
                         {article.featured_image ? (
