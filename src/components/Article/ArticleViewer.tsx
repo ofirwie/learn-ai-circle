@@ -35,12 +35,20 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
 
   // Enhanced content renderer that properly parses markdown and handles complex formatting
   const renderContent = (content: string) => {
+    console.log('🐛 DEBUG: renderContent called with:', {
+      contentLength: content?.length || 0,
+      contentStart: content?.substring(0, 100) || 'NO CONTENT',
+      articleTitle: article.title
+    })
+    
     if (!content || content.trim() === '') {
       return <div>No content available.</div>
     }
 
     // Step 1: Convert YouTube links to proper embeds first
     let processedContent = content
+    
+    console.log('🐛 DEBUG: Initial content has h3?', processedContent.includes('###'))
     
     // Handle iframe elements that are already in the content
     processedContent = processedContent.replace(
@@ -100,6 +108,8 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       .replace(/^\s*---+\s*$/gm, '<hr>') // Convert standalone dashes to HR
     
     // Step 3: Convert markdown headers (process most specific first, handle with and without spaces)
+    console.log('🐛 DEBUG: Before header processing - h3 patterns:', processedContent.match(/^###\s.*$/gm))
+    
     processedContent = processedContent
       .replace(/^#{6}\s*(.*)$/gm, '<h6>$1</h6>')
       .replace(/^#{5}\s*(.*)$/gm, '<h5>$1</h5>')
@@ -107,6 +117,9 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       .replace(/^#{3}\s*(.*)$/gm, '<h3>$1</h3>')
       .replace(/^#{2}\s*(.*)$/gm, '<h2>$1</h2>')
       .replace(/^#{1}\s+(.*)$/gm, '<h1>$1</h1>') // H1 requires space to avoid conflicts
+    
+    console.log('🐛 DEBUG: After header processing - h3 tags:', processedContent.match(/<h3>.*?<\/h3>/g))
+    console.log('🐛 DEBUG: Remaining ### patterns:', processedContent.match(/^###\s.*$/gm))
     
     // Step 4: Convert text formatting (order matters!)
     processedContent = processedContent
@@ -229,6 +242,8 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       .trim()
     
     // Step 9: Return the processed content with enhanced styling
+    console.log('🐛 DEBUG: Final processed content preview:', processedContent.substring(0, 300))
+    
     return (
       <>
         <style>
