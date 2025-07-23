@@ -54,7 +54,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToSignu
           color: '#1f2937',
           marginBottom: '8px'
         }}>
-          Welcome to ISAI
+          Welcome to IS-AI Beta
         </h1>
         <p style={{
           color: '#6b7280',

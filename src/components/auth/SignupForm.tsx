@@ -125,7 +125,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSuccess, onSwitchToLog
           color: '#1f2937',
           marginBottom: '8px'
         }}>
-          Join ISAI
+          Join IS-AI Beta
         </h1>
         <p style={{
           color: '#6b7280',

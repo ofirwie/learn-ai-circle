@@ -113,7 +113,7 @@ function App() {
     return (
       <div className="loading-screen">
         <div className="spinner" />
-        <p>Loading ISAI...</p>
+        <p>Loading IS-AI Beta...</p>
       </div>
     )
   }
@@ -124,7 +124,7 @@ function App() {
       <div className="login-page">
         <div className="login-container">
           <div className="login-header">
-            <h1>ISAI Knowledge Hub</h1>
+            <h1>IS-AI Beta</h1>
             <p>Private Access Required</p>
           </div>
           {authView === 'login' ? (
@@ -156,7 +156,7 @@ function App() {
             setCurrentView('home')
             setSelectedArticle(null)
           }}>
-            ISAI Knowledge Hub
+            IS-AI Beta
           </a>
           
           {/* Main Navigation */}
@@ -759,7 +759,7 @@ function App() {
 
           <div className="footer-bottom">
             <div className="footer-bottom-left">
-              <p>&copy; 2025 ISAI Knowledge Hub. All rights reserved.</p>
+              <p>&copy; 2025 IS-AI Beta. All rights reserved.</p>
               <div className="footer-legal">
                 <a href="/privacy">Privacy Policy</a>
                 <a href="/terms">Terms of Service</a>
