@@ -14,6 +14,8 @@ import { VideoComparison } from './components/Debug/VideoComparison'
 import { MarkdownDebugger } from './components/Debug/MarkdownDebugger'
 import { importPerplexityArticle } from './utils/importPerplexityArticle'
 import { importChatGPTAgentArticle } from './utils/importChatGPTAgentArticle'
+import SimplePromptsViewer from './components/prompts/SimplePromptsViewer'
+import SimpleAnalyticsDashboard from './components/dashboard/SimpleAnalyticsDashboard'
 
 function App() {
   const [currentView, setCurrentView] = useState('home')
@@ -33,6 +35,7 @@ function App() {
   const [showSimpleVideoTest, setShowSimpleVideoTest] = useState(false)
   const [showVideoComparison, setShowVideoComparison] = useState(false)
   const [openWithImport, setOpenWithImport] = useState(false)
+  const [showUserAnalytics, setShowUserAnalytics] = useState(false)
   const { user, loading, initialized, initialize, signOut } = useAuthStore()
   
   useEffect(() => {
@@ -196,6 +199,12 @@ function App() {
               setSelectedArticle(null)
             }} className={currentView === 'tools' ? 'active' : ''}>
               Tools Review
+            </a>
+            <a href="#" onClick={() => {
+              setCurrentView('prompts')
+              setSelectedArticle(null)
+            }} className={currentView === 'prompts' ? 'active' : ''}>
+              Prompts
             </a>
           </nav>
           
@@ -494,6 +503,10 @@ function App() {
               )}
             </section>
           </div>
+        ) : currentView === 'prompts' ? (
+          <div className="page-transition">
+            <SimplePromptsViewer />
+          </div>
         ) : currentView === 'articles' ? (
           <div className="page-transition">
             <section className="page-header">
@@ -669,6 +682,10 @@ function App() {
                 <button className="create-button" onClick={handleImportChatGPTAgentArticle}>
                   <span className="icon">🚀</span>
                   Import ChatGPT Agent Article
+                </button>
+                <button className="create-button" onClick={() => setShowUserAnalytics(true)}>
+                  <span className="icon">📊</span>
+                  User Analytics Dashboard
                 </button>
               </div>
               
@@ -862,6 +879,63 @@ function App() {
         isOpen={showVideoComparison}
         onClose={() => setShowVideoComparison(false)}
       />
+
+      {/* User Analytics Dashboard Modal */}
+      {showUserAnalytics && (
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowUserAnalytics(false)
+            }
+          }} 
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0, 
+            background: 'rgba(0,0,0,0.8)', 
+            zIndex: 9998,
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            padding: '20px',
+            overflowY: 'auto'
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'white',
+              borderRadius: '8px',
+              width: '100%',
+              maxWidth: '1200px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              padding: '20px',
+              position: 'relative'
+            }}
+          >
+            <button
+              onClick={() => setShowUserAnalytics(false)}
+              style={{
+                position: 'absolute',
+                top: '15px',
+                right: '15px',
+                background: 'none',
+                border: 'none',
+                fontSize: '24px',
+                cursor: 'pointer',
+                color: '#666',
+                zIndex: 1
+              }}
+            >
+              ×
+            </button>
+            <SimpleAnalyticsDashboard />
+          </div>
+        </div>
+      )}
 
     </div>
   )
