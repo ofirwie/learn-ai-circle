@@ -30,16 +30,16 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
     }
   }, [isOpen])
 
-  // Separate effect for filters to avoid infinite loading
+  // Separate effect for filters with debounce
   useEffect(() => {
-    if (isOpen) {
-      const timeoutId = setTimeout(() => {
-        loadArticles()
-      }, 300) // Debounce filter changes
-      
-      return () => clearTimeout(timeoutId)
-    }
-  }, [filters.status, filters.category, filters.search])
+    if (!isOpen) return
+    
+    const timeoutId = setTimeout(() => {
+      loadArticles()
+    }, 300)
+    
+    return () => clearTimeout(timeoutId)
+  }, [filters.status, filters.category, filters.search, isOpen])
 
   const loadArticles = async () => {
     try {
