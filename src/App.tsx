@@ -10,6 +10,7 @@ import { InviteCodeManager } from './components/Admin/InviteCodeManager'
 import { ContentManager } from './components/Admin/ContentManager'
 import { VideoEmbedDebugger } from './components/Debug/VideoEmbedDebugger'
 import { SimpleVideoTest } from './components/Debug/SimpleVideoTest'
+import { VideoComparison } from './components/Debug/VideoComparison'
 
 function App() {
   const [currentView, setCurrentView] = useState('home')
@@ -26,6 +27,7 @@ function App() {
   const [showContentManager, setShowContentManager] = useState(false)
   const [showVideoDebugger, setShowVideoDebugger] = useState(false)
   const [showSimpleVideoTest, setShowSimpleVideoTest] = useState(false)
+  const [showVideoComparison, setShowVideoComparison] = useState(false)
   const [openWithImport, setOpenWithImport] = useState(false)
   const { user, loading, initialized, initialize, signOut } = useAuthStore()
   
@@ -624,6 +626,10 @@ function App() {
                   <span className="icon">🎬</span>
                   Simple Video Test
                 </button>
+                <button className="create-button" onClick={() => setShowVideoComparison(true)}>
+                  <span className="icon">🔍</span>
+                  Video Comparison
+                </button>
               </div>
               
               <div className="admin-stats">
@@ -781,6 +787,12 @@ function App() {
       <SimpleVideoTest
         isOpen={showSimpleVideoTest}
         onClose={() => setShowSimpleVideoTest(false)}
+      />
+
+      {/* Video Comparison Modal */}
+      <VideoComparison
+        isOpen={showVideoComparison}
+        onClose={() => setShowVideoComparison(false)}
       />
 
     </div>
