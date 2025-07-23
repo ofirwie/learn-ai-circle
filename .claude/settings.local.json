@@ -23,7 +23,10 @@
       "Bash(npm run deploy:*)",
       "Bash(npm run:*)",
       "Bash(vercel:*)",
-      "Bash(tar:*)"
+      "Bash(tar:*)",
+      "Bash(cd F:/git/ai-knowledge-hub-fresh)",
+      "Bash(git add .)",
+      "Bash(git commit -m \"Increase MarkdownDebugger content preview length and height\")"
     ],
     "deny": []
   }

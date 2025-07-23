@@ -43,7 +43,7 @@ export const MarkdownDebugger: React.FC<MarkdownDebuggerProps> = ({ onClose }) =
       steps.push({
         step: '1. Raw File Content',
         description: `Original markdown file content (${rawContent.length} chars)`,
-        content: rawContent.length > 500 ? rawContent.substring(0, 500) + '...' : rawContent,
+        content: rawContent.length > 1500 ? rawContent.substring(0, 1500) + '...' : rawContent,
         h3Patterns: rawContent.match(/^###\s.*$/gm) || [],
         h3Tags: rawContent.match(/<h3>.*?<\/h3>/g) || []
       })
@@ -58,7 +58,7 @@ export const MarkdownDebugger: React.FC<MarkdownDebuggerProps> = ({ onClose }) =
       steps.push({
         step: '2. After MarkdownParser.parseMarkdown()',
         description: `Content after markdown parsing (title removed) - ${parsed.content.length} chars`,
-        content: parsed.content.length > 500 ? parsed.content.substring(0, 500) + '...' : parsed.content,
+        content: parsed.content.length > 1500 ? parsed.content.substring(0, 1500) + '...' : parsed.content,
         h3Patterns: parsed.content.match(/^###\s.*$/gm) || [],
         h3Tags: parsed.content.match(/<h3>.*?<\/h3>/g) || []
       })
@@ -77,7 +77,7 @@ export const MarkdownDebugger: React.FC<MarkdownDebuggerProps> = ({ onClose }) =
       steps.push({
         step: '3. After cleanup',
         description: 'After removing dashes and artifacts',
-        content: processed.length > 500 ? processed.substring(0, 500) + '...' : processed,
+        content: processed.length > 1500 ? processed.substring(0, 1500) + '...' : processed,
         h3Patterns: processed.match(/^###\s.*$/gm) || [],
         h3Tags: processed.match(/<h3>.*?<\/h3>/g) || []
       })
@@ -98,7 +98,7 @@ export const MarkdownDebugger: React.FC<MarkdownDebuggerProps> = ({ onClose }) =
       steps.push({
         step: '4. After header processing ⭐ KEY STEP',
         description: 'After converting ### to <h3> tags - this should show h3 tags!',
-        content: processed.length > 500 ? processed.substring(0, 500) + '...' : processed,
+        content: processed.length > 1500 ? processed.substring(0, 1500) + '...' : processed,
         h3Patterns: processed.match(/^###\s.*$/gm) || [],
         h3Tags: processed.match(/<h3>.*?<\/h3>/g) || []
       })
@@ -117,7 +117,7 @@ export const MarkdownDebugger: React.FC<MarkdownDebuggerProps> = ({ onClose }) =
       steps.push({
         step: '5. Final result',
         description: 'After all text formatting',
-        content: processed.length > 500 ? processed.substring(0, 500) + '...' : processed,
+        content: processed.length > 1500 ? processed.substring(0, 1500) + '...' : processed,
         h3Patterns: processed.match(/^###\s.*$/gm) || [],
         h3Tags: processed.match(/<h3>.*?<\/h3>/g) || []
       })
@@ -213,9 +213,11 @@ export const MarkdownDebugger: React.FC<MarkdownDebuggerProps> = ({ onClose }) =
                     background: '#f3f4f6',
                     padding: '12px',
                     borderRadius: '6px',
-                    fontSize: '12px',
+                    fontSize: '11px',
                     overflow: 'auto',
-                    margin: 0
+                    margin: 0,
+                    maxHeight: '300px',
+                    whiteSpace: 'pre-wrap'
                   }}>
                     {step.content}
                   </pre>
