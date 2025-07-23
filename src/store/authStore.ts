@@ -2,6 +2,9 @@ import { create } from 'zustand'
 import { supabase } from '../services/supabase'
 import { User, Entity, UserGroup, RegistrationCode } from '../types/database.types'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { analyticsService } from '../services/analyticsService'
+import { sessionService } from '../services/sessionService'
+import { registrationCodeService } from '../services/registrationCodeService'
 
 interface AuthState {
   user: SupabaseUser | null
@@ -45,6 +48,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           .single()
 
         if (!profileError && userProfile) {
+          // Restore or start new session
+          if (!sessionService.restoreSession()) {
+            await sessionService.startSession(session.user.id, userProfile.entity_id)
+          }
+          
           set({
             user: session.user,
             userProfile,
@@ -64,6 +72,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Listen for auth changes
       supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === 'SIGNED_OUT') {
+          // End session and cleanup analytics
+          await sessionService.endSession()
+          
           set({
             user: null,
             userProfile: null,
@@ -84,6 +95,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             .single()
 
           if (userProfile) {
+            // Start new session
+            await sessionService.startSession(session.user.id, userProfile.entity_id)
+            
             set({
               user: session.user,
               userProfile,
@@ -114,12 +128,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return { success: false, error: error.message }
       }
 
-      // Update last login
+      // Update last login and log analytics
       if (data.user) {
         await supabase
           .from('users')
           .update({ last_login: new Date().toISOString() })
           .eq('id', data.user.id)
+        
+        // Log login event
+        await analyticsService.logLogin(data.user.id)
       }
 
       return { success: true }
@@ -174,13 +191,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         if (profileError) {
           console.error('Profile creation error:', profileError)
+        } else {
+          // Log registration analytics
+          await analyticsService.logRegistration(
+            data.user.id, 
+            registrationCode, 
+            codeValidation.entity?.id
+          )
         }
 
-        // Increment registration code usage
-        await supabase
-          .from('registration_codes')
-          .update({ current_uses: supabase.sql`current_uses + 1` })
-          .eq('code', registrationCode)
+        // Use registration code service to handle usage increment
+        await registrationCodeService.useCode(registrationCode, data.user.id)
       }
 
       set({ loading: false })
@@ -192,7 +213,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signOut: async () => {
+    const { userProfile } = get()
     set({ loading: true })
+    
+    // End session and log logout
+    if (userProfile) {
+      await analyticsService.logLogout(userProfile.id)
+    }
+    await sessionService.endSession()
+    
     await supabase.auth.signOut()
     set({
       user: null,
@@ -230,59 +259,39 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   validateRegistrationCode: async (code: string) => {
     console.log('🔐 AuthStore: Validating registration code:', code)
-    try {
-      const { data, error } = await supabase
-        .from('registration_codes')
+    
+    // Use the registration code service for validation
+    const validation = await registrationCodeService.validateCode(code)
+    
+    if (!validation.valid) {
+      return { valid: false, error: validation.message }
+    }
+
+    // Fetch entity and user group if code has them
+    let entity = null, userGroup = null;
+    
+    if (validation.codeData?.entity_id) {
+      const { data: entityData } = await supabase
+        .from('entities')
         .select('*')
-        .eq('code', code)
-        .eq('is_active', true)
+        .eq('id', validation.codeData.entity_id)
         .single()
+      entity = entityData
+    }
+    
+    if (validation.codeData?.user_group_id) {
+      const { data: groupData } = await supabase
+        .from('user_groups')
+        .select('*')
+        .eq('id', validation.codeData.user_group_id)
+        .single()
+      userGroup = groupData
+    }
 
-      console.log('📊 Registration code response:', { data, error })
-
-      if (error || !data) {
-        console.error('❌ Code validation failed:', error?.message || 'No data')
-        return { valid: false, error: 'Registration code not found' }
-      }
-
-      // Check if code has expired
-      if (data.expires_at && new Date(data.expires_at) < new Date()) {
-        return { valid: false, error: 'Registration code has expired' }
-      }
-
-      // Check if code has reached max uses
-      if (data.max_uses && data.current_uses >= data.max_uses) {
-        return { valid: false, error: 'Registration code has reached maximum uses' }
-      }
-
-      // Fetch entity and user group separately if needed
-      let entity = null, userGroup = null;
-      
-      if (data.entity_id) {
-        const { data: entityData } = await supabase
-          .from('entities')
-          .select('*')
-          .eq('id', data.entity_id)
-          .single()
-        entity = entityData
-      }
-      
-      if (data.user_group_id) {
-        const { data: groupData } = await supabase
-          .from('user_groups')
-          .select('*')
-          .eq('id', data.user_group_id)
-          .single()
-        userGroup = groupData
-      }
-
-      return {
-        valid: true,
-        entity: entity as Entity,
-        userGroup: userGroup as UserGroup
-      }
-    } catch (error) {
-      return { valid: false, error: 'Error validating registration code' }
+    return {
+      valid: true,
+      entity: entity as Entity,
+      userGroup: userGroup as UserGroup
     }
   }
 }))

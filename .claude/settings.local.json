@@ -29,7 +29,9 @@
       "Bash(git commit -m \"Increase MarkdownDebugger content preview length and height\")",
       "Bash(git commit -m \"$(cat <<''EOF''\nFix h3 header display by cleaning formatting before HTML conversion\n\nISSUE IDENTIFIED: Headers contained nested HTML like <h3><strong>text</strong></h3>\n- Added step to clean **bold**, __bold__, *italic*, _italic_, `code` from headers BEFORE converting to HTML\n- This prevents nested HTML tags that break header display\n- Headers now render as clean <h3>text</h3> instead of <h3><strong>text</strong></h3>\n- Updated step numbering to accommodate new processing step\n\n🤖 Generated with [Claude Code](https://claude.ai/code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(git commit -m \"Add debug logging to see real article content\")",
-      "Bash(git commit -m \"Add debug to see all h3 patterns in content\")"
+      "Bash(git commit -m \"Add debug to see all h3 patterns in content\")",
+      "Bash(find:*)",
+      "Bash(npm install:*)"
     ],
     "deny": []
   }
