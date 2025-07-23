@@ -91,12 +91,29 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       .replace(/^#{2}\s+(.+)$/gm, '<h2>$1</h2>')
       .replace(/^#{1}\s+(.+)$/gm, '<h1>$1</h1>')
     
-    // Step 4: Convert bold and italic text
+    // Step 4: Convert text formatting (order matters!)
     processedContent = processedContent
-      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>') // **bold**
-      .replace(/\*([^*]+)\*/g, '<em>$1</em>') // *italic*
-      .replace(/__([^_]+)__/g, '<strong>$1</strong>') // __bold__
-      .replace(/_([^_]+)_/g, '<em>$1</em>') // _italic_
+      // Strikethrough first
+      .replace(/~~([^~]+)~~/g, '<del>$1</del>') // ~~strikethrough~~
+      // Bold (handle both ** and __ formats)
+      .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>') // **bold**
+      .replace(/__([^_\n]+)__/g, '<strong>$1</strong>') // __bold__
+      // Italic (handle both * and _ formats, but not if already in bold)
+      .replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '<em>$1</em>') // *italic*
+      .replace(/(?<!_)_([^_\n]+)_(?!_)/g, '<em>$1</em>') // _italic_
+      // Inline code
+      .replace(/`([^`]+)`/g, '<code>$1</code>') // `code`
+    
+    // Step 4b: Handle code blocks (before other processing)
+    processedContent = processedContent.replace(/```(\w+)?\n([\s\S]*?)\n```/g, (match, language, code) => {
+      return `<pre><code class="language-${language || 'text'}">${code.trim()}</code></pre>`
+    })
+    
+    // Step 4c: Handle blockquotes
+    processedContent = processedContent.replace(/^>\s(.+)$/gm, '<blockquote>$1</blockquote>')
+    
+    // Step 4d: Handle links [text](url)
+    processedContent = processedContent.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
     
     // Step 5: Convert bullet lists
     const lines = processedContent.split('\n')
@@ -132,8 +149,39 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
     
     processedContent = processedLines.join('\n')
     
-    // Step 6: Convert numbered lists
-    processedContent = processedContent.replace(/^(\d+)\.\s+(.+)$/gm, '<li>$2</li>')
+    // Step 6: Convert numbered lists (similar to bullet lists)
+    const numberedLines = processedContent.split('\n')
+    const processedNumberedLines: string[] = []
+    let inNumberedList = false
+    
+    for (let i = 0; i < numberedLines.length; i++) {
+      const line = numberedLines[i]
+      const trimmedLine = line.trim()
+      
+      // Check if this is a numbered list item
+      if (trimmedLine.match(/^\d+\.\s+/)) {
+        if (!inNumberedList) {
+          processedNumberedLines.push('<ol>')
+          inNumberedList = true
+        }
+        const listContent = trimmedLine.replace(/^\d+\.\s+/, '')
+        processedNumberedLines.push(`<li>${listContent}</li>`)
+      } else {
+        // Not a numbered list item
+        if (inNumberedList) {
+          processedNumberedLines.push('</ol>')
+          inNumberedList = false
+        }
+        processedNumberedLines.push(line)
+      }
+    }
+    
+    // Close any remaining numbered list
+    if (inNumberedList) {
+      processedNumberedLines.push('</ol>')
+    }
+    
+    processedContent = processedNumberedLines.join('\n')
     
     // Step 7: Convert paragraphs (split by double newlines)
     const paragraphs = processedContent.split(/\n\s*\n/)
@@ -324,6 +372,35 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
               font-family: 'Fira Code', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
               font-size: 14px;
               line-height: 1.5;
+            }
+            
+            .article-content pre code {
+              background: none;
+              padding: 0;
+              color: inherit;
+              font-size: inherit;
+            }
+            
+            .article-content blockquote {
+              border-left: 4px solid #3b82f6;
+              padding-left: 20px;
+              margin: 24px 0;
+              background: #f8fafc;
+              padding: 16px 20px;
+              border-radius: 8px;
+              font-style: italic;
+              color: #475569;
+            }
+            
+            .article-content del {
+              text-decoration: line-through;
+              color: #9ca3af;
+            }
+            
+            .article-content ol {
+              margin-bottom: 20px;
+              padding-left: 28px;
+              list-style-type: decimal;
             }
             
             .article-content a {
