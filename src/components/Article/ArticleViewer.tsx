@@ -100,7 +100,6 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       .replace(/^\s*---+\s*$/gm, '<hr>') // Convert standalone dashes to HR
     
     // Step 3: Convert markdown headers (process most specific first, handle with and without spaces)
-    console.log('🔍 BEFORE header processing:', processedContent.substring(0, 200))
     processedContent = processedContent
       .replace(/^#{6}\s*(.*)$/gm, '<h6>$1</h6>')
       .replace(/^#{5}\s*(.*)$/gm, '<h5>$1</h5>')
@@ -108,8 +107,6 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       .replace(/^#{3}\s*(.*)$/gm, '<h3>$1</h3>')
       .replace(/^#{2}\s*(.*)$/gm, '<h2>$1</h2>')
       .replace(/^#{1}\s+(.*)$/gm, '<h1>$1</h1>') // H1 requires space to avoid conflicts
-    
-    console.log('🔍 AFTER header processing:', processedContent.substring(0, 200))
     
     // Step 4: Convert text formatting (order matters!)
     processedContent = processedContent
