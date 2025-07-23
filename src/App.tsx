@@ -8,6 +8,7 @@ import { ArticleCreator } from './components/Article/ArticleCreator'
 import { ArticleViewer } from './components/Article/ArticleViewer'
 import { InviteCodeManager } from './components/Admin/InviteCodeManager'
 import { ContentManager } from './components/Admin/ContentManager'
+import { VideoEmbedDebugger } from './components/Debug/VideoEmbedDebugger'
 
 function App() {
   const [currentView, setCurrentView] = useState('home')
@@ -22,6 +23,7 @@ function App() {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
   const [showInviteCodeManager, setShowInviteCodeManager] = useState(false)
   const [showContentManager, setShowContentManager] = useState(false)
+  const [showVideoDebugger, setShowVideoDebugger] = useState(false)
   const [openWithImport, setOpenWithImport] = useState(false)
   const { user, loading, initialized, initialize, signOut } = useAuthStore()
   
@@ -612,6 +614,10 @@ function App() {
                   <span className="icon">📊</span>
                   Manage Content
                 </button>
+                <button className="create-button" onClick={() => setShowVideoDebugger(true)}>
+                  <span className="icon">🧪</span>
+                  Debug Video Embeds
+                </button>
               </div>
               
               <div className="admin-stats">
@@ -757,6 +763,12 @@ function App() {
           setShowContentManager(false)
           setShowArticleCreator(true)
         }}
+      />
+
+      {/* Video Embed Debugger Modal */}
+      <VideoEmbedDebugger
+        isOpen={showVideoDebugger}
+        onClose={() => setShowVideoDebugger(false)}
       />
 
     </div>
