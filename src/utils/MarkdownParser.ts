@@ -34,22 +34,41 @@ export class MarkdownParser {
       }
     }
     
-    // Extract YouTube video IDs from multiple formats
-    const patterns = [
-      /<iframe[^>]*src="https:\/\/www\.youtube\.com\/embed\/([^"?]+)"/g, // iframe embeds
-      /https:\/\/www\.youtube\.com\/embed\/([^?\s"]+)/g, // direct embed URLs
-      /https:\/\/www\.youtube\.com\/watch\?v=([^&\s"]+)/g, // watch URLs
-      /https:\/\/youtu\.be\/([^?\s"]+)/g // short URLs
-    ]
+    // Only extract YouTube video IDs if they are meant to be separate from content
+    // (i.e., when they're in frontmatter or specifically marked as featured video)
+    // Regular content videos should stay in the content flow
     
-    for (const pattern of patterns) {
-      let match
-      while ((match = pattern.exec(markdownContent)) !== null) {
-        if (match[1] && !youtubeVideoIds.includes(match[1])) {
-          youtubeVideoIds.push(match[1])
+    // Check if there are any video URLs in frontmatter or special sections
+    const frontmatterMatch = markdownContent.match(/^---\n([\s\S]*?)\n---/)
+    let shouldExtractVideos = false
+    
+    if (frontmatterMatch) {
+      const frontmatter = frontmatterMatch[1]
+      if (frontmatter.includes('video:') || frontmatter.includes('youtube:')) {
+        shouldExtractVideos = true
+      }
+    }
+    
+    // Only extract if specifically marked as featured or in frontmatter
+    if (shouldExtractVideos) {
+      const patterns = [
+        /<iframe[^>]*src="https:\/\/www\.youtube\.com\/embed\/([^"?]+)"/g, // iframe embeds
+        /https:\/\/www\.youtube\.com\/embed\/([^?\s"]+)/g, // direct embed URLs
+        /https:\/\/www\.youtube\.com\/watch\?v=([^&\s"]+)/g, // watch URLs
+        /https:\/\/youtu\.be\/([^?\s"]+)/g // short URLs
+      ]
+      
+      for (const pattern of patterns) {
+        let match
+        while ((match = pattern.exec(markdownContent)) !== null) {
+          if (match[1] && !youtubeVideoIds.includes(match[1])) {
+            youtubeVideoIds.push(match[1])
+          }
         }
       }
     }
+    
+    // For content with inline videos, leave them in the content
     
     // Generate excerpt from first paragraph after title
     excerpt = this.generateExcerpt(markdownContent)
@@ -89,7 +108,7 @@ export class MarkdownParser {
       }
     }
     
-    // Remove markdown syntax and HTML tags
+    // Remove markdown syntax, HTML tags, and video URLs
     let plainText = contentWithoutTitle
       .replace(/#{1,6}\s/g, '') // Headers
       .replace(/\*\*(.*?)\*\*/g, '$1') // Bold
@@ -99,6 +118,9 @@ export class MarkdownParser {
       .replace(/<[^>]*>/g, '') // HTML tags
       .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Links
       .replace(/!\[([^\]]*)\]\([^)]+\)/g, '') // Images
+      .replace(/https:\/\/www\.youtube\.com\/watch\?v=[^\s]+/g, '') // YouTube URLs
+      .replace(/https:\/\/youtu\.be\/[^\s]+/g, '') // YouTube short URLs
+      .replace(/Watch this video.*?:/gi, '') // Video introduction text
       .replace(/\n{2,}/g, ' ') // Multiple newlines
       .replace(/\n/g, ' ') // Single newlines
       .trim()
