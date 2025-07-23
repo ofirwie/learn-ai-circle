@@ -422,24 +422,6 @@ function App() {
               )}
             </section>
           </div>
-        ) : currentView === 'prompts' ? (
-          <div className="page-transition">
-            <section className="page-header">
-              <div className="page-icon">⚡</div>
-              <h1 className="page-title">AI Prompts & Prefixes</h1>
-              <p className="page-subtitle">
-                Ready-to-use prompts and shortcuts to boost your productivity
-              </p>
-            </section>
-            
-            <section className="content-section">
-              <div className="coming-soon-card">
-                <div className="coming-soon-icon">⚡</div>
-                <h3>Coming Soon</h3>
-                <p>AI prompts library is being curated for you.</p>
-              </div>
-            </section>
-          </div>
         ) : currentView === 'tools' ? (
           <div className="page-transition">
             <section className="page-header">
@@ -519,43 +501,61 @@ function App() {
             
             <section className="content-section">
               {loadingContent ? (
-                <div className="loading-skeleton-grid">
-                  {Array(6).fill(0).map((_, i) => (
-                    <div key={i} className="article-card-skeleton">
-                      <div className="skeleton-image"></div>
-                      <div className="skeleton-content">
-                        <div className="skeleton-title"></div>
-                        <div className="skeleton-text"></div>
-                        <div className="skeleton-text short"></div>
-                      </div>
-                    </div>
-                  ))}
+                <div className="content-loading">
+                  <div className="spinner" />
+                  <p>Loading articles...</p>
                 </div>
               ) : articles.length > 0 ? (
-                <div className="letsai-grid-layout">
+                <div className="techcrunch-grid">
                   {articles.map((article) => (
-                    <article key={article.id} className="modern-article-card" onClick={() => setSelectedArticle(article)}>
-                      <div className="article-image-container">
-                        {article.featured_image ? (
-                          <img src={article.featured_image} alt={article.title} className="article-image" />
-                        ) : (
-                          <div className="article-image-placeholder article-placeholder">
-                            <span className="placeholder-icon">📄</span>
-                          </div>
+                    <article 
+                      key={article.id} 
+                      className="techcrunch-card" 
+                      onClick={() => setSelectedArticle(article)}
+                    >
+                      <div className="techcrunch-card-image">
+                        <img 
+                          src={
+                            article.featured_image || 
+                            (article.youtube_video_id ? `https://img.youtube.com/vi/${article.youtube_video_id}/mqdefault.jpg` : 
+                            `data:image/svg+xml;base64,${btoa(`<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="320" height="180" fill="#F3F4F6"/>
+                              <circle cx="160" cy="90" r="30" fill="#9CA3AF"/>
+                              <text x="160" y="120" text-anchor="middle" fill="#4B5563" font-size="12" font-family="Arial">${article.category?.toUpperCase() || 'ARTICLE'}</text>
+                              <path d="M145 75L175 90L145 105V75Z" fill="#F9FAFB"/>
+                            </svg>`)}`)
+                          } 
+                          alt={article.title}
+                          loading="lazy"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement
+                            target.src = `data:image/svg+xml;base64,${btoa(`<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="320" height="180" fill="#F3F4F6"/>
+                              <circle cx="160" cy="90" r="30" fill="#9CA3AF"/>
+                              <text x="160" y="120" text-anchor="middle" fill="#4B5563" font-size="12" font-family="Arial">NO IMAGE</text>
+                              <path d="M145 75L175 90L145 105V75Z" fill="#F9FAFB"/>
+                            </svg>`)}`
+                          }}
+                        />
+                        {article.youtube_video_id && (
+                          <div className="techcrunch-play-button">▶</div>
                         )}
-                        <div className="content-type-badge article-badge">
-                          <span className="badge-icon">📄</span>
-                          Article
-                        </div>
                       </div>
-                      <div className="article-content">
-                        <h2 className="article-title">{article.title}</h2>
-                        <p className="article-excerpt">{article.excerpt}</p>
-                        <div className="article-meta">
-                          <span className="article-author">{article.author}</span>
-                          <span className="article-date">
-                            {new Date(article.published_at || article.created_at).toLocaleDateString()}
-                          </span>
+                      <div className="techcrunch-card-content">
+                        <span className="techcrunch-card-category">
+                          {article.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}
+                        </span>
+                        <h3>{article.title}</h3>
+                        {article.excerpt && (
+                          <p className="techcrunch-card-excerpt">
+                            {article.excerpt.length > 120 ? `${article.excerpt.substring(0, 120)}...` : article.excerpt}
+                          </p>
+                        )}
+                        <div className="techcrunch-card-meta">
+                          {new Date(article.created_at).toLocaleDateString()} • {article.author}
+                          {article.view_count && article.view_count > 0 && (
+                            <span> • {article.view_count} views</span>
+                          )}
                         </div>
                       </div>
                     </article>
