@@ -11,7 +11,7 @@ Let's explore its standout features, real-world applications, safeguards, and li
 
 The ChatGPT Agent is built to perform tasks that go beyond typical conversational AI. It takes a sophisticated approach by actively completing end-to-end processes on behalf of users. Here are some of its standout features:
 
-### 1. **Integrated Virtual Computer**
+### 1. Integrated Virtual Computer
 
 The agent operates via its own virtual computer, where it can:
 - Navigate websites using both a visual and text-based browser.
@@ -20,11 +20,11 @@ The agent operates via its own virtual computer, where it can:
 
 This functionality allows the agent to gather, process, and summarize information with efficiency and precision.
 
-### 2. **Blended Operator and Deep Research Strengths**
+### 2. Blended Operator and Deep Research Strengths
 
 Previously, Operator specialized in web interactions, while Deep Research focused on synthesizing detailed information. ChatGPT Agent combines these functionalities, giving users a single AI capable of handling both data-heavy and action-driven tasks. For example, it can analyze competitor strategies to create a slide deck or interact with authentication-protected websites to complete forms or fetch data.
 
-### 3. **User-Centric Controls**
+### 3. User-Centric Controls
 
 The tool operates with safeguards that prioritize user oversight:
 - Explicit permissions are required before critical actions, such as purchases or financial transactions.
@@ -36,14 +36,14 @@ The tool operates with safeguards that prioritize user oversight:
 The ChatGPT Agent is designed to handle a variety of tasks across personal and professional contexts:
 
 ### Personal Productivity
-- **Travel Planning**: Book flights, reserve accommodations, and create detailed itineraries.
-- **Shopping Assistance**: Compare products, find discounts, and complete purchases with user approval.
-- **Research Projects**: Gather information from multiple sources and compile comprehensive reports.
+- **Travel Planning**: Book flights, reserve accommodations, and create detailed itineraries
+- **Shopping Assistance**: Compare products, find discounts, and complete purchases with user approval
+- **Research Projects**: Gather information from multiple sources and compile comprehensive reports
 
 ### Professional Use Cases
-- **Data Analysis**: Pull data from various platforms, analyze trends, and create visualizations.
-- **Document Creation**: Draft reports, presentations, or proposals based on research and user requirements.
-- **Workflow Automation**: Handle repetitive tasks like scheduling, email management, or form submissions.
+- **Data Analysis**: Pull data from various platforms, analyze trends, and create visualizations
+- **Document Creation**: Draft reports, presentations, or proposals based on research and user requirements
+- **Workflow Automation**: Handle repetitive tasks like scheduling, email management, or form submissions
 
 ## Safeguards and Limitations
 
