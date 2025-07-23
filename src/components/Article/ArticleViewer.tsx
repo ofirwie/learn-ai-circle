@@ -42,6 +42,23 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
     // Step 1: Convert YouTube links to proper embeds first
     let processedContent = content
     
+    // Handle iframe elements that are already in the content
+    processedContent = processedContent.replace(
+      /<iframe[^>]*src="https:\/\/www\.youtube\.com\/embed\/([^"]+)"[^>]*>[^<]*<\/iframe>/gi,
+      (match, videoId) => {
+        return `
+          <div class="youtube-embed" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 600px; margin: 20px auto; border-radius: 12px;">
+            <iframe 
+              src="https://www.youtube.com/embed/${videoId}" 
+              style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px;"
+              frameborder="0" 
+              allowfullscreen>
+            </iframe>
+          </div>
+        `
+      }
+    )
+    
     // Convert YouTube anchor links to embeds
     const youtubeAnchorRegex = /<a[^>]*href="https:\/\/www\.youtube\.com\/watch\?v=([^"&]+)"[^>]*>([^<]+)<\/a>/gi
     processedContent = processedContent.replace(youtubeAnchorRegex, (match, videoId, linkText) => {
@@ -82,14 +99,14 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       .replace(/\s*---+\s*$/gm, '') // Remove trailing dashes
       .replace(/^\s*---+\s*$/gm, '<hr>') // Convert standalone dashes to HR
     
-    // Step 3: Convert markdown headers (process from most specific to least)
+    // Step 3: Convert markdown headers (handle with and without spaces)
     processedContent = processedContent
-      .replace(/^#{6}\s+(.+)$/gm, '<h6>$1</h6>')
-      .replace(/^#{5}\s+(.+)$/gm, '<h5>$1</h5>')
-      .replace(/^#{4}\s+(.+)$/gm, '<h4>$1</h4>')
-      .replace(/^#{3}\s+(.+)$/gm, '<h3>$1</h3>')
-      .replace(/^#{2}\s+(.+)$/gm, '<h2>$1</h2>')
-      .replace(/^#{1}\s+(.+)$/gm, '<h1>$1</h1>')
+      .replace(/^######\s*(.+)$/gm, '<h6>$1</h6>')
+      .replace(/^#####\s*(.+)$/gm, '<h5>$1</h5>')
+      .replace(/^####\s*(.+)$/gm, '<h4>$1</h4>')
+      .replace(/^###\s*(.+)$/gm, '<h3>$1</h3>')
+      .replace(/^##\s*(.+)$/gm, '<h2>$1</h2>')
+      .replace(/^#\s*(.+)$/gm, '<h1>$1</h1>')
     
     // Step 4: Convert text formatting (order matters!)
     processedContent = processedContent
@@ -189,8 +206,8 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       const trimmed = para.trim()
       if (!trimmed) return ''
       
-      // Skip if already wrapped in HTML tags
-      if (trimmed.match(/^<(h[1-6]|ul|ol|li|div|hr|iframe)/i)) {
+      // Skip if already wrapped in HTML tags or starts with <iframe
+      if (trimmed.match(/^<(h[1-6]|ul|ol|li|div|hr|iframe)/i) || trimmed.includes('<iframe')) {
         return trimmed
       }
       

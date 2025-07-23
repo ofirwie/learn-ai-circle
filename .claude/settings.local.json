@@ -22,7 +22,8 @@
       "Bash(python:*)",
       "Bash(npm run deploy:*)",
       "Bash(npm run:*)",
-      "Bash(vercel:*)"
+      "Bash(vercel:*)",
+      "Bash(tar:*)"
     ],
     "deny": []
   }
