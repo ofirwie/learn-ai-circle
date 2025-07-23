@@ -112,18 +112,26 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
     }
   }
 
-  const importMarkdownData = async () => {
+  const importMarkdownData = () => {
     if (!parsedData) return
     
+    // Log what we're importing
+    console.log('📥 Importing markdown data:', {
+      title: parsedData.title,
+      contentLength: parsedData.content?.length || 0,
+      contentType: parsedData.contentType,
+      videoIds: parsedData.youtubeVideoIds
+    })
+    
     // Populate form fields
-    setTitle(parsedData.title)
-    setContent(parsedData.content)
-    setExcerpt(parsedData.excerpt)
+    setTitle(parsedData.title || '')
+    setContent(parsedData.content || '')
+    setExcerpt(parsedData.excerpt || '')
     setContentType(parsedData.contentType)
-    setAuthor('Ofir Wienerman') // Set default author
+    setAuthor('Ofir Wienerman')
     
     // Set first YouTube video if found
-    if (parsedData.youtubeVideoIds.length > 0) {
+    if (parsedData.youtubeVideoIds && parsedData.youtubeVideoIds.length > 0) {
       setYoutubeVideoId(parsedData.youtubeVideoIds[0])
     }
     
@@ -132,13 +140,18 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
     setParsedData(null)
     setMarkdownFile(null)
     
-    // Auto-publish after import
-    setSuccessMessage('✅ Content imported! Publishing article...')
+    // Show success message
+    setSuccessMessage('✅ Content imported successfully! Review the fields below and click "Publish Article" to save.')
     
-    // Wait a moment for state to update, then auto-save
+    // Scroll to form after a short delay
     setTimeout(() => {
-      handleSave('published')
-    }, 500)
+      window.scrollTo({ top: 400, behavior: 'smooth' })
+    }, 100)
+    
+    // Clear success message after 5 seconds
+    setTimeout(() => {
+      setSuccessMessage(null)
+    }, 5000)
   }
 
   const cancelMarkdownImport = () => {
@@ -148,8 +161,24 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
   }
 
   const handleSave = async (status: 'draft' | 'published') => {
+    console.log('🔍 Checking required fields:', {
+      title: title,
+      titleLength: title.length,
+      titleTrimmed: title.trim(),
+      content: content.substring(0, 50) + '...',
+      contentLength: content.length,
+      contentTrimmed: content.trim().substring(0, 50) + '...',
+      author: author,
+      authorTrimmed: author.trim()
+    })
+    
     if (!title.trim() || !content.trim() || !author.trim()) {
       setError('Title, content, and author are required')
+      console.error('❌ Validation failed:', {
+        titleMissing: !title.trim(),
+        contentMissing: !content.trim(),
+        authorMissing: !author.trim()
+      })
       return
     }
 
