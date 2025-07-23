@@ -172,333 +172,97 @@ function App() {
             onRelatedClick={(article) => setSelectedArticle(article)}
           />
         ) : currentView === 'home' ? (
-          <div className="letsai-layout">
-            {/* LetsAI Hero Section */}
-            <section className="letsai-hero-section">
-              <div className="letsai-hero-content">
-{loadingContent ? (
+          <div className="techcrunch-container">
+            <div className="techcrunch-layout">
+              {/* Main Content Area */}
+              <div className="techcrunch-main">
+                {loadingContent ? (
                   <div className="content-loading">
                     <div className="spinner" />
                     <p>Loading latest articles...</p>
                   </div>
                 ) : (
-                  <div className="featured-articles">
-                    {articles.length > 0 ? (
-                      <>
-                        {/* Main featured article */}
-                        <article className="featured-main" onClick={() => setSelectedArticle(articles[0])} style={{ cursor: 'pointer' }}>
-                          <img 
-                            src={
-                              articles[0].featured_image || 
-                              (articles[0].youtube_video_id ? `https://img.youtube.com/vi/${articles[0].youtube_video_id}/maxresdefault.jpg` : 
-                              "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop&crop=center")
-                            } 
-                            alt={articles[0].title}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover'
-                            }}
-                          />
-                          {articles[0].youtube_video_id && (
-                            <div className="video-play-icon-large" style={{
-                              position: 'absolute',
-                              top: '50%',
-                              left: '50%',
-                              transform: 'translate(-50%, -50%)',
-                              backgroundColor: 'rgba(0,0,0,0.8)',
-                              borderRadius: '50%',
-                              width: '80px',
-                              height: '80px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: 'white',
-                              fontSize: '32px',
-                              zIndex: 2
-                            }}>
-                              ▶
-                            </div>
-                          )}
-                          <div className="article-overlay">
-                            <div className="article-category">{articles[0].category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}</div>
-                            <h2>{articles[0].title}</h2>
-                            <p>{articles[0].excerpt || articles[0].title}</p>
-                            <div className="article-meta">
-                              <span className="date">{new Date(articles[0].created_at).toLocaleDateString()}</span>
-                              <span className="author">by {articles[0].author}</span>
-                              <span className="read-time">{articles[0].read_time || 5} min read</span>
+                  <>
+                    {/* Featured Article */}
+                    {articles.length > 0 && (
+                      <article className="techcrunch-featured" onClick={() => setSelectedArticle(articles[0])}>
+                        <img 
+                          src={
+                            articles[0].featured_image || 
+                            (articles[0].youtube_video_id ? `https://img.youtube.com/vi/${articles[0].youtube_video_id}/maxresdefault.jpg` : 
+                            "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop&crop=center")
+                          } 
+                          alt={articles[0].title}
+                        />
+                        {articles[0].youtube_video_id && (
+                          <div className="techcrunch-play-button">▶</div>
+                        )}
+                        <div className="techcrunch-featured-overlay">
+                          <span className="techcrunch-category">
+                            {articles[0].category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}
+                          </span>
+                          <h1>{articles[0].title}</h1>
+                          <p>{articles[0].excerpt || articles[0].title}</p>
+                        </div>
+                      </article>
+                    )}
+
+                    {/* Secondary Articles Grid */}
+                    <div className="techcrunch-grid">
+                      {articles.slice(1, 7).map((article) => (
+                        <article 
+                          key={article.id} 
+                          className="techcrunch-card" 
+                          onClick={() => setSelectedArticle(article)}
+                        >
+                          <div className="techcrunch-card-image">
+                            <img 
+                              src={
+                                article.featured_image || 
+                                (article.youtube_video_id ? `https://img.youtube.com/vi/${article.youtube_video_id}/mqdefault.jpg` : 
+                                `https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=320&h=180&fit=crop&crop=center`)
+                              } 
+                              alt={article.title}
+                            />
+                            {article.youtube_video_id && (
+                              <div className="techcrunch-play-button">▶</div>
+                            )}
+                          </div>
+                          <div className="techcrunch-card-content">
+                            <span className="techcrunch-card-category">
+                              {article.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}
+                            </span>
+                            <h3>{article.title}</h3>
+                            <div className="techcrunch-card-meta">
+                              {new Date(article.created_at).toLocaleDateString()} • {article.author}
                             </div>
                           </div>
                         </article>
-                        
-                        {articles[1] && (
-                          <article className="featured-secondary" onClick={() => setSelectedArticle(articles[1])} style={{ cursor: 'pointer' }}>
-                            <img 
-                              src={
-                                articles[1].featured_image || 
-                                (articles[1].youtube_video_id ? `https://img.youtube.com/vi/${articles[1].youtube_video_id}/mqdefault.jpg` : 
-                                "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=200&fit=crop&crop=center")
-                              } 
-                              alt={articles[1].title}
-                              style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover'
-                              }}
-                            />
-                            {articles[1].youtube_video_id && (
-                              <div className="video-play-icon" style={{
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                backgroundColor: 'rgba(0,0,0,0.8)',
-                                borderRadius: '50%',
-                                width: '60px',
-                                height: '60px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white',
-                                fontSize: '24px',
-                                zIndex: 2
-                              }}>
-                                ▶
-                              </div>
-                            )}
-                            <div className="article-overlay">
-                              <div className="article-category">{articles[1].category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}</div>
-                              <h3>{articles[1].title}</h3>
-                              <div className="article-meta">
-                                <span className="date">{new Date(articles[1].created_at).toLocaleDateString()}</span>
-                                <span className="author">by {articles[1].author}</span>
-                              </div>
-                            </div>
-                          </article>
-                        )}
-                      </>
-                    ) : (
-                      <div className="no-content">
-                        <h3>No articles available</h3>
-                        <p>Check back soon for the latest AI content.</p>
-                      </div>
-                    )}
-                  </div>
+                      ))}
+                    </div>
+                  </>
                 )}
-                
               </div>
-            </section>
 
-            {/* Content Grid with Sidebar */}
-            <section className="letsai-content-grid">
-              <div className="letsai-container">
-                <header className="letsai-section-header">
-                  <h2>Latest AI Insights & Tutorials</h2>
-                  <p>Stay ahead with cutting-edge artificial intelligence knowledge and practical applications</p>
-                </header>
-                
-                <div className="letsai-main-content">
-                  <div className="letsai-articles-section">
-                    <div className="letsai-grid-layout">
-                      {loadingContent ? (
-                        // Loading skeleton for articles
-                        Array.from({length: 6}).map((_, index) => (
-                          <article key={index} className="letsai-content-card loading">
-                            <div className="letsai-card-image">
-                              <div className="skeleton-image"></div>
-                            </div>
-                            <div className="letsai-card-content">
-                              <div className="skeleton-line skeleton-title"></div>
-                              <div className="skeleton-line skeleton-text"></div>
-                              <div className="skeleton-line skeleton-text short"></div>
-                              <div className="letsai-card-meta">
-                                <div className="skeleton-line skeleton-meta"></div>
-                              </div>
-                            </div>
-                          </article>
-                        ))
-                      ) : (
-                        // Render real articles from Supabase, starting from index 2 (skip the first 2 used in hero)
-                        articles.slice(2, 14).map((article, index) => (
-                          <article 
-                            key={article.id} 
-                            className="letsai-content-card" 
-                            onClick={() => setSelectedArticle(article)}
-                            style={{ cursor: 'pointer' }}
-                          >
-                            <div className="letsai-card-image">
-                              <img 
-                                src={
-                                  article.featured_image || 
-                                  (article.youtube_video_id ? `https://img.youtube.com/vi/${article.youtube_video_id}/mqdefault.jpg` : 
-                                  `https://images.unsplash.com/photo-${index % 2 === 0 ? '1573164713714-d95e436ab8d6' : '1556761175-b413da4baf72'}?w=320&h=180&fit=crop&crop=center`)
-                                } 
-                                alt={article.title}
-                                style={{
-                                  width: '100%',
-                                  height: '100%',
-                                  objectFit: 'cover'
-                                }}
-                                onError={(e) => {
-                                  // Fallback to a default image if loading fails
-                                  e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDMyMCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iMTgwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xNDQgOTBMMTY4IDEwNkg5NkwxMTIgODRMMTQ0IDkwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'
-                                }}
-                              />
-                              <div className="letsai-card-overlay">
-                                <span className="letsai-card-category">{article.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}</span>
-                                {article.youtube_video_id && (
-                                  <div className="video-play-icon" style={{
-                                    position: 'absolute',
-                                    top: '50%',
-                                    left: '50%',
-                                    transform: 'translate(-50%, -50%)',
-                                    backgroundColor: 'rgba(0,0,0,0.7)',
-                                    borderRadius: '50%',
-                                    width: '48px',
-                                    height: '48px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: 'white',
-                                    fontSize: '20px'
-                                  }}>
-                                    ▶
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            <div className="letsai-card-content">
-                              <h3>{article.title}</h3>
-                              <p>{article.excerpt || article.title}</p>
-                              <div className="letsai-card-meta">
-                                <div className="meta-left">
-                                  <span className={`category ${article.category || 'general'}`}>
-                                    {article.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'General'}
-                                  </span>
-                                  <span className="read-time">{article.read_time || 5} min read</span>
-                                </div>
-                                <div className="meta-right">
-                                  <span className="date">{new Date(article.created_at).toLocaleDateString()}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </article>
-                        ))
-                      )}
-                    </div>
-                    
-                    <div className="letsai-load-more-section">
-                      <button className="letsai-load-more-btn">Load More Articles</button>
-                    </div>
-                  </div>
-                  
-                  {/* LetsAI Sidebar */}
-                  <aside className="letsai-sidebar">
-                    {/* Latest Articles Widget */}
-                    <div className="letsai-widget letsai-latest-widget">
-                      <div className="letsai-widget-header">
-                        <span className="letsai-new-indicator">NEW</span>
-                        <h4>Latest Articles</h4>
-                      </div>
-                      <div className="letsai-widget-content">
-                        {loadingContent ? (
-                          <div className="loading-latest">
-                            <div className="skeleton-line"></div>
-                            <div className="skeleton-line short"></div>
-                          </div>
-                        ) : articles.length > 0 ? (
-                          <div className="latest-articles-list">
-                            {articles.slice(0, 3).map((article) => (
-                              <div key={article.id} className="latest-article-item" onClick={() => setSelectedArticle(article)} style={{ cursor: 'pointer' }}>
-                                <h5>{article.title}</h5>
-                                <div className="article-meta-small">
-                                  <span className="category-badge">{article.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Article'}</span>
-                                  <span className="date-small">{new Date(article.created_at).toLocaleDateString()}</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="no-articles">No articles available yet. Check back soon!</p>
-                        )}
-                        <button className="letsai-view-all-btn">View All Articles</button>
-                      </div>
-                    </div>
-
-                    {/* Popular Articles Widget */}
-                    <div className="letsai-widget letsai-popular-widget">
-                      <h4>Most Popular This Week</h4>
-                      <div className="letsai-popular-list">
-                        {loadingContent ? (
-                          // Loading skeleton for popular articles
-                          Array.from({length: 5}).map((_, index) => (
-                            <article key={index} className="letsai-popular-item loading">
-                              <div className="letsai-popular-number">{index + 1}</div>
-                              <div className="letsai-popular-content">
-                                <div className="skeleton-line skeleton-title"></div>
-                                <div className="skeleton-line skeleton-meta short"></div>
-                              </div>
-                              <div className="letsai-popular-trend skeleton-trend"></div>
-                            </article>
-                          ))
-                        ) : (
-                          // Show top 5 articles by view count
-                          articles
-                            .sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
-                            .slice(0, 5)
-                            .map((article, index) => (
-                              <article key={article.id} className="letsai-popular-item" onClick={() => setSelectedArticle(article)} style={{ cursor: 'pointer' }}>
-                                <div className="letsai-popular-number">{index + 1}</div>
-                                <div className="letsai-popular-content">
-                                  <h5>{article.title.length > 35 ? article.title.substring(0, 35) + '...' : article.title}</h5>
-                                  <span className="letsai-popular-views">{article.view_count || 0} views</span>
-                                </div>
-                                <div className={`letsai-popular-trend ${article.view_count >= 100 ? 'letsai-trending-up' : article.view_count >= 50 ? 'letsai-trending-steady' : 'letsai-trending-down'}`}></div>
-                              </article>
-                            ))
-                        )}
-                      </div>
-                    </div>
-
-
-                    {/* Tools Widget */}
-                    <div className="letsai-widget letsai-tools-widget">
-                      <h4>Featured AI Tools</h4>
-                      <div className="letsai-tools-list">
-                        <div className="letsai-tool-item">
-                          <div className="letsai-tool-icon letsai-tool-chatgpt"></div>
-                          <div className="letsai-tool-info">
-                            <h6>ChatGPT Plus</h6>
-                            <span>Advanced conversational AI</span>
-                          </div>
-                          <div className="letsai-tool-rating">4.8</div>
-                        </div>
-                        
-                        <div className="letsai-tool-item">
-                          <div className="letsai-tool-icon letsai-tool-midjourney"></div>
-                          <div className="letsai-tool-info">
-                            <h6>Midjourney</h6>
-                            <span>AI image generation</span>
-                          </div>
-                          <div className="letsai-tool-rating">4.7</div>
-                        </div>
-                        
-                        <div className="letsai-tool-item">
-                          <div className="letsai-tool-icon letsai-tool-github"></div>
-                          <div className="letsai-tool-info">
-                            <h6>GitHub Copilot</h6>
-                            <span>AI code assistance</span>
-                          </div>
-                          <div className="letsai-tool-rating">4.6</div>
-                        </div>
-                      </div>
-                      <button className="letsai-view-all-tools">View All Tools</button>
-                    </div>
-                  </aside>
-                </div>
-              </div>
-            </section>
+              {/* Sidebar */}
+              <aside className="techcrunch-sidebar">
+                <h2>Latest Headlines</h2>
+                <ul className="techcrunch-headlines">
+                  {articles.slice(0, 10).map((article, index) => (
+                    <li 
+                      key={article.id} 
+                      className="techcrunch-headline-item"
+                      onClick={() => setSelectedArticle(article)}
+                    >
+                      <span className="techcrunch-headline-bullet">■</span>
+                      <span className="techcrunch-headline-text">
+                        {article.title}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </aside>
+            </div>
           </div>
         ) : currentView === 'guides' ? (
           <div className="page-transition">
