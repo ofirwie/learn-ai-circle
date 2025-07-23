@@ -81,14 +81,25 @@ export const ArticleCreator: React.FC<ArticleCreatorProps> = ({
   }
 
   const handleMarkdownUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('🟡 Upload Debug: handleMarkdownUpload called')
+    console.log('🟡 Upload Debug: Files:', e.target.files)
     const file = e.target.files?.[0]
+    console.log('🟡 Upload Debug: Selected file:', file)
     if (file) {
+      console.log('🟡 Upload Debug: File name:', file.name)
+      console.log('🟡 Upload Debug: File type:', file.type)
+      console.log('🟡 Upload Debug: File size:', file.size)
       if (!file.name.endsWith('.md')) {
+        console.log('🔴 Upload Debug: File rejected - not .md')
         setError('Please select a valid markdown file (.md)')
         return
       }
+      console.log('🟢 Upload Debug: File accepted, setting state')
       setMarkdownFile(file)
+      console.log('🟢 Upload Debug: Calling parseMarkdownFile')
       parseMarkdownFile(file)
+    } else {
+      console.log('🔴 Upload Debug: No file selected')
     }
   }
 
