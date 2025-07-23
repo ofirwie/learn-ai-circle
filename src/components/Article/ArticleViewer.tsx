@@ -104,12 +104,12 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
     console.log('🔍 Before header processing:', processedContent.substring(0, 500) + '...')
     
     processedContent = processedContent
-      .replace(/^(#{6})\s*(.+)$/gm, '<h6>$2</h6>')
-      .replace(/^(#{5})\s*(.+)$/gm, '<h5>$2</h5>')
-      .replace(/^(#{4})\s*(.+)$/gm, '<h4>$2</h4>')
-      .replace(/^(#{3})\s*(.+)$/gm, '<h3>$2</h3>')
-      .replace(/^(#{2})\s*(.+)$/gm, '<h2>$2</h2>')
-      .replace(/^(#{1})\s+(.+)$/gm, '<h1>$2</h1>') // H1 requires space to avoid conflicts
+      .replace(/^#{6}\s*(.*)$/gm, '<h6>$1</h6>')
+      .replace(/^#{5}\s*(.*)$/gm, '<h5>$1</h5>')
+      .replace(/^#{4}\s*(.*)$/gm, '<h4>$1</h4>')
+      .replace(/^#{3}\s*(.*)$/gm, '<h3>$1</h3>')
+      .replace(/^#{2}\s*(.*)$/gm, '<h2>$1</h2>')
+      .replace(/^#{1}\s+(.*)$/gm, '<h1>$1</h1>') // H1 requires space to avoid conflicts
     
     // Debug log after header processing
     console.log('🔍 After header processing:', processedContent.substring(0, 500) + '...')
