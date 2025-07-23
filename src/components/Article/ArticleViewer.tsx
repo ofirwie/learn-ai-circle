@@ -99,7 +99,19 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       .replace(/\s*---+\s*$/gm, '') // Remove trailing dashes
       .replace(/^\s*---+\s*$/gm, '<hr>') // Convert standalone dashes to HR
     
-    // Step 3: Convert markdown headers (process most specific first, handle with and without spaces)
+    // Step 3: Clean up header text formatting BEFORE converting to HTML
+    // Remove **bold** from headers to prevent nested HTML
+    processedContent = processedContent.replace(/^(#{1,6})\s*(.*?)$/gm, (match, hashes, text) => {
+      const cleanText = text
+        .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove **bold**
+        .replace(/__([^_]+)__/g, '$1')     // Remove __bold__
+        .replace(/\*([^*]+)\*/g, '$1')     // Remove *italic*
+        .replace(/_([^_]+)_/g, '$1')       // Remove _italic_
+        .replace(/`([^`]+)`/g, '$1')       // Remove `code`
+      return hashes + ' ' + cleanText
+    })
+    
+    // Step 4: Convert markdown headers (process most specific first, handle with and without spaces)
     processedContent = processedContent
       .replace(/^#{6}\s*(.*)$/gm, '<h6>$1</h6>')
       .replace(/^#{5}\s*(.*)$/gm, '<h5>$1</h5>')
@@ -108,7 +120,7 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       .replace(/^#{2}\s*(.*)$/gm, '<h2>$1</h2>')
       .replace(/^#{1}\s+(.*)$/gm, '<h1>$1</h1>') // H1 requires space to avoid conflicts
     
-    // Step 4: Convert text formatting (order matters!)
+    // Step 5: Convert text formatting (order matters!)
     processedContent = processedContent
       // Strikethrough first
       .replace(/~~([^~]+)~~/g, '<del>$1</del>') // ~~strikethrough~~
@@ -121,18 +133,18 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       // Inline code
       .replace(/`([^`]+)`/g, '<code>$1</code>') // `code`
     
-    // Step 4b: Handle code blocks (before other processing)
+    // Step 5b: Handle code blocks (before other processing)
     processedContent = processedContent.replace(/```(\w+)?\n([\s\S]*?)\n```/g, (match, language, code) => {
       return `<pre><code class="language-${language || 'text'}">${code.trim()}</code></pre>`
     })
     
-    // Step 4c: Handle blockquotes
+    // Step 5c: Handle blockquotes
     processedContent = processedContent.replace(/^>\s(.+)$/gm, '<blockquote>$1</blockquote>')
     
-    // Step 4d: Handle links [text](url)
+    // Step 5d: Handle links [text](url)
     processedContent = processedContent.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
     
-    // Step 5: Convert bullet lists
+    // Step 6: Convert bullet lists
     const lines = processedContent.split('\n')
     const processedLines: string[] = []
     let inList = false
@@ -166,7 +178,7 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
     
     processedContent = processedLines.join('\n')
     
-    // Step 6: Convert numbered lists (similar to bullet lists)
+    // Step 7: Convert numbered lists (similar to bullet lists)
     const numberedLines = processedContent.split('\n')
     const processedNumberedLines: string[] = []
     let inNumberedList = false
@@ -200,7 +212,7 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
     
     processedContent = processedNumberedLines.join('\n')
     
-    // Step 7: Convert paragraphs (split by double newlines)
+    // Step 8: Convert paragraphs (split by double newlines)
     const paragraphs = processedContent.split(/\n\s*\n/)
     const htmlParagraphs = paragraphs.map(para => {
       const trimmed = para.trim()
@@ -217,7 +229,7 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
     
     processedContent = htmlParagraphs.join('\n')
     
-    // Step 8: Clean up formatting issues
+    // Step 9: Clean up formatting issues
     processedContent = processedContent
       .replace(/<p>(<h[1-6][^>]*>.*?<\/h[1-6]>)<\/p>/gi, '$1') // Remove p tags around headers
       .replace(/<p>(<ul>.*?<\/ul>)<\/p>/gs, '$1') // Remove p tags around lists
@@ -228,7 +240,7 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
       .replace(/<\/li>\n*<li>/g, '</li><li>') // Clean up list items
       .trim()
     
-    // Step 9: Return the processed content with enhanced styling
+    // Step 10: Return the processed content with enhanced styling
     return (
       <>
         <style>
