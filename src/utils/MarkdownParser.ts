@@ -30,48 +30,17 @@ export class MarkdownParser {
       const trimmedLine = line.trim()
       if (trimmedLine.startsWith('# ')) {
         title = trimmedLine.substring(2).trim()
+        // Remove the title line from content
+        content = lines.filter((l, i) => i !== lines.indexOf(line)).join('\n').trim()
         break
       }
     }
     
-    // Only extract YouTube video IDs if they are meant to be separate from content
-    // (i.e., when they're in frontmatter or specifically marked as featured video)
-    // Regular content videos should stay in the content flow
-    
-    // Check if there are any video URLs in frontmatter or special sections
-    const frontmatterMatch = markdownContent.match(/^---\n([\s\S]*?)\n---/)
-    let shouldExtractVideos = false
-    
-    if (frontmatterMatch) {
-      const frontmatter = frontmatterMatch[1]
-      if (frontmatter.includes('video:') || frontmatter.includes('youtube:')) {
-        shouldExtractVideos = true
-      }
-    }
-    
-    // Only extract if specifically marked as featured or in frontmatter
-    if (shouldExtractVideos) {
-      const patterns = [
-        /<iframe[^>]*src="https:\/\/www\.youtube\.com\/embed\/([^"?]+)"/g, // iframe embeds
-        /https:\/\/www\.youtube\.com\/embed\/([^?\s"]+)/g, // direct embed URLs
-        /https:\/\/www\.youtube\.com\/watch\?v=([^&\s"]+)/g, // watch URLs
-        /https:\/\/youtu\.be\/([^?\s"]+)/g // short URLs
-      ]
-      
-      for (const pattern of patterns) {
-        let match
-        while ((match = pattern.exec(markdownContent)) !== null) {
-          if (match[1] && !youtubeVideoIds.includes(match[1])) {
-            youtubeVideoIds.push(match[1])
-          }
-        }
-      }
-    }
-    
-    // For content with inline videos, leave them in the content
+    // Don't extract YouTube videos - leave them in the content where they belong
+    // Videos should stay in their original position in the markdown
     
     // Generate excerpt from first paragraph after title
-    excerpt = this.generateExcerpt(markdownContent)
+    excerpt = this.generateExcerpt(content)
     
     // Detect content type
     const contentType = this.detectContentType(markdownContent, title)

@@ -12,6 +12,7 @@ import { VideoEmbedDebugger } from './components/Debug/VideoEmbedDebugger'
 import { SimpleVideoTest } from './components/Debug/SimpleVideoTest'
 import { VideoComparison } from './components/Debug/VideoComparison'
 import { importPerplexityArticle } from './utils/importPerplexityArticle'
+import { importChatGPTAgentArticle } from './utils/importChatGPTAgentArticle'
 
 function App() {
   const [currentView, setCurrentView] = useState('home')
@@ -86,6 +87,18 @@ function App() {
     try {
       const result = await importPerplexityArticle()
       alert(`✅ Perplexity AI article imported successfully!\nID: ${result.id}\nTitle: ${result.title}`)
+      // Refresh articles
+      fetchArticles()
+    } catch (error) {
+      console.error('Import failed:', error)
+      alert(`❌ Failed to import article: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
+  }
+
+  const handleImportChatGPTAgentArticle = async () => {
+    try {
+      const result = await importChatGPTAgentArticle()
+      alert(`✅ ChatGPT Agent article imported successfully!\nID: ${result.id}\nTitle: ${result.title}`)
       // Refresh articles
       fetchArticles()
     } catch (error) {
@@ -646,6 +659,10 @@ function App() {
                 <button className="create-button" onClick={handleImportPerplexityArticle}>
                   <span className="icon">🤖</span>
                   Import Perplexity AI Article
+                </button>
+                <button className="create-button" onClick={handleImportChatGPTAgentArticle}>
+                  <span className="icon">🚀</span>
+                  Import ChatGPT Agent Article
                 </button>
               </div>
               
