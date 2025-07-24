@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Article } from '../../types/content'
 import { ArticleService } from '../../services/articleService'
 import { format } from 'date-fns'
+import { ShareButtons } from './ShareButtons'
 
 interface ArticleViewerProps {
   article: Article
@@ -597,6 +598,9 @@ export const ArticleViewer: React.FC<ArticleViewerProps> = ({
             ))}
           </div>
         )}
+
+        {/* Share Buttons */}
+        <ShareButtons article={article} />
       </header>
 
       {/* Featured Image only - no videos at top */}
