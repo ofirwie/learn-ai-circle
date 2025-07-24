@@ -201,30 +201,53 @@ const SimpleUserManager: React.FC<SimpleUserManagerProps> = ({ onClose }) => {
 
     try {
       setError(null);
+      console.log('🔍 Starting registration code creation debug...');
       
-      // Get the admin entity and user group
-      const { data: adminEntity } = await supabase
+      // Get the admin entity and user group with detailed logging
+      console.log('📊 Querying admin entity...');
+      const { data: adminEntity, error: entityError } = await supabase
         .from('entities')
-        .select('id')
+        .select('id, name, code_prefix')
         .eq('code_prefix', 'ADMIN')
         .single();
 
-      if (!adminEntity) {
-        throw new Error('Admin entity not found. Please run the admin setup SQL first.');
+      console.log('🏢 Admin entity result:', { adminEntity, entityError });
+
+      if (entityError) {
+        throw new Error(`Failed to query admin entity: ${entityError.message}`);
       }
 
-      const { data: adminGroup } = await supabase
+      if (!adminEntity) {
+        throw new Error('Admin entity not found. Please run the setup-admin-access.sql script in Supabase SQL Editor first.');
+      }
+
+      console.log('👥 Querying admin user group...');
+      const { data: adminGroup, error: groupError } = await supabase
         .from('user_groups')
-        .select('id')
+        .select('id, name, entity_id')
         .eq('entity_id', adminEntity.id)
         .eq('name', 'Administrators')
         .single();
 
-      if (!adminGroup) {
-        throw new Error('Admin user group not found. Please run the admin setup SQL first.');
+      console.log('👑 Admin group result:', { adminGroup, groupError });
+
+      if (groupError) {
+        throw new Error(`Failed to query admin user group: ${groupError.message}`);
       }
 
-      const { error } = await supabase
+      if (!adminGroup) {
+        throw new Error('Admin user group not found. Please run the setup-admin-access.sql script in Supabase SQL Editor first.');
+      }
+
+      console.log('💾 Creating registration code with data:', {
+        code: code.toUpperCase(),
+        description,
+        max_uses: maxUses,
+        entity_id: adminEntity.id,
+        user_group_id: adminGroup.id
+      });
+
+      const { data: newCode, error: insertError } = await supabase
         .from('registration_codes')
         .insert({
           code: code.toUpperCase(),
@@ -235,13 +258,44 @@ const SimpleUserManager: React.FC<SimpleUserManagerProps> = ({ onClose }) => {
           expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
           entity_id: adminEntity.id,
           user_group_id: adminGroup.id
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
-      alert('Registration code created successfully!');
+      console.log('🎯 Insert result:', { newCode, insertError });
+
+      if (insertError) {
+        throw new Error(`Database insert failed: ${insertError.message} (Code: ${insertError.code})`);
+      }
+
+      alert(`Registration code '${code.toUpperCase()}' created successfully!`);
+      console.log('✅ Registration code created successfully:', newCode);
     } catch (error) {
-      console.error('Failed to create registration code:', error);
-      setError('Failed to create registration code: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      console.error('❌ Registration code creation failed:', error);
+      
+      // Enhanced error reporting
+      let errorMessage = 'Failed to create registration code: ';
+      if (error instanceof Error) {
+        errorMessage += error.message;
+        
+        // Add helpful hints based on error type
+        if (error.message.includes('Admin entity not found')) {
+          errorMessage += '\n\n🔧 Fix: Run the setup-admin-access.sql script in your Supabase SQL Editor';
+        } else if (error.message.includes('Admin user group not found')) {
+          errorMessage += '\n\n🔧 Fix: Run the setup-admin-access.sql script in your Supabase SQL Editor';
+        } else if (error.message.includes('duplicate key')) {
+          errorMessage += '\n\n🔧 Fix: Try a different code name - this one already exists';
+        } else if (error.message.includes('permission denied')) {
+          errorMessage += '\n\n🔧 Fix: Make sure you have admin privileges and RLS policies are set correctly';
+        }
+      } else {
+        errorMessage += 'Unknown error occurred';
+      }
+      
+      setError(errorMessage);
+      
+      // Also show in alert for immediate visibility
+      alert(errorMessage);
     }
   };
 
