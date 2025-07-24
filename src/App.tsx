@@ -1,69 +1,47 @@
 import React, { useState, useEffect } from 'react'
-import { useAuthStore } from './store/authStore'
-import { SignupForm } from './components/auth/SignupForm'
-import { LoginForm } from './components/auth/LoginForm'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { ArticleService } from './services/articleService'
 import { Article } from './types/content'
-import { ArticleCreator } from './components/Article/ArticleCreator'
 import { ArticleViewer } from './components/Article/ArticleViewer'
-import { InviteCodeManager } from './components/Admin/InviteCodeManager'
-import { InviteManager } from './components/Admin/InviteManager'
-import { ContentManager } from './components/Admin/ContentManager'
-import { VideoEmbedDebugger } from './components/Debug/VideoEmbedDebugger'
-import { SimpleVideoTest } from './components/Debug/SimpleVideoTest'
-import { VideoComparison } from './components/Debug/VideoComparison'
-import { MarkdownDebugger } from './components/Debug/MarkdownDebugger'
-import { importPerplexityArticle } from './utils/importPerplexityArticle'
-import { importChatGPTAgentArticle } from './utils/importChatGPTAgentArticle'
 import SimplePromptsViewer from './components/prompts/SimplePromptsViewer'
-import SimpleAnalyticsDashboard from './components/Dashboard/SimpleAnalyticsDashboard'
-import SimpleUserManager from './components/Admin/SimpleUserManager'
+import { AdminApp } from './components/AdminApp'
 
 function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/admin/*" element={<AdminApp />} />
+        <Route path="/*" element={<PublicISAIApp />} />
+      </Routes>
+    </Router>
+  )
+}
+
+// Public ISAI Website (no login required)
+const PublicISAIApp: React.FC = () => {
   const [currentView, setCurrentView] = useState('home')
-  const [authView, setAuthView] = useState('login')
   const [articles, setArticles] = useState<Article[]>([])
   const [guides, setGuides] = useState<Article[]>([])
   const [toolReviews, setToolReviews] = useState<Article[]>([])
   const [loadingContent, setLoadingContent] = useState(true)
   const [loadingGuides, setLoadingGuides] = useState(false)
   const [loadingTools, setLoadingTools] = useState(false)
-  const [showArticleCreator, setShowArticleCreator] = useState(false)
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
-  const [showInviteCodeManager, setShowInviteCodeManager] = useState(false)
-  const [showInviteManager, setShowInviteManager] = useState(false)
-  const [showContentManager, setShowContentManager] = useState(false)
-  const [showVideoDebugger, setShowVideoDebugger] = useState(false)
-  const [showMarkdownDebugger, setShowMarkdownDebugger] = useState(false)
-  const [showSimpleVideoTest, setShowSimpleVideoTest] = useState(false)
-  const [showVideoComparison, setShowVideoComparison] = useState(false)
-  const [openWithImport, setOpenWithImport] = useState(false)
-  const [showUserAnalytics, setShowUserAnalytics] = useState(false)
-  const [showUserManager, setShowUserManager] = useState(false)
-  const { user, loading, initialized, initialize, signOut } = useAuthStore()
   
+  // Fetch articles on load (no authentication required)
   useEffect(() => {
-    initialize()
+    fetchArticles()
   }, [])
-
-  // Fetch articles when user is authenticated
-  useEffect(() => {
-    if (user && initialized) {
-      fetchArticles()
-    }
-  }, [user, initialized])
 
   // Fetch content by type when view changes
   useEffect(() => {
-    if (user && initialized) {
-      if (currentView === 'guides' && guides.length === 0) {
-        fetchContentByType('guide', setGuides, setLoadingGuides)
-      }
-      if (currentView === 'tools' && toolReviews.length === 0) {
-        fetchContentByType('tool-review', setToolReviews, setLoadingTools)
-      }
+    if (currentView === 'guides' && guides.length === 0) {
+      fetchContentByType('guide', setGuides, setLoadingGuides)
     }
-  }, [currentView, user, initialized, guides.length, toolReviews.length])
+    if (currentView === 'tools' && toolReviews.length === 0) {
+      fetchContentByType('tool-review', setToolReviews, setLoadingTools)
+    }
+  }, [currentView, guides.length, toolReviews.length])
 
   const fetchArticles = async () => {
     try {
@@ -92,67 +70,7 @@ function App() {
     }
   }
 
-  const handleImportPerplexityArticle = async () => {
-    try {
-      const result = await importPerplexityArticle()
-      alert(`✅ Perplexity AI article imported successfully!\nID: ${result.id}\nTitle: ${result.title}`)
-      // Refresh articles
-      fetchArticles()
-    } catch (error) {
-      console.error('Import failed:', error)
-      alert(`❌ Failed to import article: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
-  }
-
-  const handleImportChatGPTAgentArticle = async () => {
-    try {
-      const result = await importChatGPTAgentArticle()
-      alert(`✅ ChatGPT Agent article imported successfully!\nID: ${result.id}\nTitle: ${result.title}`)
-      // Refresh articles
-      fetchArticles()
-    } catch (error) {
-      console.error('Import failed:', error)
-      alert(`❌ Failed to import article: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    }
-  }
-  
-  if (!initialized) {
-    return (
-      <div className="loading-screen">
-        <div className="spinner" />
-        <p>Loading IS-AI Beta...</p>
-      </div>
-    )
-  }
-
-  // If user is not logged in, show login page
-  if (!user) {
-    return (
-      <div className="login-page">
-        <div className="login-container">
-          <div className="login-header">
-            <h1>IS-AI Beta</h1>
-            <p>Private Access Required</p>
-          </div>
-          {authView === 'login' ? (
-            <LoginForm onSuccess={() => {}} />
-          ) : (
-            <SignupForm onSuccess={() => {}} />
-          )}
-          <div className="auth-switch">
-            <button
-              onClick={() => setAuthView(authView === 'login' ? 'signup' : 'login')}
-              className="auth-switch-btn"
-            >
-              {authView === 'login' ? "Need to register? Sign Up" : "Already have an account? Sign In"}
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // User is logged in - show main app
+  // Show main app (public access)
   return (
     <div className="app">
       {/* LetsAI Professional Header */}
@@ -215,27 +133,9 @@ function App() {
           {/* Right Side Elements */}
           <div className="header-right">
             <div className="user-menu">
-              <span>Welcome back, {user.email?.split('@')[0]}</span>
-              <button className="admin-button" onClick={() => {
-                setCurrentView('admin')
-                setSelectedArticle(null)
-              }}>
+              <a href="/admin" className="admin-button">
                 Admin Panel
-              </button>
-              <button 
-                className="logout-button" 
-                onClick={async () => {
-                  console.log('Logout button clicked');
-                  try {
-                    await signOut();
-                    console.log('Logout completed');
-                  } catch (error) {
-                    console.error('Logout error:', error);
-                  }
-                }}
-              >
-                Logout
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -677,95 +577,6 @@ function App() {
               </div>
             </section>
           </div>
-        ) : currentView === 'admin' ? (
-          <div className="page-transition">
-            <section className="page-header">
-              <div className="page-icon">⚙️</div>
-              <h1 className="page-title">Admin Panel</h1>
-              <p className="page-subtitle">
-                Manage content, create articles, and monitor your knowledge hub
-              </p>
-            </section>
-            
-            <section className="content-section">
-              <div className="admin-actions">
-                <button className="create-button" onClick={() => setShowArticleCreator(true)}>
-                  <span className="icon">✍️</span>
-                  Create New Article
-                </button>
-                <button className="create-button" onClick={() => {
-                  setOpenWithImport(true)
-                  setShowArticleCreator(true)
-                }}>
-                  <span className="icon">📄</span>
-                  Import from Markdown
-                </button>
-                <button className="create-button" onClick={() => alert('Tips feature coming soon!')}>
-                  <span className="icon">💡</span>
-                  Create New Tip
-                </button>
-                <button className="create-button" onClick={() => setShowInviteManager(true)}>
-                  <span className="icon">📧</span>
-                  Send Invitations
-                </button>
-                <button className="create-button" onClick={() => setShowInviteCodeManager(true)}>
-                  <span className="icon">🎟️</span>
-                  Manage Invite Codes
-                </button>
-                <button className="create-button" onClick={() => setShowContentManager(true)}>
-                  <span className="icon">📊</span>
-                  Manage Content
-                </button>
-                <button className="create-button" onClick={() => setShowVideoDebugger(true)}>
-                  <span className="icon">🧪</span>
-                  Debug Video Embeds
-                </button>
-                <button className="create-button" onClick={() => setShowMarkdownDebugger(true)}>
-                  <span className="icon">🔍</span>
-                  Debug Markdown Processing
-                </button>
-                <button className="create-button" onClick={() => setShowSimpleVideoTest(true)}>
-                  <span className="icon">🎬</span>
-                  Simple Video Test
-                </button>
-                <button className="create-button" onClick={() => setShowVideoComparison(true)}>
-                  <span className="icon">🔍</span>
-                  Video Comparison
-                </button>
-                <button className="create-button" onClick={handleImportPerplexityArticle}>
-                  <span className="icon">🤖</span>
-                  Import Perplexity AI Article
-                </button>
-                <button className="create-button" onClick={handleImportChatGPTAgentArticle}>
-                  <span className="icon">🚀</span>
-                  Import ChatGPT Agent Article
-                </button>
-                <button className="create-button" onClick={() => setShowUserAnalytics(true)}>
-                  <span className="icon">📊</span>
-                  User Analytics Dashboard
-                </button>
-                <button className="create-button" onClick={() => setShowUserManager(true)}>
-                  <span className="icon">👥</span>
-                  Manage Users
-                </button>
-              </div>
-              
-              <div className="admin-stats">
-                <div className="stat-card">
-                  <h3>Total Articles</h3>
-                  <p className="stat-number">{articles.length}</p>
-                </div>
-                <div className="stat-card">
-                  <h3>Published</h3>
-                  <p className="stat-number">{articles.filter(a => a.published).length}</p>
-                </div>
-                <div className="stat-card">
-                  <h3>Categories</h3>
-                  <p className="stat-number">{new Set(articles.map(a => a.category)).size}</p>
-                </div>
-              </div>
-            </section>
-          </div>
         ) : null}
       </main>
 
@@ -857,158 +668,6 @@ function App() {
           </div>
         </div>
       </footer>
-
-      {/* Article Creator Modal */}
-      {showArticleCreator && (
-        <ArticleCreator
-          isOpen={showArticleCreator}
-          onClose={() => {
-            setShowArticleCreator(false)
-            setOpenWithImport(false)
-          }}
-          onSuccess={(article) => {
-            setShowArticleCreator(false)
-            setOpenWithImport(false)
-            // Refresh articles list
-            fetchArticles()
-            alert('Article created successfully!')
-          }}
-          highlightImport={openWithImport}
-        />
-      )}
-
-      {/* Invite Manager Modal */}
-      {showInviteManager && (
-        <InviteManager
-          onClose={() => setShowInviteManager(false)}
-        />
-      )}
-
-      {/* Invite Code Manager Modal */}
-      {showInviteCodeManager && (
-        <InviteCodeManager
-          onClose={() => setShowInviteCodeManager(false)}
-        />
-      )}
-
-      {/* Content Manager Modal */}
-      <ContentManager
-        isOpen={showContentManager}
-        onClose={() => setShowContentManager(false)}
-        onArticleSelect={(article) => {
-          setSelectedArticle(article)
-          setShowContentManager(false)
-          setShowArticleCreator(true)
-        }}
-      />
-
-      {/* Video Embed Debugger Modal */}
-      <VideoEmbedDebugger
-        isOpen={showVideoDebugger}
-        onClose={() => setShowVideoDebugger(false)}
-      />
-
-      {/* Markdown Debugger Modal */}
-      {showMarkdownDebugger && (
-        <div 
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setShowMarkdownDebugger(false)
-            }
-          }} 
-          style={{ 
-            position: 'fixed', 
-            top: 0, 
-            left: 0, 
-            right: 0, 
-            bottom: 0, 
-            background: 'rgba(0,0,0,0.8)', 
-            zIndex: 9998,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px'
-          }}
-        >
-          <div onClick={(e) => e.stopPropagation()}>
-            <MarkdownDebugger onClose={() => setShowMarkdownDebugger(false)} />
-          </div>
-        </div>
-      )}
-
-      {/* Simple Video Test Modal */}
-      <SimpleVideoTest
-        isOpen={showSimpleVideoTest}
-        onClose={() => setShowSimpleVideoTest(false)}
-      />
-
-      {/* Video Comparison Modal */}
-      <VideoComparison
-        isOpen={showVideoComparison}
-        onClose={() => setShowVideoComparison(false)}
-      />
-
-      {/* User Analytics Dashboard Modal */}
-      {showUserAnalytics && (
-        <div 
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setShowUserAnalytics(false)
-            }
-          }} 
-          style={{ 
-            position: 'fixed', 
-            top: 0, 
-            left: 0, 
-            right: 0, 
-            bottom: 0, 
-            background: 'rgba(0,0,0,0.8)', 
-            zIndex: 9998,
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'center',
-            padding: '20px',
-            overflowY: 'auto'
-          }}
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: 'white',
-              borderRadius: '8px',
-              width: '100%',
-              maxWidth: '1200px',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              padding: '20px',
-              position: 'relative'
-            }}
-          >
-            <button
-              onClick={() => setShowUserAnalytics(false)}
-              style={{
-                position: 'absolute',
-                top: '15px',
-                right: '15px',
-                background: 'none',
-                border: 'none',
-                fontSize: '24px',
-                cursor: 'pointer',
-                color: '#666',
-                zIndex: 1
-              }}
-            >
-              ×
-            </button>
-            <SimpleAnalyticsDashboard />
-          </div>
-        </div>
-      )}
-
-      {/* User Manager Modal */}
-      {showUserManager && (
-        <SimpleUserManager onClose={() => setShowUserManager(false)} />
-      )}
 
     </div>
   )
