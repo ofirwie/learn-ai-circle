@@ -4,19 +4,19 @@ import { supabase } from '../../services/supabase'
 interface RegistrationCode {
   id: string
   code: string
-  description: string
   max_uses: number
   current_uses: number
   expires_at: string | null
   is_active: boolean
   created_at: string
+  entity_id?: string
+  user_group_id?: string
   entity: {
     name: string
-    type: string
   } | null
   user_group: {
     name: string
-    permissions: string[]
+    permissions: any
   } | null
 }
 
@@ -32,7 +32,6 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({ onClose })
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [newCode, setNewCode] = useState({
     code: '',
-    description: '',
     max_uses: 100,
     expires_at: '',
   })
@@ -44,23 +43,30 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({ onClose })
   const fetchRegistrationCodes = async () => {
     try {
       setLoading(true)
+      console.log('📋 Fetching registration codes...')
+      
       const { data, error } = await supabase
         .from('registration_codes')
         .select(`
           *,
-          entity:entities(name, type),
+          entity:entities(name),
           user_group:user_groups(name, permissions)
         `)
         .order('created_at', { ascending: false })
 
+      console.log('📋 Fetch result:', { data, error })
+
       if (error) {
+        console.error('❌ Database error:', error)
         throw error
       }
 
       setCodes(data || [])
+      console.log('✅ Registration codes loaded:', data?.length || 0)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch registration codes')
-      console.error('Error fetching registration codes:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch registration codes'
+      setError(errorMessage)
+      console.error('❌ Error fetching registration codes:', err)
     } finally {
       setLoading(false)
     }
@@ -97,18 +103,34 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({ onClose })
       setCreating(true)
       setError(null)
 
+      // Get the admin entity and user group first
+      const { data: adminEntity } = await supabase
+        .from('entities')
+        .select('id')
+        .eq('code_prefix', 'ADMIN')
+        .single();
+
+      const { data: adminGroup } = await supabase
+        .from('user_groups')
+        .select('id')
+        .eq('entity_id', adminEntity?.id)
+        .eq('name', 'Administrators')
+        .single();
+
       const { data, error } = await supabase
         .from('registration_codes')
         .insert({
           code: newCode.code.trim().toUpperCase(),
-          description: newCode.description.trim() || 'Custom registration code',
           max_uses: newCode.max_uses,
           expires_at: newCode.expires_at || null,
-          is_active: true
+          is_active: true,
+          current_uses: 0,
+          entity_id: adminEntity?.id,
+          user_group_id: adminGroup?.id
         })
         .select(`
           *,
-          entity:entities(name, type),
+          entity:entities(name),
           user_group:user_groups(name, permissions)
         `)
         .single()
@@ -126,7 +148,6 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({ onClose })
       // Reset form
       setNewCode({
         code: '',
-        description: '',
         max_uses: 100,
         expires_at: '',
       })
@@ -331,30 +352,6 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({ onClose })
                     marginBottom: '6px',
                     color: '#374151'
                   }}>
-                    Description
-                  </label>
-                  <input
-                    type="text"
-                    value={newCode.description}
-                    onChange={(e) => setNewCode(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Describe the purpose of this code"
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px'
-                    }}
-                  />
-                </div>
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    marginBottom: '6px',
-                    color: '#374151'
-                  }}>
                     Expires At (Optional)
                   </label>
                   <input
@@ -428,7 +425,7 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({ onClose })
                 <thead>
                   <tr style={{ backgroundColor: '#f8fafc' }}>
                     <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '14px' }}>Code</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '14px' }}>Description</th>
+                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '14px' }}>Entity/Group</th>
                     <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '14px' }}>Usage</th>
                     <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '14px' }}>Expires</th>
                     <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '14px' }}>Status</th>
@@ -452,7 +449,7 @@ export const InviteCodeManager: React.FC<InviteCodeManagerProps> = ({ onClose })
                         )}
                       </td>
                       <td style={{ padding: '12px 16px', fontSize: '14px', color: '#64748b' }}>
-                        {code.description}
+                        {code.entity?.name || 'N/A'} / {code.user_group?.name || 'N/A'}
                       </td>
                       <td style={{ padding: '12px 16px' }}>
                         <div style={{
