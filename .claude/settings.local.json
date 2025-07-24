@@ -33,7 +33,8 @@
       "Bash(find:*)",
       "Bash(npm install:*)",
       "Bash(VITE_SUPABASE_ANON_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsb3Rjd3RjbmxpaG9wcnhjZHpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NjEyODEsImV4cCI6MjA2ODUzNzI4MX0.aCNESZNvoz_vL_lHT68NyExTjYmaw9Z5YJ_6rtcKaZk\" node -e \"\nconst { createClient } = require(''@supabase/supabase-js'');\nconst supabase = createClient(''https://ilotcwtcnlihoprxcdzp.supabase.co'', process.env.VITE_SUPABASE_ANON_KEY);\n\n(async () => {\n  console.log(''Checking database content...'');\n  \n  // Check articles\n  const { data: articles, error: articlesError } = await supabase\n    .from(''articles'')\n    .select(''id, title, featured_image, excerpt'')\n    .limit(5);\n  \n  console.log(''Articles count:'', articles?.length || 0);\n  if (articlesError) console.error(''Articles error:'', articlesError);\n  \n  // Check prompts\n  const { data: prompts, error: promptsError } = await supabase\n    .from(''content'')\n    .select(''id, title, content_type, is_published'')\n    .eq(''content_type'', ''prompt'');\n  \n  console.log(''Total prompts:'', prompts?.length || 0);\n  console.log(''Published prompts:'', prompts?.filter(p => p.is_published).length || 0);\n  if (promptsError) console.error(''Prompts error:'', promptsError);\n})();\n\")",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(ren:*)"
     ],
     "deny": []
   }
