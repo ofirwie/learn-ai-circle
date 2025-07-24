@@ -7,6 +7,7 @@ import { Article } from './types/content'
 import { ArticleCreator } from './components/Article/ArticleCreator'
 import { ArticleViewer } from './components/Article/ArticleViewer'
 import { InviteCodeManager } from './components/Admin/InviteCodeManager'
+import { InviteManager } from './components/Admin/InviteManager'
 import { ContentManager } from './components/Admin/ContentManager'
 import { VideoEmbedDebugger } from './components/Debug/VideoEmbedDebugger'
 import { SimpleVideoTest } from './components/Debug/SimpleVideoTest'
@@ -30,6 +31,7 @@ function App() {
   const [showArticleCreator, setShowArticleCreator] = useState(false)
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
   const [showInviteCodeManager, setShowInviteCodeManager] = useState(false)
+  const [showInviteManager, setShowInviteManager] = useState(false)
   const [showContentManager, setShowContentManager] = useState(false)
   const [showVideoDebugger, setShowVideoDebugger] = useState(false)
   const [showMarkdownDebugger, setShowMarkdownDebugger] = useState(false)
@@ -691,6 +693,10 @@ function App() {
                   <span className="icon">💡</span>
                   Create New Tip
                 </button>
+                <button className="create-button" onClick={() => setShowInviteManager(true)}>
+                  <span className="icon">📧</span>
+                  Send Invitations
+                </button>
                 <button className="create-button" onClick={() => setShowInviteCodeManager(true)}>
                   <span className="icon">🎟️</span>
                   Manage Invite Codes
@@ -857,6 +863,13 @@ function App() {
             alert('Article created successfully!')
           }}
           highlightImport={openWithImport}
+        />
+      )}
+
+      {/* Invite Manager Modal */}
+      {showInviteManager && (
+        <InviteManager
+          onClose={() => setShowInviteManager(false)}
         />
       )}
 

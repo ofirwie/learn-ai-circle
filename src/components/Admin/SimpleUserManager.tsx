@@ -129,6 +129,69 @@ const SimpleUserManager: React.FC<SimpleUserManagerProps> = ({ onClose }) => {
     }
   };
 
+  const promoteToAdmin = async (userId: string) => {
+    if (!confirm('Are you sure you want to promote this user to admin? This will give them full system access.')) {
+      return;
+    }
+
+    try {
+      setError(null);
+      
+      // First, get the admin entity and group IDs
+      const { data: adminEntity } = await supabase
+        .from('entities')
+        .select('id')
+        .eq('code_prefix', 'ADMIN')
+        .single();
+
+      if (!adminEntity) {
+        throw new Error('Admin entity not found. Please run the admin setup SQL first.');
+      }
+
+      const { data: adminGroup } = await supabase
+        .from('user_groups')
+        .select('id')
+        .eq('entity_id', adminEntity.id)
+        .eq('name', 'Administrators')
+        .single();
+
+      if (!adminGroup) {
+        throw new Error('Admin user group not found. Please run the admin setup SQL first.');
+      }
+
+      // Update the user's entity and group
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ 
+          entity_id: adminEntity.id,
+          user_group_id: adminGroup.id
+        })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      // Update local state
+      setUsers(users.map(user => {
+        if (user.id === userId) {
+          return {
+            ...user,
+            profile: { 
+              ...user.profile, 
+              entity_id: adminEntity.id,
+              user_group_id: adminGroup.id
+            }
+          };
+        }
+        return user;
+      }));
+
+      alert('User successfully promoted to admin!');
+    } catch (error) {
+      console.error('Failed to promote user:', error);
+      setError('Failed to promote user to admin: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  };
+
   const createRegistrationCode = async () => {
     const code = prompt('Enter new registration code:');
     if (!code) return;
@@ -357,6 +420,20 @@ const SimpleUserManager: React.FC<SimpleUserManagerProps> = ({ onClose }) => {
                     }}
                   >
                     {user.profile?.is_active === false ? '✅ Activate' : '⏸️ Deactivate'}
+                  </button>
+                  <button
+                    onClick={() => promoteToAdmin(user.id)}
+                    style={{
+                      background: '#8b5cf6',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    👑 Make Admin
                   </button>
                   <button
                     onClick={() => deleteUser(user.id)}

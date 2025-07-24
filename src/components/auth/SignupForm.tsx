@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuthStore } from '../../store/authStore'
 import { Eye, EyeOff, UserPlus, CheckCircle } from 'lucide-react'
 
@@ -8,12 +8,21 @@ interface SignupFormProps {
 }
 
 export const SignupForm: React.FC<SignupFormProps> = ({ onSuccess, onSwitchToLogin }) => {
+  // Check for URL parameters on component mount
+  const getInitialRegistrationCode = () => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      return urlParams.get('code') || ''
+    }
+    return ''
+  }
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
     fullName: '',
-    registrationCode: ''
+    registrationCode: getInitialRegistrationCode()
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -26,6 +35,22 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSuccess, onSwitchToLog
   } | null>(null)
 
   const { signUp, validateRegistrationCode } = useAuthStore()
+
+  // Effect to validate pre-filled registration code and clean URL
+  useEffect(() => {
+    const initialCode = getInitialRegistrationCode()
+    if (initialCode) {
+      // Validate the pre-filled code
+      validateCode(initialCode)
+      
+      // Clean up the URL parameter to avoid sharing codes in browser history
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        url.searchParams.delete('code')
+        window.history.replaceState({}, document.title, url.toString())
+      }
+    }
+  }, [])
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -196,6 +221,11 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSuccess, onSwitchToLog
               color: '#15803d'
             }}>
               ✓ Valid code for {codeValidation.entity} - {codeValidation.userGroup}
+              {getInitialRegistrationCode() && (
+                <div style={{ marginTop: '4px', fontSize: '11px', opacity: 0.8 }}>
+                  📧 Pre-filled from invitation link
+                </div>
+              )}
             </div>
           )}
         </div>
