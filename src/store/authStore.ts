@@ -244,6 +244,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   signOut: async () => {
     const { userProfile } = get()
+    console.log('🚪 SignOut called, userProfile:', userProfile)
     set({ loading: true })
     
     // End session and log logout (only in browser)
@@ -256,7 +257,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     }
     
-    await supabase.auth.signOut()
+    console.log('🔐 Calling supabase.auth.signOut()')
+    const { error } = await supabase.auth.signOut()
+    
+    if (error) {
+      console.error('❌ Supabase signOut error:', error)
+    } else {
+      console.log('✅ Supabase signOut successful')
+    }
+    
     set({
       user: null,
       userProfile: null,
@@ -264,6 +273,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       userGroup: null,
       loading: false
     })
+    
+    console.log('🏠 State cleared, should redirect to login')
   },
 
   updateProfile: async (updates: Partial<User>) => {

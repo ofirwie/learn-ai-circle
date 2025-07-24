@@ -222,7 +222,18 @@ function App() {
               }}>
                 Admin Panel
               </button>
-              <button className="logout-button" onClick={signOut}>
+              <button 
+                className="logout-button" 
+                onClick={async () => {
+                  console.log('Logout button clicked');
+                  try {
+                    await signOut();
+                    console.log('Logout completed');
+                  } catch (error) {
+                    console.error('Logout error:', error);
+                  }
+                }}
+              >
                 Logout
               </button>
             </div>

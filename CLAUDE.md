@@ -200,3 +200,4 @@ The project appears to be a complete AI Knowledge Hub implementation with:
 
 ### Memorized Tasks
 - memorize never remove the login mechanisem
+- `memorize`
