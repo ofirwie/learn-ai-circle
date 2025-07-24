@@ -201,6 +201,29 @@ const SimpleUserManager: React.FC<SimpleUserManagerProps> = ({ onClose }) => {
 
     try {
       setError(null);
+      
+      // Get the admin entity and user group
+      const { data: adminEntity } = await supabase
+        .from('entities')
+        .select('id')
+        .eq('code_prefix', 'ADMIN')
+        .single();
+
+      if (!adminEntity) {
+        throw new Error('Admin entity not found. Please run the admin setup SQL first.');
+      }
+
+      const { data: adminGroup } = await supabase
+        .from('user_groups')
+        .select('id')
+        .eq('entity_id', adminEntity.id)
+        .eq('name', 'Administrators')
+        .single();
+
+      if (!adminGroup) {
+        throw new Error('Admin user group not found. Please run the admin setup SQL first.');
+      }
+
       const { error } = await supabase
         .from('registration_codes')
         .insert({
@@ -209,14 +232,16 @@ const SimpleUserManager: React.FC<SimpleUserManagerProps> = ({ onClose }) => {
           max_uses: maxUses,
           current_uses: 0,
           is_active: true,
-          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+          entity_id: adminEntity.id,
+          user_group_id: adminGroup.id
         });
 
       if (error) throw error;
       alert('Registration code created successfully!');
     } catch (error) {
       console.error('Failed to create registration code:', error);
-      setError('Failed to create registration code');
+      setError('Failed to create registration code: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   };
 
