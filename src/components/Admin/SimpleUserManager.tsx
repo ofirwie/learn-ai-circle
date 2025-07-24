@@ -36,7 +36,7 @@ const SimpleUserManager: React.FC<SimpleUserManagerProps> = ({ onClose }) => {
 
       // Simplified query - just get user profiles without complex joins
       const { data: profiles, error: profileError } = await supabase
-        .from('user_profiles')
+        .from('users')
         .select('*')
         .order('created_at', { ascending: false });
       
@@ -44,7 +44,7 @@ const SimpleUserManager: React.FC<SimpleUserManagerProps> = ({ onClose }) => {
         console.error('Error fetching user profiles:', profileError);
         // Try a minimal query as last resort
         const { data: minimalProfiles, error: minimalError } = await supabase
-          .from('user_profiles')
+          .from('users')
           .select('id, email, created_at, updated_at, is_active')
           .limit(100);
         
@@ -86,9 +86,9 @@ const SimpleUserManager: React.FC<SimpleUserManagerProps> = ({ onClose }) => {
     try {
       setError(null);
       const { error } = await supabase
-        .from('user_profiles')
+        .from('users')
         .update({ is_active: !currentStatus })
-        .eq('user_id', userId);
+        .eq('id', userId);
 
       if (error) throw error;
 
@@ -116,9 +116,9 @@ const SimpleUserManager: React.FC<SimpleUserManagerProps> = ({ onClose }) => {
     try {
       setError(null);
       const { error } = await supabase
-        .from('user_profiles')
+        .from('users')
         .delete()
-        .eq('user_id', userId);
+        .eq('id', userId);
 
       if (error) throw error;
 
@@ -161,12 +161,12 @@ const SimpleUserManager: React.FC<SimpleUserManagerProps> = ({ onClose }) => {
 
       // Update the user's entity and group
       const { error } = await supabase
-        .from('user_profiles')
+        .from('users')
         .update({ 
           entity_id: adminEntity.id,
           user_group_id: adminGroup.id
         })
-        .eq('user_id', userId);
+        .eq('id', userId);
 
       if (error) throw error;
 

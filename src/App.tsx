@@ -354,7 +354,7 @@ function App() {
                       className="techcrunch-headline-item"
                       onClick={() => setSelectedArticle(article)}
                     >
-                      <span className="techcrunch-headline-bullet">■</span>
+                      <span className="techcrunch-headline-bullet"></span>
                       <span className="techcrunch-headline-text">
                         {article.title}
                       </span>
