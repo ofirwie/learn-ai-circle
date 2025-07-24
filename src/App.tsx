@@ -345,7 +345,8 @@ function App() {
               <aside className="techcrunch-sidebar">
                 <h2>Latest Headlines</h2>
                 <ul className="techcrunch-headlines">
-                  {articles.slice(9, 19).map((article, index) => (
+                  {/* Show articles 1-10 if we have less than 10 articles, otherwise show 9-19 */}
+                  {articles.slice(articles.length <= 10 ? 1 : 9, articles.length <= 10 ? Math.min(articles.length, 10) : 19).map((article, index) => (
                     <li 
                       key={article.id} 
                       className="techcrunch-headline-item"
@@ -357,6 +358,13 @@ function App() {
                       </span>
                     </li>
                   ))}
+                  {articles.length <= 1 && (
+                    <li className="techcrunch-headline-item" style={{ opacity: 0.6, cursor: 'default' }}>
+                      <span className="techcrunch-headline-text">
+                        No additional headlines available
+                      </span>
+                    </li>
+                  )}
                 </ul>
               </aside>
             </div>
@@ -386,30 +394,45 @@ function App() {
                   ))}
                 </div>
               ) : guides.length > 0 ? (
-                <div className="letsai-grid-layout">
+                <div className="techcrunch-grid">
                   {guides.map((guide) => (
-                    <article key={guide.id} className="modern-article-card" onClick={() => setSelectedArticle(guide)}>
-                      <div className="article-image-container">
-                        {guide.featured_image ? (
-                          <img src={guide.featured_image} alt={guide.title} className="article-image" />
-                        ) : (
-                          <div className="article-image-placeholder guide-placeholder">
-                            <span className="placeholder-icon">📖</span>
-                          </div>
+                    <article 
+                      key={guide.id} 
+                      className="techcrunch-card" 
+                      onClick={() => setSelectedArticle(guide)}
+                    >
+                      <div className="techcrunch-card-image">
+                        <img 
+                          src={
+                            guide.featured_image || 
+                            (guide.youtube_video_id ? `https://img.youtube.com/vi/${guide.youtube_video_id}/mqdefault.jpg` : 
+                            `data:image/svg+xml;base64,${btoa(`<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="320" height="180" fill="#10B981"/>
+                              <circle cx="160" cy="90" r="40" fill="#FFFFFF" opacity="0.2"/>
+                              <text x="160" y="95" text-anchor="middle" fill="#FFFFFF" font-size="16" font-family="Arial, sans-serif" font-weight="bold">GUIDE</text>
+                              <path d="M145 75L175 90L145 105V75Z" fill="#FFFFFF" opacity="0.4"/>
+                            </svg>`)}`)
+                          }
+                        />
+                        {guide.youtube_video_id && (
+                          <div className="techcrunch-play-button">▶</div>
                         )}
-                        <div className="content-type-badge guide-badge">
-                          <span className="badge-icon">📖</span>
-                          Guide
-                        </div>
                       </div>
-                      <div className="article-content">
-                        <h2 className="article-title">{guide.title}</h2>
-                        <p className="article-excerpt">{guide.excerpt}</p>
-                        <div className="article-meta">
-                          <span className="article-author">{guide.author}</span>
-                          <span className="article-date">
-                            {new Date(guide.published_at || guide.created_at).toLocaleDateString()}
-                          </span>
+                      <div className="techcrunch-card-content">
+                        <span className="techcrunch-card-category">
+                          📖 {guide.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Guide'}
+                        </span>
+                        <h3>{guide.title}</h3>
+                        {guide.excerpt && (
+                          <p className="techcrunch-card-excerpt">
+                            {guide.excerpt.length > 120 ? `${guide.excerpt.substring(0, 120)}...` : guide.excerpt}
+                          </p>
+                        )}
+                        <div className="techcrunch-card-meta">
+                          {new Date(guide.published_at || guide.created_at).toLocaleDateString()} • {guide.author}
+                          {guide.view_count && guide.view_count > 0 && (
+                            <span> • {guide.view_count} views</span>
+                          )}
                         </div>
                       </div>
                     </article>
@@ -449,30 +472,45 @@ function App() {
                   ))}
                 </div>
               ) : toolReviews.length > 0 ? (
-                <div className="letsai-grid-layout">
+                <div className="techcrunch-grid">
                   {toolReviews.map((tool) => (
-                    <article key={tool.id} className="modern-article-card" onClick={() => setSelectedArticle(tool)}>
-                      <div className="article-image-container">
-                        {tool.featured_image ? (
-                          <img src={tool.featured_image} alt={tool.title} className="article-image" />
-                        ) : (
-                          <div className="article-image-placeholder tool-placeholder">
-                            <span className="placeholder-icon">🔧</span>
-                          </div>
+                    <article 
+                      key={tool.id} 
+                      className="techcrunch-card" 
+                      onClick={() => setSelectedArticle(tool)}
+                    >
+                      <div className="techcrunch-card-image">
+                        <img 
+                          src={
+                            tool.featured_image || 
+                            (tool.youtube_video_id ? `https://img.youtube.com/vi/${tool.youtube_video_id}/mqdefault.jpg` : 
+                            `data:image/svg+xml;base64,${btoa(`<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="320" height="180" fill="#3B82F6"/>
+                              <circle cx="160" cy="90" r="40" fill="#FFFFFF" opacity="0.2"/>
+                              <text x="160" y="95" text-anchor="middle" fill="#FFFFFF" font-size="16" font-family="Arial, sans-serif" font-weight="bold">TOOL REVIEW</text>
+                              <path d="M145 75L175 90L145 105V75Z" fill="#FFFFFF" opacity="0.4"/>
+                            </svg>`)}`)
+                          }
+                        />
+                        {tool.youtube_video_id && (
+                          <div className="techcrunch-play-button">▶</div>
                         )}
-                        <div className="content-type-badge tool-badge">
-                          <span className="badge-icon">🔧</span>
-                          Tool Review
-                        </div>
                       </div>
-                      <div className="article-content">
-                        <h2 className="article-title">{tool.title}</h2>
-                        <p className="article-excerpt">{tool.excerpt}</p>
-                        <div className="article-meta">
-                          <span className="article-author">{tool.author}</span>
-                          <span className="article-date">
-                            {new Date(tool.published_at || tool.created_at).toLocaleDateString()}
-                          </span>
+                      <div className="techcrunch-card-content">
+                        <span className="techcrunch-card-category">
+                          🔧 {tool.category?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Tool Review'}
+                        </span>
+                        <h3>{tool.title}</h3>
+                        {tool.excerpt && (
+                          <p className="techcrunch-card-excerpt">
+                            {tool.excerpt.length > 120 ? `${tool.excerpt.substring(0, 120)}...` : tool.excerpt}
+                          </p>
+                        )}
+                        <div className="techcrunch-card-meta">
+                          {new Date(tool.published_at || tool.created_at).toLocaleDateString()} • {tool.author}
+                          {tool.view_count && tool.view_count > 0 && (
+                            <span> • {tool.view_count} views</span>
+                          )}
                         </div>
                       </div>
                     </article>

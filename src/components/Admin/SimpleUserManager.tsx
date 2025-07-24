@@ -34,26 +34,25 @@ const SimpleUserManager: React.FC<SimpleUserManagerProps> = ({ onClose }) => {
       setLoading(true);
       setError(null);
 
-      // Get users from auth.users (requires service role)
-      const { data: authUsers, error: authError } = await supabase
+      // Simplified query - just get user profiles without complex joins
+      const { data: profiles, error: profileError } = await supabase
         .from('user_profiles')
-        .select(`
-          *,
-          entities(name, type),
-          user_groups(name, permissions)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
-
-      if (authError) {
-        console.error('Auth users error:', authError);
-        // Fallback: try to get user profiles only
-        const { data: profiles, error: profileError } = await supabase
+      
+      if (profileError) {
+        console.error('Error fetching user profiles:', profileError);
+        // Try a minimal query as last resort
+        const { data: minimalProfiles, error: minimalError } = await supabase
           .from('user_profiles')
-          .select('*')
-          .order('created_at', { ascending: false });
+          .select('id, email, created_at, updated_at, is_active')
+          .limit(100);
         
-        if (profileError) throw profileError;
-        setUsers(profiles.map(p => ({
+        if (minimalError) {
+          throw new Error('Unable to load users. Please check database permissions.');
+        }
+        
+        setUsers((minimalProfiles || []).map(p => ({
           id: p.id,
           email: p.email || 'Unknown',
           created_at: p.created_at,
@@ -62,13 +61,17 @@ const SimpleUserManager: React.FC<SimpleUserManagerProps> = ({ onClose }) => {
           profile: p
         })));
       } else {
-        setUsers(authUsers.map(user => ({
-          id: user.id,
-          email: user.email || 'Unknown',
-          created_at: user.created_at,
-          last_sign_in_at: user.updated_at,
+        setUsers((profiles || []).map(p => ({
+          id: p.id || p.user_id,
+          email: p.email || 'Unknown',
+          created_at: p.created_at,
+          last_sign_in_at: p.updated_at,
           user_metadata: {},
-          profile: user
+          profile: {
+            ...p,
+            full_name: p.full_name || p.email?.split('@')[0] || 'User',
+            is_active: p.is_active !== false
+          }
         })));
       }
     } catch (error) {
