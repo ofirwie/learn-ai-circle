@@ -347,8 +347,8 @@ function App() {
               <aside className="techcrunch-sidebar">
                 <h2>Latest Headlines</h2>
                 <ul className="techcrunch-headlines">
-                  {/* Show articles 1-10 if we have less than 10 articles, otherwise show 9-19 */}
-                  {articles.slice(articles.length <= 10 ? 1 : 9, articles.length <= 10 ? Math.min(articles.length, 10) : 19).map((article, index) => (
+                  {/* Show up to 10 headlines, starting from article 2 (skip the featured article) */}
+                  {articles.slice(1, Math.min(articles.length, 11)).map((article, index) => (
                     <li 
                       key={article.id} 
                       className="techcrunch-headline-item"
