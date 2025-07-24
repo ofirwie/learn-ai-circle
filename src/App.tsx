@@ -130,12 +130,10 @@ const PublicISAIApp: React.FC = () => {
             </a>
           </nav>
           
-          {/* Right Side Elements */}
+          {/* Right Side Elements - Admin access hidden */}
           <div className="header-right">
             <div className="user-menu">
-              <a href="/admin" className="admin-button">
-                Admin Panel
-              </a>
+              {/* Admin panel accessible only via direct URL: /admin */}
             </div>
           </div>
         </div>
